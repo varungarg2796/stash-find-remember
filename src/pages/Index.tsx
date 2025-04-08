@@ -10,7 +10,7 @@ import ViewToggle from "@/components/ViewToggle";
 import AddItemButton from "@/components/AddItemButton";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { BarChart } from "lucide-react";
+import { BarChart, MessageSquareMore } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,6 +39,10 @@ const Index = () => {
 
   const navigateToStats = () => {
     navigate("/stats");
+  };
+  
+  const navigateToAskStasher = () => {
+    navigate("/ask");
   };
 
   // Filter items based on search query and active filter
@@ -78,6 +82,15 @@ const Index = () => {
       <div className="mb-8 flex justify-between items-center">
         <FilterTabs onFilterChange={handleFilterChange} />
         <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={navigateToAskStasher}
+            className="flex-shrink-0"
+            title="Ask Stasher"
+          >
+            <MessageSquareMore size={18} />
+          </Button>
           <Button 
             variant="outline" 
             size="icon" 

@@ -2,11 +2,12 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Trash2, Tag, MapPin } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Tag, MapPin, Heart, Gift, Activity } from "lucide-react";
+import { toast } from "sonner";
 
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getItem, deleteItem } = useItems();
+  const { getItem, deleteItem, updateItem } = useItems();
   const navigate = useNavigate();
   
   const item = getItem(id || "");
@@ -33,6 +34,38 @@ const ItemDetail = () => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       deleteItem(item.id);
       navigate("/");
+    }
+  };
+
+  const handleUseItem = () => {
+    if (item.quantity > 1) {
+      updateItem({
+        ...item,
+        quantity: item.quantity - 1
+      });
+      toast.success(`Used one ${item.name}`);
+    } else {
+      if (window.confirm(`This is your last ${item.name}. Do you want to mark it as used and remove it?`)) {
+        deleteItem(item.id);
+        toast.success(`Used the last ${item.name}`);
+        navigate("/");
+      }
+    }
+  };
+
+  const handleGiftItem = () => {
+    if (item.quantity > 1) {
+      updateItem({
+        ...item,
+        quantity: item.quantity - 1
+      });
+      toast.success(`Gifted one ${item.name}`);
+    } else {
+      if (window.confirm(`This is your last ${item.name}. Do you want to mark it as gifted and remove it?`)) {
+        deleteItem(item.id);
+        toast.success(`Gifted the last ${item.name}`);
+        navigate("/");
+      }
     }
   };
 
@@ -86,6 +119,13 @@ const ItemDetail = () => {
             <Edit className="mr-2" size={16} />
             Edit Item
           </Button>
+          
+          {item.priceless && (
+            <div className="absolute top-4 left-4 bg-pink-100 text-pink-700 px-3 py-1 rounded-full flex items-center shadow-sm">
+              <Heart className="mr-1" size={16} fill="currentColor" />
+              Priceless
+            </div>
+          )}
         </div>
         
         <div className="p-6">
@@ -117,6 +157,42 @@ const ItemDetail = () => {
                 {item.location || "Not specified"}
               </p>
             </div>
+            
+            {(item.price !== undefined || item.priceless) && (
+              <div className="bg-gray-50 p-4 rounded-lg col-span-2">
+                <h2 className="text-lg font-semibold mb-1">Value</h2>
+                {item.priceless ? (
+                  <p className="flex items-center text-pink-700">
+                    <Heart size={16} className="mr-1" fill="currentColor" />
+                    Priceless (Sentimental Value)
+                  </p>
+                ) : (
+                  <p className="text-2xl font-bold text-gray-800">
+                    ${item.price?.toFixed(2) || "Not specified"}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <Button 
+              variant="outline" 
+              className="flex items-center"
+              onClick={handleUseItem}
+            >
+              <Activity className="mr-2" size={18} />
+              Use Item
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="flex items-center"
+              onClick={handleGiftItem}
+            >
+              <Gift className="mr-2" size={18} />
+              Gift Item
+            </Button>
           </div>
           
           <div className="flex justify-between">
