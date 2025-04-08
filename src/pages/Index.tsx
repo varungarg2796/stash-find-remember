@@ -1,51 +1,17 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SearchBar from "@/components/SearchBar";
 import FilterTabs from "@/components/FilterTabs";
 import ItemCard from "@/components/ItemCard";
 import AddItemButton from "@/components/AddItemButton";
-import { toast } from "sonner";
-
-// Mock data for our items
-const MOCK_ITEMS = [
-  {
-    id: "1",
-    name: "Sweater",
-    imageUrl: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-    tags: ["Clothing", "Gift"],
-    quantity: 1,
-    location: "Wardrobe"
-  },
-  {
-    id: "2",
-    name: "Cookbook",
-    imageUrl: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-    tags: ["Books", "Christmas"],
-    quantity: 1,
-    location: "Bookshelf"
-  },
-  {
-    id: "3",
-    name: "Wine Glasses",
-    imageUrl: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-    tags: ["Glassware", "Set"],
-    quantity: 2,
-    location: "Kitchen"
-  },
-  {
-    id: "4",
-    name: "Wireless Earbuds",
-    imageUrl: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-    tags: ["Electronics", "Prize"],
-    quantity: 1,
-    location: "Drawer"
-  }
-];
+import { useItems } from "@/context/ItemsContext";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [items, setItems] = useState(MOCK_ITEMS);
+  const { items } = useItems();
+  const navigate = useNavigate();
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -55,22 +21,8 @@ const Index = () => {
     setActiveFilter(filter);
   };
 
-  const handleUseItem = (id: string) => {
-    // In a real app, we would update the database
-    // For now, we'll just show a toast
-    toast.success("Item marked as used");
-  };
-
-  const handleGiftItem = (id: string) => {
-    // In a real app, we would update the database
-    // For now, we'll just show a toast
-    toast.success("Item marked for gifting");
-  };
-
   const handleAddItem = () => {
-    // In a real app, we would navigate to an add item page
-    // For now, we'll just show a toast
-    toast.info("Add item functionality coming soon!");
+    navigate("/add-item");
   };
 
   // Filter items based on search query and active filter
@@ -99,6 +51,7 @@ const Index = () => {
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">
       <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-6 text-center">Stasher</h1>
         <SearchBar onSearch={handleSearch} />
       </div>
       
@@ -106,18 +59,9 @@ const Index = () => {
         <FilterTabs onFilterChange={handleFilterChange} />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {filteredItems.map(item => (
-          <ItemCard
-            key={item.id}
-            id={item.id}
-            name={item.name}
-            imageUrl={item.imageUrl}
-            tags={item.tags}
-            quantity={item.quantity}
-            onUse={handleUseItem}
-            onGift={handleGiftItem}
-          />
+          <ItemCard key={item.id} item={item} />
         ))}
       </div>
       
