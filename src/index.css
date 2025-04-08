@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +36,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -97,5 +91,29 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .item-tag {
+    @apply px-3 py-1 rounded-full text-sm font-medium bg-secondary text-secondary-foreground;
+  }
+  
+  .action-button {
+    @apply py-2 px-6 rounded-full border border-gray-300 text-gray-700 font-medium transition-colors duration-200 hover:bg-gray-100;
+  }
+  
+  .filter-tab {
+    @apply px-6 py-3 rounded-full text-gray-600 font-medium transition-all duration-200;
+  }
+  
+  .filter-tab.active {
+    @apply bg-gray-600 text-white;
+  }
+}
+
+@layer utilities {
+  .card-shadow {
+    @apply shadow-sm hover:shadow-md transition-shadow duration-200;
   }
 }
