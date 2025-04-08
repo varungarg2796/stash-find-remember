@@ -7,6 +7,7 @@ export interface Item {
   quantity: number;
   location: string;
   tags: string[];
+  price?: number; // Adding optional price field
 }
 
 export type ViewMode = 'grid' | 'list';

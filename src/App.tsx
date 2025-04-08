@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import ItemDetail from "./pages/ItemDetail";
 import AddItem from "./pages/AddItem";
 import EditItem from "./pages/EditItem";
+import Stats from "./pages/Stats";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/items/:id" element={<ItemDetail />} />
             <Route path="/add-item" element={<AddItem />} />
             <Route path="/edit-item/:id" element={<EditItem />} />
+            <Route path="/stats" element={<Stats />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

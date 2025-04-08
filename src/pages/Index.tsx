@@ -9,10 +9,13 @@ import ItemList from "@/components/ItemList";
 import ViewToggle from "@/components/ViewToggle";
 import AddItemButton from "@/components/AddItemButton";
 import { useItems } from "@/context/ItemsContext";
+import { Button } from "@/components/ui/button";
+import { BarChart } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [activeSubFilter, setActiveSubFilter] = useState<string | undefined>(undefined);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { items } = useItems();
   const navigate = useNavigate();
@@ -21,8 +24,9 @@ const Index = () => {
     setSearchQuery(query);
   };
 
-  const handleFilterChange = (filter: string) => {
+  const handleFilterChange = (filter: string, subFilter?: string) => {
     setActiveFilter(filter);
+    setActiveSubFilter(subFilter);
   };
   
   const handleViewChange = (view: ViewMode) => {
@@ -31,6 +35,10 @@ const Index = () => {
 
   const handleAddItem = () => {
     navigate("/add-item");
+  };
+
+  const navigateToStats = () => {
+    navigate("/stats");
   };
 
   // Filter items based on search query and active filter
@@ -45,9 +53,13 @@ const Index = () => {
     // Then apply category filter
     switch (activeFilter) {
       case "tags":
-        return item.tags.length > 0;
+        return activeSubFilter 
+          ? item.tags.includes(activeSubFilter)
+          : item.tags.length > 0;
       case "location":
-        return !!item.location;
+        return activeSubFilter
+          ? item.location === activeSubFilter
+          : !!item.location;
       case "unused":
         return true; // In a real app, we would check usage history
       case "all":
@@ -65,8 +77,35 @@ const Index = () => {
       
       <div className="mb-8 flex justify-between items-center">
         <FilterTabs onFilterChange={handleFilterChange} />
-        <ViewToggle activeView={viewMode} onViewChange={handleViewChange} />
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={navigateToStats}
+            className="flex-shrink-0"
+            title="View Statistics"
+          >
+            <BarChart size={18} />
+          </Button>
+          <ViewToggle activeView={viewMode} onViewChange={handleViewChange} />
+        </div>
       </div>
+      
+      {activeSubFilter && (
+        <div className="mb-4 flex items-center">
+          <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+            Filtering by: {activeSubFilter}
+          </span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="ml-2 h-7 text-xs"
+            onClick={() => setActiveSubFilter(undefined)}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
       
       {viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
