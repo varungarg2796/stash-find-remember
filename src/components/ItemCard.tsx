@@ -1,17 +1,43 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
+import { Edit, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ItemCardProps {
   item: Item;
 }
 
+// Function to generate a consistent color based on item name
+const getColorForItem = (name: string): string => {
+  const colors = [
+    "bg-blue-200", "bg-green-200", "bg-yellow-200", 
+    "bg-red-200", "bg-purple-200", "bg-pink-200",
+    "bg-indigo-200", "bg-teal-200", "bg-orange-200"
+  ];
+  
+  // Simple hash function to get consistent color
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  // Get positive value
+  hash = Math.abs(hash);
+  
+  // Get index in color array
+  const index = hash % colors.length;
+  
+  return colors[index];
+};
+
 const ItemCard = ({ item }: ItemCardProps) => {
   const { id, name, imageUrl, tags, quantity, location } = item;
+  const placeholderColor = getColorForItem(name);
   
   return (
-    <Link to={`/items/${id}`} className="block">
-      <div className="bg-white rounded-lg overflow-hidden card-shadow">
+    <div className="bg-white rounded-lg overflow-hidden card-shadow">
+      <div className="relative">
         <div className="aspect-square bg-gray-50 overflow-hidden">
           {imageUrl ? (
             <img 
@@ -20,27 +46,44 @@ const ItemCard = ({ item }: ItemCardProps) => {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-4xl font-bold">
-              {name.charAt(0)}
+            <div className={`w-full h-full flex items-center justify-center ${placeholderColor} text-gray-700 text-4xl font-bold`}>
+              {name.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
-        <div className="p-4">
-          <h3 className="text-2xl font-semibold mb-2">{name}</h3>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {tags.map((tag, index) => (
-              <span key={index} className="item-tag">
-                {tag}
-              </span>
-            ))}
-          </div>
-          <div className="flex justify-between items-center">
-            <p className="text-gray-600">Qty: {quantity}</p>
-            <p className="text-gray-600 text-sm">{location}</p>
-          </div>
-        </div>
+        
+        <Link 
+          to={`/edit-item/${id}`}
+          className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm hover:bg-gray-100"
+          aria-label="Edit item"
+        >
+          <Edit size={16} className="text-gray-600" />
+        </Link>
       </div>
-    </Link>
+      
+      <Link to={`/items/${id}`} className="block p-4">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-semibold">{name}</h3>
+          <span className="text-sm text-gray-600 font-medium">Qty: {quantity}</span>
+        </div>
+        
+        <div className="flex flex-wrap gap-2 mb-3">
+          {tags.slice(0, 2).map((tag, index) => (
+            <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+              {tag}
+            </span>
+          ))}
+          {tags.length > 2 && <span className="text-xs text-gray-500">+{tags.length - 2}</span>}
+        </div>
+        
+        {location && (
+          <p className="text-xs text-gray-500 flex items-center">
+            <span className="truncate">{location}</span>
+            <ExternalLink size={12} className="ml-1 flex-shrink-0" />
+          </p>
+        )}
+      </Link>
+    </div>
   );
 };
 

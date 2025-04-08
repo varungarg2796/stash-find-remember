@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Item } from "@/types";
 import { Input } from "@/components/ui/input";
@@ -12,6 +11,14 @@ interface ItemFormProps {
   onCancel: () => void;
   submitLabel: string;
 }
+
+const getPlaceholderImage = (name: string = ""): string => {
+  const placeholders = [
+    "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
+  ];
+  
+  return placeholders[0];
+};
 
 const ItemForm = ({ 
   initialData = {
@@ -60,7 +67,13 @@ const ItemForm = ({
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    const finalData = {
+      ...formData,
+      imageUrl: formData.imageUrl || getPlaceholderImage(formData.name)
+    };
+    
+    onSubmit(finalData);
   };
 
   return (
@@ -98,24 +111,46 @@ const ItemForm = ({
           Add Photo
         </label>
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-          <Image className="mx-auto text-gray-400" size={48} />
-          <p className="mt-2 text-sm text-gray-500">
-            Click to upload or drag and drop
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            PNG, JPG, GIF up to 5MB
-          </p>
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => setFormData(prev => ({ 
-              ...prev, 
-              imageUrl: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png" 
-            }))}
-          >
-            Simulate Upload
-          </Button>
+          {formData.imageUrl ? (
+            <div className="relative w-32 h-32 mx-auto">
+              <img 
+                src={formData.imageUrl} 
+                alt="Preview" 
+                className="w-full h-full object-cover rounded"
+              />
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, imageUrl: "" }))}
+                className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow-sm hover:bg-gray-100"
+              >
+                <X size={14} className="text-gray-600" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Image className="mx-auto text-gray-400" size={48} />
+              <p className="mt-2 text-sm text-gray-500">
+                Click to upload or drag and drop
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                PNG, JPG, GIF up to 5MB
+              </p>
+            </>
+          )}
+          
+          {!formData.imageUrl && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => setFormData(prev => ({ 
+                ...prev, 
+                imageUrl: getPlaceholderImage(prev.name)
+              }))}
+            >
+              Simulate Upload
+            </Button>
+          )}
         </div>
       </div>
       

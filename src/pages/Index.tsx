@@ -1,15 +1,19 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ViewMode } from "@/types";
 import SearchBar from "@/components/SearchBar";
 import FilterTabs from "@/components/FilterTabs";
 import ItemCard from "@/components/ItemCard";
+import ItemList from "@/components/ItemList";
+import ViewToggle from "@/components/ViewToggle";
 import AddItemButton from "@/components/AddItemButton";
 import { useItems } from "@/context/ItemsContext";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { items } = useItems();
   const navigate = useNavigate();
 
@@ -19,6 +23,10 @@ const Index = () => {
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter);
+  };
+  
+  const handleViewChange = (view: ViewMode) => {
+    setViewMode(view);
   };
 
   const handleAddItem = () => {
@@ -55,15 +63,20 @@ const Index = () => {
         <SearchBar onSearch={handleSearch} />
       </div>
       
-      <div className="mb-8">
+      <div className="mb-8 flex justify-between items-center">
         <FilterTabs onFilterChange={handleFilterChange} />
+        <ViewToggle activeView={viewMode} onViewChange={handleViewChange} />
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {filteredItems.map(item => (
-          <ItemCard key={item.id} item={item} />
-        ))}
-      </div>
+      {viewMode === "grid" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {filteredItems.map(item => (
+            <ItemCard key={item.id} item={item} />
+          ))}
+        </div>
+      ) : (
+        <ItemList items={filteredItems} />
+      )}
       
       {filteredItems.length === 0 && (
         <div className="text-center py-12">

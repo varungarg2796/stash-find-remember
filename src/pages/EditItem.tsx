@@ -2,9 +2,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Edit } from "lucide-react";
 import ItemForm from "@/components/ItemForm";
 import { Item } from "@/types";
+import { toast } from "sonner";
 
 const EditItem = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +30,7 @@ const EditItem = () => {
   
   const handleSubmit = (data: Omit<Item, "id">) => {
     updateItem({ ...data, id: item.id });
+    toast.success("Item updated successfully");
     navigate(`/items/${id}`);
   };
   
@@ -43,7 +45,10 @@ const EditItem = () => {
         Back
       </Button>
       
-      <h1 className="text-3xl font-bold mb-6">Edit Item</h1>
+      <h1 className="text-3xl font-bold mb-6 flex items-center">
+        <Edit size={24} className="mr-2 text-gray-600" />
+        Edit Item
+      </h1>
       
       <div className="bg-white rounded-lg shadow-md p-6">
         <ItemForm

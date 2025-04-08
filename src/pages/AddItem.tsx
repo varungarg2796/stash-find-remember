@@ -2,9 +2,10 @@
 import { useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import ItemForm from "@/components/ItemForm";
 import { Item } from "@/types";
+import { toast } from "sonner";
 
 const AddItem = () => {
   const { addItem } = useItems();
@@ -12,6 +13,7 @@ const AddItem = () => {
   
   const handleSubmit = (data: Omit<Item, "id">) => {
     addItem(data);
+    toast.success("Item added successfully");
     navigate("/");
   };
   
@@ -26,7 +28,10 @@ const AddItem = () => {
         Back
       </Button>
       
-      <h1 className="text-3xl font-bold mb-6">Add New Item</h1>
+      <h1 className="text-3xl font-bold mb-6 flex items-center">
+        <Plus size={24} className="mr-2 text-gray-600" />
+        Add New Item
+      </h1>
       
       <div className="bg-white rounded-lg shadow-md p-6">
         <ItemForm

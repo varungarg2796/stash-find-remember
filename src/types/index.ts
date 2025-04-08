@@ -8,3 +8,5 @@ export interface Item {
   location: string;
   tags: string[];
 }
+
+export type ViewMode = 'grid' | 'list';
