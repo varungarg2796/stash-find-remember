@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ViewMode } from "@/types";
@@ -32,36 +33,29 @@ const Index = () => {
     setViewMode(view);
   };
 
-  const handleAddItem = () => {
-    navigate("/add-item");
-  };
-
-  const navigateToStats = () => {
-    navigate("/stats");
-  };
-  
-  const navigateToAskStasher = () => {
-    navigate("/ask");
-  };
-
   const filteredItems = items.filter(item => {
+    // Search filter
     const matchesSearch = searchQuery === "" || 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
       item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
     if (!matchesSearch) return false;
     
+    // Category filters
     switch (activeFilter) {
       case "tags":
         return activeSubFilter 
           ? item.tags.includes(activeSubFilter)
-          : item.tags.length > 0;
+          : true;
       case "location":
         return activeSubFilter
           ? item.location === activeSubFilter
-          : !!item.location;
+          : true;
       case "unused":
-        return true;
+        // Filter for items marked as unused or rarely used
+        // This is a placeholder - in a real app, you might have a usage count field
+        return item.quantity > 0; // Simple placeholder logic
       case "all":
       default:
         return true;
@@ -108,7 +102,10 @@ const Index = () => {
             variant="ghost" 
             size="sm" 
             className="ml-2 h-7 text-xs"
-            onClick={() => setActiveSubFilter(undefined)}
+            onClick={() => {
+              setActiveSubFilter(undefined);
+              handleFilterChange(activeFilter);
+            }}
           >
             Clear
           </Button>
@@ -127,7 +124,7 @@ const Index = () => {
       
       {filteredItems.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No items found. Add some items to your stash!</p>
+          <p className="text-gray-500">No items found. Try adjusting your filters or add new items!</p>
         </div>
       )}
       

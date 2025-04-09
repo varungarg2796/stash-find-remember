@@ -18,23 +18,21 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
   const [activeSubFilter, setActiveSubFilter] = useState<string | undefined>(undefined);
   const { items } = useItems();
   
+  // Extract unique tags and locations for subfilters
+  const uniqueTags = [...new Set(items.flatMap(item => item.tags))].sort();
+  const uniqueLocations = [...new Set(items.map(item => item.location))].filter(Boolean).sort();
+  
   const filters = [
-    { id: "all", label: "All" },
-    { id: "tags", label: "Tags", hasSubFilters: true },
-    { id: "location", label: "Location", hasSubFilters: true },
+    { id: "all", label: "All Items" },
+    { id: "tags", label: "By Tag", hasSubFilters: true },
+    { id: "location", label: "By Location", hasSubFilters: true },
     { id: "unused", label: "Unused" },
   ];
   
-  // Extract unique tags and locations for subfilters
-  const uniqueTags = [...new Set(items.flatMap(item => item.tags))];
-  const uniqueLocations = [...new Set(items.map(item => item.location))].filter(Boolean);
-  
   const handleFilterClick = (filterId: string) => {
-    if (filterId !== activeFilter) {
-      setActiveFilter(filterId);
-      setActiveSubFilter(undefined);
-      onFilterChange(filterId);
-    }
+    setActiveFilter(filterId);
+    setActiveSubFilter(undefined);
+    onFilterChange(filterId);
   };
   
   const handleSubFilterClick = (subFilter: string) => {
@@ -43,16 +41,21 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
   };
   
   return (
-    <div className="flex space-x-3 overflow-x-auto pb-2 no-scrollbar">
+    <div className="flex space-x-2 overflow-x-auto pb-2 no-scrollbar">
       {filters.map((filter) => (
         <div key={filter.id} className="relative">
           {filter.hasSubFilters ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className={`filter-tab flex items-center ${activeFilter === filter.id ? "active" : ""}`}>
+              <DropdownMenuTrigger 
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none
+                  ${activeFilter === filter.id 
+                    ? "bg-primary text-primary-foreground" 
+                    : "bg-secondary hover:bg-secondary/80"}`}
+              >
                 {filter.label}
-                <ChevronDown size={16} className="ml-1" />
+                <ChevronDown size={16} className="ml-1 inline" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto">
                 {filter.id === "tags" && uniqueTags.map(tag => (
                   <DropdownMenuItem 
                     key={tag} 
@@ -75,7 +78,10 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
             </DropdownMenu>
           ) : (
             <button
-              className={`filter-tab ${activeFilter === filter.id ? "active" : ""}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none
+                ${activeFilter === filter.id 
+                  ? "bg-primary text-primary-foreground" 
+                  : "bg-secondary hover:bg-secondary/80"}`}
               onClick={() => handleFilterClick(filter.id)}
             >
               {filter.label}

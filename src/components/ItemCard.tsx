@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { Edit, ExternalLink } from "lucide-react";
+import { Edit, ExternalLink, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ItemCardProps {
@@ -32,11 +32,11 @@ const getColorForItem = (name: string): string => {
 };
 
 const ItemCard = ({ item }: ItemCardProps) => {
-  const { id, name, imageUrl, tags, quantity, location } = item;
+  const { id, name, imageUrl, tags, quantity, location, priceless } = item;
   const placeholderColor = getColorForItem(name);
   
   return (
-    <div className="bg-white rounded-lg overflow-hidden card-shadow">
+    <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="relative">
         <div className="aspect-square bg-gray-50 overflow-hidden">
           {imageUrl ? (
@@ -54,11 +54,18 @@ const ItemCard = ({ item }: ItemCardProps) => {
         
         <Link 
           to={`/edit-item/${id}`}
-          className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm hover:bg-gray-100"
+          className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm hover:bg-gray-100 transition-colors"
           aria-label="Edit item"
         >
           <Edit size={16} className="text-gray-600" />
         </Link>
+        
+        {priceless && (
+          <div className="absolute top-2 left-2 flex items-center bg-white/90 px-2 py-1 rounded-full shadow-sm">
+            <Heart size={14} className="text-red-500 mr-1 fill-red-500" />
+            <span className="text-xs font-medium">Priceless</span>
+          </div>
+        )}
       </div>
       
       <Link to={`/items/${id}`} className="block p-4">
