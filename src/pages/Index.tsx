@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ViewMode } from "@/types";
@@ -45,16 +44,13 @@ const Index = () => {
     navigate("/ask");
   };
 
-  // Filter items based on search query and active filter
   const filteredItems = items.filter(item => {
-    // First apply search filter
     const matchesSearch = searchQuery === "" || 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
     if (!matchesSearch) return false;
     
-    // Then apply category filter
     switch (activeFilter) {
       case "tags":
         return activeSubFilter 
@@ -65,7 +61,7 @@ const Index = () => {
           ? item.location === activeSubFilter
           : !!item.location;
       case "unused":
-        return true; // In a real app, we would check usage history
+        return true;
       case "all":
       default:
         return true;
@@ -75,7 +71,6 @@ const Index = () => {
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-6 text-center">Stasher</h1>
         <SearchBar onSearch={handleSearch} />
       </div>
       
@@ -85,7 +80,7 @@ const Index = () => {
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={navigateToAskStasher}
+            onClick={() => navigate("/ask")}
             className="flex-shrink-0"
             title="Ask Stasher"
           >
@@ -94,7 +89,7 @@ const Index = () => {
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={navigateToStats}
+            onClick={() => navigate("/stats")}
             className="flex-shrink-0"
             title="View Statistics"
           >
@@ -136,7 +131,7 @@ const Index = () => {
         </div>
       )}
       
-      <AddItemButton onClick={handleAddItem} />
+      <AddItemButton onClick={() => navigate("/add-item")} />
     </div>
   );
 };
