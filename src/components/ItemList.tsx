@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Heart } from "lucide-react";
 
 interface ItemListProps {
   items: Item[];
@@ -29,7 +29,14 @@ const ItemList = ({ items }: ItemListProps) => {
               </div>
               
               <div className="ml-3 flex-grow">
-                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <div className="flex items-center">
+                  <h3 className="text-lg font-semibold">{item.name}</h3>
+                  {item.priceless && (
+                    <div className="ml-2 flex items-center text-red-500">
+                      <Heart size={14} className="fill-current" />
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-between items-center mt-1">
                   <div className="flex space-x-2">
                     {item.tags.slice(0, 2).map((tag, index) => (

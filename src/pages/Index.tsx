@@ -51,11 +51,12 @@ const Index = () => {
       case "location":
         return activeSubFilter
           ? item.location === activeSubFilter
-          : true;
+          : Boolean(item.location);
       case "unused":
-        // Filter for items marked as unused or rarely used
-        // This is a placeholder - in a real app, you might have a usage count field
-        return item.quantity > 0; // Simple placeholder logic
+        // This is just a placeholder for unused items
+        return item.quantity > 0;
+      case "priceless":
+        return item.priceless === true;
       case "all":
       default:
         return true;

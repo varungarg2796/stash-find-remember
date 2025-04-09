@@ -2,7 +2,6 @@
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
 import { Edit, ExternalLink, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface ItemCardProps {
   item: Item;
@@ -38,7 +37,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="relative">
-        <div className="aspect-square bg-gray-50 overflow-hidden">
+        <div className="h-48 bg-gray-50 overflow-hidden">
           {imageUrl ? (
             <img 
               src={imageUrl} 
@@ -70,7 +69,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
       
       <Link to={`/items/${id}`} className="block p-4">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold">{name}</h3>
+          <h3 className="text-lg font-semibold line-clamp-1">{name}</h3>
           <span className="text-sm text-gray-600 font-medium">Qty: {quantity}</span>
         </div>
         

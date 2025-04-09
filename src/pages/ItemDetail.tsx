@@ -98,7 +98,7 @@ const ItemDetail = () => {
       </Button>
       
       <div className="bg-white rounded-lg overflow-hidden shadow-md">
-        <div className="aspect-video bg-gray-50 overflow-hidden relative">
+        <div className="h-64 bg-gray-50 overflow-hidden relative">
           {item.imageUrl ? (
             <img 
               src={item.imageUrl} 

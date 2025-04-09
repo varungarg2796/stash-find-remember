@@ -20,13 +20,14 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
   
   // Extract unique tags and locations for subfilters
   const uniqueTags = [...new Set(items.flatMap(item => item.tags))].sort();
-  const uniqueLocations = [...new Set(items.map(item => item.location))].filter(Boolean).sort();
+  const uniqueLocations = [...new Set(items.map(item => item.location).filter(Boolean))].sort();
   
   const filters = [
     { id: "all", label: "All Items" },
     { id: "tags", label: "By Tag", hasSubFilters: true },
     { id: "location", label: "By Location", hasSubFilters: true },
     { id: "unused", label: "Unused" },
+    { id: "priceless", label: "Priceless" },
   ];
   
   const handleFilterClick = (filterId: string) => {
@@ -55,7 +56,7 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
                 {filter.label}
                 <ChevronDown size={16} className="ml-1 inline" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto">
+              <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto z-50 bg-white">
                 {filter.id === "tags" && uniqueTags.map(tag => (
                   <DropdownMenuItem 
                     key={tag} 
