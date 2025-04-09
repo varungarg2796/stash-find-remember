@@ -2,6 +2,8 @@
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
 import { Edit, ExternalLink, Heart } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ItemCardProps {
   item: Item;
@@ -33,22 +35,25 @@ const getColorForItem = (name: string): string => {
 const ItemCard = ({ item }: ItemCardProps) => {
   const { id, name, imageUrl, tags, quantity, location, priceless } = item;
   const placeholderColor = getColorForItem(name);
+  const isMobile = useIsMobile();
   
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="relative">
-        <div className="h-48 bg-gray-50 overflow-hidden">
-          {imageUrl ? (
-            <img 
-              src={imageUrl} 
-              alt={name} 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className={`w-full h-full flex items-center justify-center ${placeholderColor} text-gray-700 text-4xl font-bold`}>
-              {name.charAt(0).toUpperCase()}
-            </div>
-          )}
+        <div className="w-full overflow-hidden">
+          <AspectRatio ratio={4/3} className="bg-gray-50">
+            {imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt={name} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className={`w-full h-full flex items-center justify-center ${placeholderColor} text-gray-700 text-4xl font-bold`}>
+                {name.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </AspectRatio>
         </div>
         
         <Link 
@@ -74,12 +79,12 @@ const ItemCard = ({ item }: ItemCardProps) => {
         </div>
         
         <div className="flex flex-wrap gap-2 mb-3">
-          {tags.slice(0, 2).map((tag, index) => (
+          {tags.slice(0, isMobile ? 1 : 2).map((tag, index) => (
             <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
               {tag}
             </span>
           ))}
-          {tags.length > 2 && <span className="text-xs text-gray-500">+{tags.length - 2}</span>}
+          {tags.length > (isMobile ? 1 : 2) && <span className="text-xs text-gray-500">+{tags.length - (isMobile ? 1 : 2)}</span>}
         </div>
         
         {location && (

@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
 import { ArrowRight, Heart } from "lucide-react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface ItemListProps {
   items: Item[];
@@ -14,43 +15,45 @@ const ItemList = ({ items }: ItemListProps) => {
         <Link to={`/items/${item.id}`} key={item.id} className="block">
           <div className="bg-white rounded-lg overflow-hidden card-shadow">
             <div className="flex items-center p-3">
-              <div className="h-12 w-12 rounded-md overflow-hidden bg-gray-50 flex-shrink-0">
-                {item.imageUrl ? (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-xl font-bold">
-                    {item.name.charAt(0)}
-                  </div>
-                )}
+              <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-50 flex-shrink-0">
+                <AspectRatio ratio={1/1}>
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-xl font-bold">
+                      {item.name.charAt(0)}
+                    </div>
+                  )}
+                </AspectRatio>
               </div>
               
-              <div className="ml-3 flex-grow">
+              <div className="ml-3 flex-grow min-w-0">
                 <div className="flex items-center">
-                  <h3 className="text-lg font-semibold">{item.name}</h3>
+                  <h3 className="text-lg font-semibold truncate">{item.name}</h3>
                   {item.priceless && (
-                    <div className="ml-2 flex items-center text-red-500">
+                    <div className="ml-2 flex items-center text-red-500 flex-shrink-0">
                       <Heart size={14} className="fill-current" />
                     </div>
                   )}
                 </div>
                 <div className="flex justify-between items-center mt-1">
-                  <div className="flex space-x-2">
-                    {item.tags.slice(0, 2).map((tag, index) => (
-                      <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+                  <div className="flex space-x-2 overflow-hidden">
+                    {item.tags.slice(0, 1).map((tag, index) => (
+                      <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full truncate">
                         {tag}
                       </span>
                     ))}
-                    {item.tags.length > 2 && <span className="text-xs text-gray-500">+{item.tags.length - 2}</span>}
+                    {item.tags.length > 1 && <span className="text-xs text-gray-500">+{item.tags.length - 1}</span>}
                   </div>
-                  <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
+                  <span className="text-sm text-gray-600 flex-shrink-0">Qty: {item.quantity}</span>
                 </div>
               </div>
               
-              <ArrowRight size={18} className="text-gray-400 ml-2" />
+              <ArrowRight size={18} className="text-gray-400 ml-2 flex-shrink-0" />
             </div>
           </div>
         </Link>

@@ -4,6 +4,7 @@ import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Trash2, Tag, MapPin, Heart, Gift, Activity } from "lucide-react";
 import { toast } from "sonner";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -98,18 +99,20 @@ const ItemDetail = () => {
       </Button>
       
       <div className="bg-white rounded-lg overflow-hidden shadow-md">
-        <div className="h-64 bg-gray-50 overflow-hidden relative">
-          {item.imageUrl ? (
-            <img 
-              src={item.imageUrl} 
-              alt={item.name} 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className={`w-full h-full flex items-center justify-center ${placeholderColor} text-gray-700 text-6xl font-bold`}>
-              {item.name.charAt(0).toUpperCase()}
-            </div>
-          )}
+        <div className="relative">
+          <AspectRatio ratio={16/9} className="bg-gray-50">
+            {item.imageUrl ? (
+              <img 
+                src={item.imageUrl} 
+                alt={item.name} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className={`w-full h-full flex items-center justify-center ${placeholderColor} text-gray-700 text-6xl font-bold`}>
+                {item.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </AspectRatio>
           
           <Button 
             onClick={handleEdit}
@@ -145,7 +148,7 @@ const ItemDetail = () => {
             <p className="text-gray-700">{item.description || "No description provided."}</p>
           </div>
           
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div className="bg-gray-50 p-4 rounded-lg">
               <h2 className="text-lg font-semibold mb-1">Quantity</h2>
               <p className="text-2xl font-bold text-gray-800">{item.quantity}</p>
@@ -159,7 +162,7 @@ const ItemDetail = () => {
             </div>
             
             {(item.price !== undefined || item.priceless) && (
-              <div className="bg-gray-50 p-4 rounded-lg col-span-2">
+              <div className="bg-gray-50 p-4 rounded-lg col-span-1 sm:col-span-2">
                 <h2 className="text-lg font-semibold mb-1">Value</h2>
                 {item.priceless ? (
                   <p className="flex items-center text-pink-700">
@@ -175,7 +178,7 @@ const ItemDetail = () => {
             )}
           </div>
           
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <Button 
               variant="outline" 
               className="flex items-center"
@@ -195,12 +198,12 @@ const ItemDetail = () => {
             </Button>
           </div>
           
-          <div className="flex justify-between">
-            <Button onClick={handleEdit} className="flex-1 mr-2">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button onClick={handleEdit} className="flex-1">
               <Edit className="mr-2" size={18} />
               Edit
             </Button>
-            <Button variant="destructive" onClick={handleDelete} className="flex-1 ml-2">
+            <Button variant="destructive" onClick={handleDelete} className="flex-1">
               <Trash2 className="mr-2" size={18} />
               Delete
             </Button>
