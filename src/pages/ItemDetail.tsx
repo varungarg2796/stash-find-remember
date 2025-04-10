@@ -1,17 +1,41 @@
 
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Trash2, Tag, MapPin, Heart, Gift, Activity } from "lucide-react";
+import { 
+  ArrowLeft, Edit, Trash2, Tag, MapPin, 
+  Heart, Gift, Activity, Archive, RefreshCw,
+  Calendar, Clock, AlertTriangle
+} from "lucide-react";
 import { toast } from "sonner";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { format } from "date-fns";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ItemHistory from "@/components/ItemHistory";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getItem, deleteItem, updateItem } = useItems();
+  const { getItem, deleteItem, updateItem, useItem, giftItem, archiveItem, restoreItem } = useItems();
+  const { user } = useAuth();
   const navigate = useNavigate();
   
   const item = getItem(id || "");
+  const [activeTab, setActiveTab] = useState("details");
+  const [actionNote, setActionNote] = useState("");
+  const [actionType, setActionType] = useState<"use" | "gift" | "archive" | "restore" | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   
   if (!item) {
     return (
@@ -38,36 +62,33 @@ const ItemDetail = () => {
     }
   };
 
-  const handleUseItem = () => {
-    if (item.quantity > 1) {
-      updateItem({
-        ...item,
-        quantity: item.quantity - 1
-      });
-      toast.success(`Used one ${item.name}`);
-    } else {
-      if (window.confirm(`This is your last ${item.name}. Do you want to mark it as used and remove it?`)) {
-        deleteItem(item.id);
-        toast.success(`Used the last ${item.name}`);
-        navigate("/");
-      }
-    }
+  const openActionDialog = (type: "use" | "gift" | "archive" | "restore") => {
+    setActionType(type);
+    setActionNote("");
+    setDialogOpen(true);
   };
 
-  const handleGiftItem = () => {
-    if (item.quantity > 1) {
-      updateItem({
-        ...item,
-        quantity: item.quantity - 1
-      });
-      toast.success(`Gifted one ${item.name}`);
-    } else {
-      if (window.confirm(`This is your last ${item.name}. Do you want to mark it as gifted and remove it?`)) {
-        deleteItem(item.id);
-        toast.success(`Gifted the last ${item.name}`);
-        navigate("/");
-      }
+  const executeAction = () => {
+    if (!actionType) return;
+
+    switch (actionType) {
+      case "use":
+        useItem(item.id, actionNote);
+        if (item.quantity <= 1) navigate("/");
+        break;
+      case "gift":
+        giftItem(item.id, actionNote);
+        if (item.quantity <= 1) navigate("/");
+        break;
+      case "archive":
+        archiveItem(item.id, actionNote);
+        break;
+      case "restore":
+        restoreItem(item.id, actionNote);
+        break;
     }
+    
+    setDialogOpen(false);
   };
 
   // Function to generate a consistent color based on item name
@@ -90,6 +111,52 @@ const ItemDetail = () => {
   };
 
   const placeholderColor = getColorForItem(item.name);
+
+  const getActionButton = () => {
+    if (item.archived) {
+      return (
+        <Button 
+          onClick={() => openActionDialog("restore")} 
+          className="w-full"
+          variant="outline"
+        >
+          <RefreshCw className="mr-2" size={18} />
+          Restore Item
+        </Button>
+      );
+    }
+    
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <Button 
+          variant="outline" 
+          className="flex items-center"
+          onClick={() => openActionDialog("use")}
+        >
+          <Activity className="mr-2" size={18} />
+          Use Item
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="flex items-center"
+          onClick={() => openActionDialog("gift")}
+        >
+          <Gift className="mr-2" size={18} />
+          Gift Item
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="flex items-center"
+          onClick={() => openActionDialog("archive")}
+        >
+          <Archive className="mr-2" size={18} />
+          Archive
+        </Button>
+      </div>
+    );
+  };
 
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">
@@ -114,14 +181,16 @@ const ItemDetail = () => {
             )}
           </AspectRatio>
           
-          <Button 
-            onClick={handleEdit}
-            className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800"
-            size="sm"
-          >
-            <Edit className="mr-2" size={16} />
-            Edit Item
-          </Button>
+          {!item.archived && (
+            <Button 
+              onClick={handleEdit}
+              className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800"
+              size="sm"
+            >
+              <Edit className="mr-2" size={16} />
+              Edit Item
+            </Button>
+          )}
           
           {item.priceless && (
             <div className="absolute top-4 left-4 bg-pink-100 text-pink-700 px-3 py-1 rounded-full flex items-center shadow-sm">
@@ -129,87 +198,146 @@ const ItemDetail = () => {
               Priceless
             </div>
           )}
+          
+          {item.archived && (
+            <div className="absolute bottom-0 inset-x-0 bg-gray-800/70 text-white py-2 px-4 flex items-center justify-center">
+              <Archive className="mr-2" size={16} />
+              <span className="font-medium">Archived Item</span>
+            </div>
+          )}
         </div>
         
         <div className="p-6">
-          <h1 className="text-3xl font-bold mb-4">{item.name}</h1>
-          
-          <div className="flex flex-wrap gap-2 mb-6">
-            {item.tags.map((tag, index) => (
-              <span key={index} className="flex items-center text-sm bg-gray-100 px-3 py-1 rounded-full">
-                <Tag size={14} className="mr-1 text-gray-500" />
-                {tag}
-              </span>
-            ))}
-          </div>
-          
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Description</h2>
-            <p className="text-gray-700">{item.description || "No description provided."}</p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold mb-1">Quantity</h2>
-              <p className="text-2xl font-bold text-gray-800">{item.quantity}</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold mb-1">Location</h2>
-              <p className="text-gray-700 flex items-center">
-                <MapPin size={16} className="mr-1 text-gray-500" />
-                {item.location || "Not specified"}
-              </p>
-            </div>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-3xl font-bold">{item.name}</h1>
             
-            {(item.price !== undefined || item.priceless) && (
-              <div className="bg-gray-50 p-4 rounded-lg col-span-1 sm:col-span-2">
-                <h2 className="text-lg font-semibold mb-1">Value</h2>
-                {item.priceless ? (
-                  <p className="flex items-center text-pink-700">
-                    <Heart size={16} className="mr-1" fill="currentColor" />
-                    Priceless (Sentimental Value)
+            <div className="flex items-center text-sm text-gray-500">
+              <Calendar size={14} className="mr-1" />
+              Added {format(new Date(item.createdAt), 'MMM d, yyyy')}
+            </div>
+          </div>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="details" className="mt-4">
+              <div className="flex flex-wrap gap-2 mb-6">
+                {item.tags.map((tag, index) => (
+                  <span key={index} className="flex items-center text-sm bg-gray-100 px-3 py-1 rounded-full">
+                    <Tag size={14} className="mr-1 text-gray-500" />
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-2">Description</h2>
+                <p className="text-gray-700">{item.description || "No description provided."}</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h2 className="text-lg font-semibold mb-1">Quantity</h2>
+                  <p className="text-2xl font-bold text-gray-800">{item.quantity}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h2 className="text-lg font-semibold mb-1">Location</h2>
+                  <p className="text-gray-700 flex items-center">
+                    <MapPin size={16} className="mr-1 text-gray-500" />
+                    {item.location || "Not specified"}
                   </p>
-                ) : (
-                  <p className="text-2xl font-bold text-gray-800">
-                    ${item.price?.toFixed(2) || "Not specified"}
-                  </p>
+                </div>
+                
+                {(item.price !== undefined || item.priceless) && (
+                  <div className="bg-gray-50 p-4 rounded-lg col-span-1 sm:col-span-2">
+                    <h2 className="text-lg font-semibold mb-1">Value</h2>
+                    {item.priceless ? (
+                      <p className="flex items-center text-pink-700">
+                        <Heart size={16} className="mr-1" fill="currentColor" />
+                        Priceless (Sentimental Value)
+                      </p>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-800">
+                        ${item.price?.toFixed(2) || "Not specified"}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <Button 
-              variant="outline" 
-              className="flex items-center"
-              onClick={handleUseItem}
-            >
-              <Activity className="mr-2" size={18} />
-              Use Item
-            </Button>
+              
+              {getActionButton()}
+              
+              {!item.archived && (
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button onClick={handleEdit} className="flex-1">
+                    <Edit className="mr-2" size={18} />
+                    Edit
+                  </Button>
+                  <Button variant="destructive" onClick={handleDelete} className="flex-1">
+                    <Trash2 className="mr-2" size={18} />
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
             
-            <Button 
-              variant="outline" 
-              className="flex items-center"
-              onClick={handleGiftItem}
-            >
-              <Gift className="mr-2" size={18} />
-              Gift Item
-            </Button>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button onClick={handleEdit} className="flex-1">
-              <Edit className="mr-2" size={18} />
-              Edit
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} className="flex-1">
-              <Trash2 className="mr-2" size={18} />
-              Delete
-            </Button>
-          </div>
+            <TabsContent value="history" className="mt-4">
+              <ItemHistory item={item} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
+      
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === "use" && "Use Item"}
+              {actionType === "gift" && "Gift Item"}
+              {actionType === "archive" && "Archive Item"}
+              {actionType === "restore" && "Restore Item"}
+            </DialogTitle>
+            <DialogDescription>
+              {actionType === "use" && "Mark this item as used."}
+              {actionType === "gift" && "Mark this item as gifted to someone."}
+              {actionType === "archive" && "Move this item to the archive."}
+              {actionType === "restore" && "Restore this item from the archive."}
+              
+              {(actionType === "use" || actionType === "gift") && item.quantity <= 1 && (
+                <div className="flex items-center mt-2 text-amber-600">
+                  <AlertTriangle size={16} className="mr-1" />
+                  <span>This is your last item. It will be archived.</span>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-2">
+            <label className="text-sm font-medium mb-1 block">Add a note (optional)</label>
+            <Textarea
+              placeholder="Add a note about this action..."
+              value={actionNote}
+              onChange={(e) => setActionNote(e.target.value)}
+              className="resize-none"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={executeAction}>
+              {actionType === "use" && "Use Item"}
+              {actionType === "gift" && "Gift Item"}
+              {actionType === "archive" && "Archive Item"}
+              {actionType === "restore" && "Restore Item"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

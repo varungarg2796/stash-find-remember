@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { 
   Select,
   SelectContent, 
@@ -10,10 +11,11 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, X, Tag } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const Profile = () => {
-  const { user, updateUserPreferences } = useAuth();
+  const { user, updateUserPreferences, addLocation, removeLocation } = useAuth();
   const navigate = useNavigate();
   
   const [theme, setTheme] = useState<"light" | "dark">(
@@ -22,6 +24,7 @@ const Profile = () => {
   const [currency, setCurrency] = useState<string>(
     user?.preferences?.currency || "USD"
   );
+  const [newLocation, setNewLocation] = useState<string>("");
 
   if (!user) {
     navigate("/");
@@ -33,6 +36,19 @@ const Profile = () => {
       theme,
       currency,
     });
+  };
+
+  const handleAddLocation = () => {
+    if (newLocation.trim()) {
+      addLocation(newLocation.trim());
+      setNewLocation("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAddLocation();
+    }
   };
 
   return (
@@ -99,6 +115,62 @@ const Profile = () => {
                 </Select>
               </div>
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">My Locations</h3>
+            <p className="text-sm text-muted-foreground">
+              Add up to 20 custom locations where you store your items.
+            </p>
+            
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add new location..."
+                value={newLocation}
+                onChange={(e) => setNewLocation(e.target.value)}
+                onKeyPress={handleKeyPress}
+                maxLength={30}
+                className="flex-grow"
+              />
+              <Button 
+                onClick={handleAddLocation} 
+                variant="outline"
+                disabled={!newLocation.trim() || (user.preferences?.locations?.length || 0) >= 20}
+              >
+                <Plus size={16} className="mr-1" />
+                Add
+              </Button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mt-2">
+              {user.preferences?.locations?.map((location) => (
+                <Badge 
+                  key={location} 
+                  variant="outline"
+                  className="flex items-center gap-1 px-3 py-1.5"
+                >
+                  <Tag size={12} className="mr-1" />
+                  {location}
+                  <Button
+                    variant="ghost" 
+                    size="icon"
+                    className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground"
+                    onClick={() => removeLocation(location)}
+                  >
+                    <X size={12} />
+                  </Button>
+                </Badge>
+              ))}
+              {!user.preferences?.locations?.length && (
+                <p className="text-sm text-muted-foreground py-2">
+                  No locations added yet. Add your first location above.
+                </p>
+              )}
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              {user.preferences?.locations?.length || 0}/20 locations used
+            </p>
           </div>
 
           <Button onClick={handleSavePreferences}>Save Preferences</Button>

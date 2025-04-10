@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut, Settings, Box } from "lucide-react";
 
 const Header = () => {
   const { user, login, logout } = useAuth();
@@ -45,7 +45,16 @@ const Header = () => {
         <span className="font-bold text-xl">Stasher</span>
       </Link>
       
-      <div>
+      <div className="flex items-center gap-4">
+        {user && (
+          <Link to="/archive">
+            <Button variant="ghost" size="sm" className="hidden sm:flex items-center">
+              <Box className="mr-2 h-4 w-4" />
+              Archive
+            </Button>
+          </Link>
+        )}
+        
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -72,6 +81,12 @@ const Header = () => {
                 <Link to="/profile" className="cursor-pointer flex w-full items-center">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>My Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/archive" className="cursor-pointer flex w-full items-center sm:hidden">
+                  <Box className="mr-2 h-4 w-4" />
+                  <span>Archive</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

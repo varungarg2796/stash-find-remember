@@ -15,6 +15,7 @@ import EditItem from "./pages/EditItem";
 import Stats from "./pages/Stats";
 import AskStasher from "./pages/AskStasher";
 import Profile from "./pages/Profile";
+import Archive from "./pages/Archive";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
                   <Route path="/stats" element={<Stats />} />
                   <Route path="/ask" element={<AskStasher />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/archive" element={<Archive />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

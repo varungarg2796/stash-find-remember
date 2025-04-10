@@ -1,9 +1,10 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { Edit, ExternalLink, Heart } from "lucide-react";
+import { Edit, ExternalLink, Heart, Calendar } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { format } from "date-fns";
 
 interface ItemCardProps {
   item: Item;
@@ -33,7 +34,7 @@ const getColorForItem = (name: string): string => {
 };
 
 const ItemCard = ({ item }: ItemCardProps) => {
-  const { id, name, imageUrl, tags, quantity, location, priceless } = item;
+  const { id, name, imageUrl, tags, quantity, location, priceless, createdAt } = item;
   const placeholderColor = getColorForItem(name);
   const isMobile = useIsMobile();
   
@@ -87,12 +88,19 @@ const ItemCard = ({ item }: ItemCardProps) => {
           {tags.length > (isMobile ? 1 : 2) && <span className="text-xs text-gray-500">+{tags.length - (isMobile ? 1 : 2)}</span>}
         </div>
         
-        {location && (
-          <p className="text-xs text-gray-500 flex items-center">
-            <span className="truncate">{location}</span>
-            <ExternalLink size={12} className="ml-1 flex-shrink-0" />
+        <div className="flex justify-between items-center text-xs text-gray-500">
+          {location && (
+            <p className="flex items-center">
+              <ExternalLink size={12} className="mr-1 flex-shrink-0" />
+              <span className="truncate">{location}</span>
+            </p>
+          )}
+          
+          <p className="flex items-center ml-auto">
+            <Calendar size={12} className="mr-1 flex-shrink-0" />
+            <span>{format(new Date(createdAt), 'MMM d, yyyy')}</span>
           </p>
-        )}
+        </div>
       </Link>
     </div>
   );
