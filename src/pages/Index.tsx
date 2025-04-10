@@ -10,7 +10,7 @@ import ViewToggle from "@/components/ViewToggle";
 import AddItemButton from "@/components/AddItemButton";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { BarChart, MessageSquareMore } from "lucide-react";
+import { BarChart, MessageSquareMore, Download, Upload } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,6 +83,15 @@ const Index = () => {
           activeSubFilter={activeSubFilter}
         />
         <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={() => navigate("/bulk-import")}
+            className="flex-shrink-0"
+            title="Bulk Import"
+          >
+            <Upload size={18} />
+          </Button>
           <Button 
             variant="outline" 
             size="icon" 

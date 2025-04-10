@@ -16,6 +16,7 @@ import Stats from "./pages/Stats";
 import AskStasher from "./pages/AskStasher";
 import Profile from "./pages/Profile";
 import Archive from "./pages/Archive";
+import BulkImport from "./pages/BulkImport";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
                   <Route path="/ask" element={<AskStasher />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/archive" element={<Archive />} />
+                  <Route path="/bulk-import" element={<BulkImport />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
