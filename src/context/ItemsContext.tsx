@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { Item, ItemHistory } from "@/types";
 import { toast } from "sonner";
@@ -81,12 +80,11 @@ export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addItem = (newItem: Omit<Item, "id" | "createdAt" | "history">) => {
     const now = new Date();
-    const itemCreatedAt = newItem.createdAt ? new Date(newItem.createdAt) : now;
     
     const item = {
       ...newItem,
       id: Date.now().toString(),
-      createdAt: itemCreatedAt,
+      createdAt: now,
       history: [
         { id: Date.now().toString(), action: "created" as const, date: now }
       ]

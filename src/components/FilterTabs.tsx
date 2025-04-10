@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, DollarSign } from "lucide-react";
+import { ChevronDown, DollarSign, Filter } from "lucide-react";
 import { useItems } from "@/context/ItemsContext";
 
 interface FilterTabsProps {
@@ -57,7 +57,7 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
                 {filter.label}
                 <ChevronDown size={16} className="ml-1 inline" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto z-50 bg-white">
+              <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto z-50 bg-popover shadow-md">
                 {filter.id === "tags" && uniqueTags.map(tag => (
                   <DropdownMenuItem 
                     key={tag} 
