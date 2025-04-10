@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, DollarSign } from "lucide-react";
 import { useItems } from "@/context/ItemsContext";
 
 interface FilterTabsProps {
@@ -16,18 +16,18 @@ interface FilterTabsProps {
 const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeSubFilter, setActiveSubFilter] = useState<string | undefined>(undefined);
-  const { items } = useItems();
+  const { getActiveItems } = useItems();
   
-  // Extract unique tags and locations for subfilters
-  const uniqueTags = [...new Set(items.flatMap(item => item.tags))].sort();
-  const uniqueLocations = [...new Set(items.map(item => item.location).filter(Boolean))].sort();
+  // Extract unique tags and locations for subfilters from active items only
+  const activeItems = getActiveItems();
+  const uniqueTags = [...new Set(activeItems.flatMap(item => item.tags))].sort();
+  const uniqueLocations = [...new Set(activeItems.map(item => item.location).filter(Boolean))].sort();
   
   const filters = [
     { id: "all", label: "All Items" },
     { id: "tags", label: "By Tag", hasSubFilters: true },
     { id: "location", label: "By Location", hasSubFilters: true },
-    { id: "unused", label: "Unused" },
-    { id: "priceless", label: "Priceless" },
+    { id: "price", label: "By Price", hasSubFilters: true, icon: <DollarSign size={16} className="mr-1" /> }
   ];
   
   const handleFilterClick = (filterId: string) => {
@@ -48,11 +48,12 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
           {filter.hasSubFilters ? (
             <DropdownMenu>
               <DropdownMenuTrigger 
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none flex items-center
                   ${activeFilter === filter.id 
                     ? "bg-primary text-primary-foreground" 
                     : "bg-secondary hover:bg-secondary/80"}`}
               >
+                {filter.icon}
                 {filter.label}
                 <ChevronDown size={16} className="ml-1 inline" />
               </DropdownMenuTrigger>
@@ -73,6 +74,19 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
                     onClick={() => handleSubFilterClick(location as string)}
                   >
                     {location}
+                  </DropdownMenuItem>
+                ))}
+                {filter.id === "price" && [
+                  { id: "priceless", label: "Priceless Items" },
+                  { id: "with-price", label: "Items with Price" },
+                  { id: "no-price", label: "Items without Price" }
+                ].map(priceFilter => (
+                  <DropdownMenuItem 
+                    key={priceFilter.id} 
+                    className={activeSubFilter === priceFilter.id ? "bg-muted" : ""}
+                    onClick={() => handleSubFilterClick(priceFilter.id)}
+                  >
+                    {priceFilter.label}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

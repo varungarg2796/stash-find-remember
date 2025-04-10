@@ -17,8 +17,11 @@ const Index = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeSubFilter, setActiveSubFilter] = useState<string | undefined>(undefined);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const { items } = useItems();
+  const { getActiveItems } = useItems();
   const navigate = useNavigate();
+  
+  // Get only active (non-archived) items
+  const activeItems = getActiveItems();
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -33,7 +36,7 @@ const Index = () => {
     setViewMode(view);
   };
 
-  const filteredItems = items.filter(item => {
+  const filteredItems = activeItems.filter(item => {
     // Search filter
     const matchesSearch = searchQuery === "" || 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -52,11 +55,15 @@ const Index = () => {
         return activeSubFilter
           ? item.location === activeSubFilter
           : Boolean(item.location);
-      case "unused":
-        // This is just a placeholder for unused items
-        return item.quantity > 0;
-      case "priceless":
-        return item.priceless === true;
+      case "price":
+        if (activeSubFilter === "priceless") {
+          return item.priceless === true;
+        } else if (activeSubFilter === "with-price") {
+          return item.price !== undefined && item.price > 0;
+        } else if (activeSubFilter === "no-price") {
+          return (item.price === undefined || item.price === 0) && !item.priceless;
+        }
+        return true;
       case "all":
       default:
         return true;

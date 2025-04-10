@@ -81,12 +81,12 @@ export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addItem = (newItem: Omit<Item, "id" | "createdAt" | "history">) => {
     const now = new Date();
-    const createdAt = newItem.createdAt ? new Date(newItem.createdAt) : now;
+    const itemCreatedAt = newItem.createdAt ? new Date(newItem.createdAt) : now;
     
     const item = {
       ...newItem,
       id: Date.now().toString(),
-      createdAt,
+      createdAt: itemCreatedAt,
       history: [
         { id: Date.now().toString(), action: "created" as const, date: now }
       ]
@@ -179,7 +179,7 @@ export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
       toast.success(`Used one ${item.name}`);
     } else {
       // Archive the last item
-      archiveItem(id, note);
+      archiveItem(id, note || "Last item used");
     }
   };
 
@@ -200,7 +200,7 @@ export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
       toast.success(`Gifted one ${item.name}`);
     } else {
       // Archive the last item with gifted status
-      archiveItem(id, note ? note : "Gifted to someone");
+      archiveItem(id, note || "Gifted to someone");
     }
   };
 
