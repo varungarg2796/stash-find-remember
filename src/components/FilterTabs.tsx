@@ -11,11 +11,11 @@ import { useItems } from "@/context/ItemsContext";
 
 interface FilterTabsProps {
   onFilterChange: (filter: string, subFilter?: string) => void;
+  activeFilter: string;
+  activeSubFilter?: string;
 }
 
-const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [activeSubFilter, setActiveSubFilter] = useState<string | undefined>(undefined);
+const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTabsProps) => {
   const { getActiveItems } = useItems();
   
   // Extract unique tags and locations for subfilters from active items only
@@ -31,13 +31,10 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
   ];
   
   const handleFilterClick = (filterId: string) => {
-    setActiveFilter(filterId);
-    setActiveSubFilter(undefined);
     onFilterChange(filterId);
   };
   
   const handleSubFilterClick = (subFilter: string) => {
-    setActiveSubFilter(subFilter);
     onFilterChange(activeFilter, subFilter);
   };
   
@@ -71,7 +68,7 @@ const FilterTabs = ({ onFilterChange }: FilterTabsProps) => {
                   <DropdownMenuItem 
                     key={location} 
                     className={activeSubFilter === location ? "bg-muted" : ""}
-                    onClick={() => handleSubFilterClick(location as string)}
+                    onClick={() => handleSubFilterClick(location)}
                   >
                     {location}
                   </DropdownMenuItem>

@@ -54,7 +54,7 @@ const Index = () => {
       case "location":
         return activeSubFilter
           ? item.location === activeSubFilter
-          : Boolean(item.location);
+          : true;
       case "price":
         if (activeSubFilter === "priceless") {
           return item.priceless === true;
@@ -77,7 +77,11 @@ const Index = () => {
       </div>
       
       <div className="mb-8 flex justify-between items-center">
-        <FilterTabs onFilterChange={handleFilterChange} />
+        <FilterTabs 
+          onFilterChange={handleFilterChange} 
+          activeFilter={activeFilter}
+          activeSubFilter={activeSubFilter}
+        />
         <div className="flex items-center space-x-2">
           <Button 
             variant="outline" 
