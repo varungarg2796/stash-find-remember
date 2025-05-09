@@ -3,19 +3,19 @@ import { Item } from "@/types";
 
 // Mapping of item categories (based on tags) to default images
 const categoryImageMap: Record<string, string> = {
-  clothing: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  book: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  electronics: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  furniture: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  kitchen: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  decor: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  toy: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  tool: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  sport: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  outdoor: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  cosmetic: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  food: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
-  pet: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
+  clothing: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+  book: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
+  electronics: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+  furniture: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc",
+  kitchen: "https://images.unsplash.com/photo-1556909212-d5b604d0c90d",
+  decor: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4",
+  toy: "https://images.unsplash.com/photo-1558060370-d5019f566210",
+  tool: "https://images.unsplash.com/photo-1581235720704-06d3acfcb36f",
+  sport: "https://images.unsplash.com/photo-1562771242-a02d9090c90c",
+  outdoor: "https://images.unsplash.com/photo-1575438922952-8ebd22b0bc1f",
+  cosmetic: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9",
+  food: "https://images.unsplash.com/photo-1498837167922-ddd27525d352",
+  pet: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b"
 };
 
 /**
@@ -63,5 +63,5 @@ export const getDefaultImage = (item: Item | Partial<Item>): string => {
   }
   
   // If no matches, use a generic placeholder
-  return "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png";
+  return "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
 };

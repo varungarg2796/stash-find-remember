@@ -82,46 +82,41 @@ const Index = () => {
         <SearchBar onSearch={handleSearch} />
       </div>
       
-      {/* Mobile and Desktop layout */}
+      {/* Mobile and Desktop layout with improved responsive design */}
       <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div className="hidden sm:block">
-            <FilterTabs 
-              onFilterChange={handleFilterChange} 
-              activeFilter={activeFilter}
-              activeSubFilter={activeSubFilter}
-            />
-          </div>
+        {/* Top actions row */}
+        <div className="flex justify-between items-center mb-6 gap-2">
+          <h2 className="text-xl font-bold">Your Items</h2>
           
-          {/* Mobile Action Menu */}
-          <div className="block sm:hidden">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <MenuIcon size={18} />
-                  <span className="sr-only">Menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuItem onClick={() => navigate("/bulk-import")}>
-                  <Upload size={16} className="mr-2" />
-                  Bulk Import
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/ask")}>
-                  <MessageSquareMore size={16} className="mr-2" />
-                  Ask Stasher
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/stats")}>
-                  <BarChart size={16} className="mr-2" />
-                  View Statistics
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
+            {/* Mobile Action Menu */}
+            <div className="block md:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <MenuIcon size={16} className="mr-1" />
+                    <span className="text-xs">Actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate("/bulk-import")}>
+                    <Upload size={16} className="mr-2" />
+                    Bulk Import
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/ask")}>
+                    <MessageSquareMore size={16} className="mr-2" />
+                    Ask Stasher
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/stats")}>
+                    <BarChart size={16} className="mr-2" />
+                    View Statistics
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
             {/* Desktop Actions */}
-            <div className="hidden sm:flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-2">
               <Button 
                 variant="outline" 
                 size="icon" 
@@ -154,13 +149,26 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Mobile Filter Tabs - separate row */}
-        <div className="block sm:hidden mb-4 overflow-x-auto pb-2">
+        {/* Filter tabs row - separate for desktop and mobile */}
+        <div className="hidden md:block mb-4">
           <FilterTabs 
             onFilterChange={handleFilterChange} 
             activeFilter={activeFilter}
             activeSubFilter={activeSubFilter}
           />
+        </div>
+        
+        {/* Mobile Filter Tabs - scrollable */}
+        <div className="md:hidden mb-4">
+          <div className="overflow-x-auto pb-2 -mx-4 px-4">
+            <div className="inline-flex min-w-full">
+              <FilterTabs 
+                onFilterChange={handleFilterChange} 
+                activeFilter={activeFilter}
+                activeSubFilter={activeSubFilter}
+              />
+            </div>
+          </div>
         </div>
       </div>
       

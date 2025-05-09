@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
 import ItemList from "@/components/ItemList";
-import { ArrowLeft, Box, RefreshCw } from "lucide-react";
+import { ArrowLeft, Box, Trash2 } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 const Archive = () => {
-  const { getArchivedItems, restoreItem } = useItems();
+  const { getArchivedItems, deleteItem } = useItems();
   const navigate = useNavigate();
   const archivedItems = getArchivedItems();
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -28,8 +28,10 @@ const Archive = () => {
     }
   });
 
-  const handleRestore = (id: string) => {
-    restoreItem(id);
+  const handleDelete = (id: string) => {
+    if (window.confirm("Are you sure you want to permanently delete this item?")) {
+      deleteItem(id);
+    }
   };
 
   return (
@@ -73,7 +75,7 @@ const Archive = () => {
             <ItemList 
               items={sortedItems} 
               isArchive={true}
-              onRestore={handleRestore}
+              onDelete={handleDelete}
             />
           </div>
         </>
