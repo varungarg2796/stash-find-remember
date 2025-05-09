@@ -5,6 +5,7 @@ import { Edit, ExternalLink, Heart, Calendar } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
+import { getDefaultImage } from "@/utils/imageUtils";
 
 interface ItemCardProps {
   item: Item;
@@ -37,6 +38,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
   const { id, name, imageUrl, tags, quantity, location, priceless, createdAt } = item;
   const placeholderColor = getColorForItem(name);
   const isMobile = useIsMobile();
+  const defaultImage = getDefaultImage(item);
   
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -46,6 +48,12 @@ const ItemCard = ({ item }: ItemCardProps) => {
             {imageUrl ? (
               <img 
                 src={imageUrl} 
+                alt={name} 
+                className="w-full h-full object-cover"
+              />
+            ) : defaultImage ? (
+              <img 
+                src={defaultImage} 
                 alt={name} 
                 className="w-full h-full object-cover"
               />

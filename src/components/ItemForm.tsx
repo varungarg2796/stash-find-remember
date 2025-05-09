@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus, Image, X, Heart } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { getDefaultImage } from "@/utils/imageUtils";
 
 interface ItemFormProps {
   initialData?: Partial<Item>;
@@ -87,7 +88,7 @@ const ItemForm = ({
     
     const finalData = {
       ...formData,
-      imageUrl: formData.imageUrl || getPlaceholderImage(formData.name)
+      imageUrl: formData.imageUrl || getDefaultImage(formData)
     };
     
     onSubmit(finalData);

@@ -10,7 +10,13 @@ import ViewToggle from "@/components/ViewToggle";
 import AddItemButton from "@/components/AddItemButton";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { BarChart, MessageSquareMore, Download, Upload } from "lucide-react";
+import { BarChart, MessageSquareMore, Download, Upload, MenuIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -76,41 +82,85 @@ const Index = () => {
         <SearchBar onSearch={handleSearch} />
       </div>
       
-      <div className="mb-8 flex justify-between items-center">
-        <FilterTabs 
-          onFilterChange={handleFilterChange} 
-          activeFilter={activeFilter}
-          activeSubFilter={activeSubFilter}
-        />
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => navigate("/bulk-import")}
-            className="flex-shrink-0"
-            title="Bulk Import"
-          >
-            <Upload size={18} />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => navigate("/ask")}
-            className="flex-shrink-0"
-            title="Ask Stasher"
-          >
-            <MessageSquareMore size={18} />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => navigate("/stats")}
-            className="flex-shrink-0"
-            title="View Statistics"
-          >
-            <BarChart size={18} />
-          </Button>
-          <ViewToggle activeView={viewMode} onViewChange={handleViewChange} />
+      {/* Mobile and Desktop layout */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <div className="hidden sm:block">
+            <FilterTabs 
+              onFilterChange={handleFilterChange} 
+              activeFilter={activeFilter}
+              activeSubFilter={activeSubFilter}
+            />
+          </div>
+          
+          {/* Mobile Action Menu */}
+          <div className="block sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MenuIcon size={18} />
+                  <span className="sr-only">Menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem onClick={() => navigate("/bulk-import")}>
+                  <Upload size={16} className="mr-2" />
+                  Bulk Import
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/ask")}>
+                  <MessageSquareMore size={16} className="mr-2" />
+                  Ask Stasher
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/stats")}>
+                  <BarChart size={16} className="mr-2" />
+                  View Statistics
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            {/* Desktop Actions */}
+            <div className="hidden sm:flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => navigate("/bulk-import")}
+                className="flex-shrink-0"
+                title="Bulk Import"
+              >
+                <Upload size={18} />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => navigate("/ask")}
+                className="flex-shrink-0"
+                title="Ask Stasher"
+              >
+                <MessageSquareMore size={18} />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={() => navigate("/stats")}
+                className="flex-shrink-0"
+                title="View Statistics"
+              >
+                <BarChart size={18} />
+              </Button>
+            </div>
+            <ViewToggle activeView={viewMode} onViewChange={handleViewChange} />
+          </div>
+        </div>
+        
+        {/* Mobile Filter Tabs - separate row */}
+        <div className="block sm:hidden mb-4 overflow-x-auto pb-2">
+          <FilterTabs 
+            onFilterChange={handleFilterChange} 
+            activeFilter={activeFilter}
+            activeSubFilter={activeSubFilter}
+          />
         </div>
       </div>
       

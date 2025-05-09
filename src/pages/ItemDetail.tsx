@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
@@ -6,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowLeft, Edit, Trash2, Tag, MapPin, 
-  Heart, Gift, Activity, Archive, RefreshCw,
+  Heart, Gift, Archive, RefreshCw,
   Calendar, Clock, AlertTriangle
 } from "lucide-react";
 import { toast } from "sonner";
@@ -24,17 +23,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { getDefaultImage } from "@/utils/imageUtils";
 
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getItem, deleteItem, updateItem, useItem, giftItem, archiveItem, restoreItem } = useItems();
+  const { getItem, deleteItem, updateItem, giftItem, archiveItem, restoreItem } = useItems();
   const { user } = useAuth();
   const navigate = useNavigate();
   
   const item = getItem(id || "");
   const [activeTab, setActiveTab] = useState("details");
   const [actionNote, setActionNote] = useState("");
-  const [actionType, setActionType] = useState<"use" | "gift" | "archive" | "restore" | null>(null);
+  const [actionType, setActionType] = useState<"gift" | "archive" | "restore" | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
   if (!item) {
@@ -62,7 +62,7 @@ const ItemDetail = () => {
     }
   };
 
-  const openActionDialog = (type: "use" | "gift" | "archive" | "restore") => {
+  const openActionDialog = (type: "gift" | "archive" | "restore") => {
     setActionType(type);
     setActionNote("");
     setDialogOpen(true);
@@ -72,10 +72,6 @@ const ItemDetail = () => {
     if (!actionType) return;
 
     switch (actionType) {
-      case "use":
-        useItem(item.id, actionNote);
-        if (item.quantity <= 1) navigate("/");
-        break;
       case "gift":
         giftItem(item.id, actionNote);
         if (item.quantity <= 1) navigate("/");
@@ -111,6 +107,7 @@ const ItemDetail = () => {
   };
 
   const placeholderColor = getColorForItem(item.name);
+  const defaultImage = getDefaultImage(item);
 
   const getActionButton = () => {
     if (item.archived) {
@@ -127,16 +124,7 @@ const ItemDetail = () => {
     }
     
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Button 
-          variant="outline" 
-          className="flex items-center"
-          onClick={() => openActionDialog("use")}
-        >
-          <Activity className="mr-2" size={18} />
-          Use Item
-        </Button>
-        
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <Button 
           variant="outline" 
           className="flex items-center"
@@ -171,6 +159,12 @@ const ItemDetail = () => {
             {item.imageUrl ? (
               <img 
                 src={item.imageUrl} 
+                alt={item.name} 
+                className="w-full h-full object-cover"
+              />
+            ) : defaultImage ? (
+              <img 
+                src={defaultImage} 
                 alt={item.name} 
                 className="w-full h-full object-cover"
               />
@@ -295,18 +289,16 @@ const ItemDetail = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionType === "use" && "Use Item"}
               {actionType === "gift" && "Gift Item"}
               {actionType === "archive" && "Archive Item"}
               {actionType === "restore" && "Restore Item"}
             </DialogTitle>
             <DialogDescription>
-              {actionType === "use" && "Mark this item as used."}
               {actionType === "gift" && "Mark this item as gifted to someone."}
               {actionType === "archive" && "Move this item to the archive."}
               {actionType === "restore" && "Restore this item from the archive."}
               
-              {(actionType === "use" || actionType === "gift") && item.quantity <= 1 && (
+              {actionType === "gift" && item.quantity <= 1 && (
                 <div className="flex items-center mt-2 text-amber-600">
                   <AlertTriangle size={16} className="mr-1" />
                   <span>This is your last item. It will be archived.</span>
@@ -330,7 +322,6 @@ const ItemDetail = () => {
               Cancel
             </Button>
             <Button onClick={executeAction}>
-              {actionType === "use" && "Use Item"}
               {actionType === "gift" && "Gift Item"}
               {actionType === "archive" && "Archive Item"}
               {actionType === "restore" && "Restore Item"}
