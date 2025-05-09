@@ -15,7 +15,7 @@ import { ArrowLeft, Plus, X, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const Profile = () => {
-  const { user, updateUserPreferences, addLocation, removeLocation } = useAuth();
+  const { user, updateUserPreferences, addLocation, removeLocation, addTag, removeTag } = useAuth();
   const navigate = useNavigate();
   
   const [theme, setTheme] = useState<"light" | "dark">(
@@ -25,6 +25,7 @@ const Profile = () => {
     user?.preferences?.currency || "USD"
   );
   const [newLocation, setNewLocation] = useState<string>("");
+  const [newTag, setNewTag] = useState<string>("");
 
   if (!user) {
     navigate("/");
@@ -44,10 +45,17 @@ const Profile = () => {
       setNewLocation("");
     }
   };
+  
+  const handleAddTag = () => {
+    if (newTag.trim()) {
+      addTag(newTag.trim());
+      setNewTag("");
+    }
+  };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent, action: () => void) => {
     if (e.key === 'Enter') {
-      handleAddLocation();
+      action();
     }
   };
 
@@ -128,7 +136,7 @@ const Profile = () => {
                 placeholder="Add new location..."
                 value={newLocation}
                 onChange={(e) => setNewLocation(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyPress={(e) => handleKeyPress(e, handleAddLocation)}
                 maxLength={30}
                 className="flex-grow"
               />
@@ -171,6 +179,58 @@ const Profile = () => {
             <p className="text-xs text-muted-foreground">
               {user.preferences?.locations?.length || 0}/20 locations used
             </p>
+          </div>
+          
+          <div className="space-y-4 pt-6 border-t border-gray-100">
+            <h3 className="text-lg font-medium">Common Tags</h3>
+            <p className="text-sm text-muted-foreground">
+              Add common tags that you frequently use for your items.
+            </p>
+            
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add common tag..."
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyPress={(e) => handleKeyPress(e, handleAddTag)}
+                maxLength={30}
+                className="flex-grow"
+              />
+              <Button 
+                onClick={handleAddTag} 
+                variant="outline"
+                disabled={!newTag.trim()}
+              >
+                <Plus size={16} className="mr-1" />
+                Add
+              </Button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mt-2">
+              {user.preferences?.tags?.map((tag) => (
+                <Badge 
+                  key={tag} 
+                  variant="outline"
+                  className="flex items-center gap-1 px-3 py-1.5"
+                >
+                  <Tag size={12} className="mr-1" />
+                  {tag}
+                  <Button
+                    variant="ghost" 
+                    size="icon"
+                    className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground"
+                    onClick={() => removeTag(tag)}
+                  >
+                    <X size={12} />
+                  </Button>
+                </Badge>
+              ))}
+              {!user.preferences?.tags?.length && (
+                <p className="text-sm text-muted-foreground py-2">
+                  No common tags added yet. Add your first tag above.
+                </p>
+              )}
+            </div>
           </div>
 
           <Button onClick={handleSavePreferences}>Save Preferences</Button>

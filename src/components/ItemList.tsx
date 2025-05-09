@@ -1,12 +1,13 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { ArrowRight, Heart, Trash2, Archive, Clock } from "lucide-react";
+import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { getDefaultImage } from "@/utils/imageUtils";
+import { useAuth } from "@/context/AuthContext";
 
 interface ItemListProps {
   items: Item[];
@@ -26,6 +27,11 @@ const getArchivedDate = (item: Item): Date | null => {
 };
 
 const ItemList = ({ items, isArchive = false, onDelete }: ItemListProps) => {
+  const { user } = useAuth();
+  const currencySymbol = user?.preferences?.currency === 'EUR' ? '€' : 
+                         user?.preferences?.currency === 'GBP' ? '£' : 
+                         user?.preferences?.currency === 'JPY' ? '¥' : '$';
+                         
   return (
     <div className="flex flex-col space-y-3">
       {items.map((item) => {
@@ -62,6 +68,12 @@ const ItemList = ({ items, isArchive = false, onDelete }: ItemListProps) => {
                   {item.priceless && (
                     <div className="ml-2 flex items-center text-red-500 flex-shrink-0">
                       <Heart size={14} className="fill-current" />
+                    </div>
+                  )}
+                  {item.price && item.price > 0 && !item.priceless && (
+                    <div className="ml-2 flex items-center text-green-600 flex-shrink-0">
+                      <DollarSign size={14} />
+                      <span className="text-xs font-semibold">{currencySymbol}{item.price.toLocaleString()}</span>
                     </div>
                   )}
                 </div>

@@ -31,11 +31,11 @@ const EditItem = () => {
   const handleSubmit = (data: Omit<Item, "id">) => {
     updateItem({ ...data, id: item.id });
     toast.success("Item updated successfully");
-    navigate(`/items/${id}`);
+    navigate("/"); // Navigate to home page instead of item detail
   };
   
   const handleCancel = () => {
-    navigate(`/items/${id}`);
+    navigate("/"); // Navigate to home page instead of item detail
   };
 
   return (

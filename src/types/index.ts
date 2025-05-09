@@ -16,7 +16,7 @@ export interface Item {
 
 export interface ItemHistory {
   id: string;
-  action: 'created' | 'updated' | 'used' | 'gifted' | 'archived';
+  action: 'created' | 'updated' | 'gifted' | 'archived';
   date: Date;
   note?: string;
 }
@@ -27,4 +27,5 @@ export interface UserPreferences {
   theme?: "light" | "dark";
   currency?: string;
   locations?: string[];
+  tags?: string[];
 }

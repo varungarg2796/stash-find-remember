@@ -3,10 +3,18 @@ import { Item } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, Image, X, Heart } from "lucide-react";
+import { Plus, Minus, Image, X, Heart, Tag } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getDefaultImage } from "@/utils/imageUtils";
+import { useAuth } from "@/context/AuthContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ItemFormProps {
   initialData?: Partial<Item>;
@@ -40,6 +48,13 @@ const ItemForm = ({
 }: ItemFormProps) => {
   const [formData, setFormData] = useState<Omit<Item, "id">>(initialData as Omit<Item, "id">);
   const [tagInput, setTagInput] = useState("");
+  const { user } = useAuth();
+  
+  // Common tags from user preferences or default ones
+  const commonTags = user?.preferences?.tags || [
+    "Clothing", "Book", "Electronics", "Furniture", "Kitchen",
+    "Decor", "Toy", "Tool", "Sport", "Outdoor", "Cosmetic", "Food", "Pet"
+  ];
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -73,6 +88,15 @@ const ItemForm = ({
         tags: [...prev.tags, tagInput.trim()]
       }));
       setTagInput("");
+    }
+  };
+  
+  const handleTagSelect = (tag: string) => {
+    if (!formData.tags.includes(tag)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
     }
   };
   
@@ -218,14 +242,18 @@ const ItemForm = ({
           className="w-full p-2 border border-gray-300 rounded-md"
         >
           <option value="">Select a location</option>
-          <option value="Kitchen">Kitchen</option>
-          <option value="Bedroom">Bedroom</option>
-          <option value="Wardrobe">Wardrobe</option>
-          <option value="Drawer">Drawer</option>
-          <option value="Garage">Garage</option>
-          <option value="Attic">Attic</option>
-          <option value="Basement">Basement</option>
-          <option value="Other">Other</option>
+          {user?.preferences?.locations?.map(loc => (
+            <option key={loc} value={loc}>{loc}</option>
+          )) || [
+            <option key="kitchen" value="Kitchen">Kitchen</option>,
+            <option key="bedroom" value="Bedroom">Bedroom</option>,
+            <option key="wardrobe" value="Wardrobe">Wardrobe</option>,
+            <option key="drawer" value="Drawer">Drawer</option>,
+            <option key="garage" value="Garage">Garage</option>,
+            <option key="attic" value="Attic">Attic</option>,
+            <option key="basement" value="Basement">Basement</option>,
+            <option key="other" value="Other">Other</option>
+          ]}
         </select>
       </div>
       
@@ -267,12 +295,37 @@ const ItemForm = ({
         <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
           Tags
         </label>
+        
+        {/* Common tag selection */}
+        <div className="mb-3">
+          <Select onValueChange={handleTagSelect}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a tag" />
+            </SelectTrigger>
+            <SelectContent>
+              {commonTags.map(tag => (
+                <SelectItem 
+                  key={tag} 
+                  value={tag}
+                  disabled={formData.tags.includes(tag)}
+                >
+                  <div className="flex items-center">
+                    <Tag size={14} className="mr-2" />
+                    {tag}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Custom tag input */}
         <div className="flex mb-2">
           <Input
             id="tagInput"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
-            placeholder="Add a tag"
+            placeholder="Add a custom tag"
             className="mr-2"
           />
           <Button 

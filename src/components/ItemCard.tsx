@@ -1,11 +1,12 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { Edit, ExternalLink, Heart, Calendar } from "lucide-react";
+import { Edit, ExternalLink, Heart, Calendar, DollarSign } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { getDefaultImage } from "@/utils/imageUtils";
+import { useAuth } from "@/context/AuthContext";
 
 interface ItemCardProps {
   item: Item;
@@ -35,10 +36,14 @@ const getColorForItem = (name: string): string => {
 };
 
 const ItemCard = ({ item }: ItemCardProps) => {
-  const { id, name, imageUrl, tags, quantity, location, priceless, createdAt } = item;
+  const { id, name, imageUrl, tags, quantity, location, priceless, createdAt, price } = item;
   const placeholderColor = getColorForItem(name);
   const isMobile = useIsMobile();
   const defaultImage = getDefaultImage(item);
+  const { user } = useAuth();
+  const currencySymbol = user?.preferences?.currency === 'EUR' ? '€' : 
+                         user?.preferences?.currency === 'GBP' ? '£' : 
+                         user?.preferences?.currency === 'JPY' ? '¥' : '$';
   
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -77,6 +82,13 @@ const ItemCard = ({ item }: ItemCardProps) => {
           <div className="absolute top-2 left-2 flex items-center bg-white/90 px-2 py-1 rounded-full shadow-sm">
             <Heart size={14} className="text-red-500 mr-1 fill-red-500" />
             <span className="text-xs font-medium">Priceless</span>
+          </div>
+        )}
+        
+        {price && price > 0 && !priceless && (
+          <div className="absolute top-2 left-2 flex items-center bg-white/90 px-2 py-1 rounded-full shadow-sm">
+            <DollarSign size={14} className="text-green-500 mr-1" />
+            <span className="text-xs font-medium">{currencySymbol}{price.toLocaleString()}</span>
           </div>
         )}
       </div>
