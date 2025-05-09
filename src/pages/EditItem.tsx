@@ -17,7 +17,7 @@ const EditItem = () => {
   if (!item) {
     return (
       <div className="max-w-screen-md mx-auto px-4 py-6">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+        <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
           <ArrowLeft className="mr-2" size={18} />
           Back
         </Button>
@@ -31,16 +31,16 @@ const EditItem = () => {
   const handleSubmit = (data: Omit<Item, "id">) => {
     updateItem({ ...data, id: item.id });
     toast.success("Item updated successfully");
-    navigate("/"); // Navigate to home page instead of item detail
+    navigate("/"); // Navigate to home page
   };
   
   const handleCancel = () => {
-    navigate("/"); // Navigate to home page instead of item detail
+    navigate("/"); // Navigate to home page
   };
 
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+      <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
         <ArrowLeft className="mr-2" size={18} />
         Back
       </Button>
@@ -56,6 +56,7 @@ const EditItem = () => {
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           submitLabel="Save Changes"
+          isEditing={true}
         />
       </div>
     </div>

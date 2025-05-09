@@ -18,6 +18,8 @@ interface AuthContextType {
   updateUserPreferences: (preferences: Partial<UserPreferences>) => void;
   addLocation: (location: string) => void;
   removeLocation: (location: string) => void;
+  addTag: (tag: string) => void;
+  removeTag: (tag: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,12 +34,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       userData.preferences = {
         theme: "light",
         currency: "USD",
-        locations: ["Wardrobe", "Kitchen", "Bookshelf", "Drawer"]
+        locations: ["Wardrobe", "Kitchen", "Bookshelf", "Drawer"],
+        tags: ["Clothing", "Book", "Electronics", "Furniture"]
       };
     }
     
     if (!userData.preferences.locations) {
       userData.preferences.locations = ["Wardrobe", "Kitchen", "Bookshelf", "Drawer"];
+    }
+
+    if (!userData.preferences.tags) {
+      userData.preferences.tags = ["Clothing", "Book", "Electronics", "Furniture"];
     }
     
     setUser(userData);
@@ -114,6 +121,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
     }
   };
+  
+  const addTag = (tag: string) => {
+    if (user && user.preferences) {
+      // Check if tags exist, initialize if not
+      const currentTags = user.preferences.tags || [];
+      
+      // Check if we already have the maximum number of tags
+      if (currentTags.length >= 20) {
+        toast({
+          title: "Too many tags",
+          description: "You can have a maximum of 20 common tags.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Check if tag already exists
+      if (currentTags.includes(tag)) {
+        toast({
+          title: "Tag already exists",
+          description: `${tag} is already in your list.`,
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Add the new tag
+      const updatedTags = [...currentTags, tag];
+      
+      updateUserPreferences({
+        tags: updatedTags
+      });
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    if (user && user.preferences && user.preferences.tags) {
+      const updatedTags = user.preferences.tags.filter(t => t !== tag);
+      
+      updateUserPreferences({
+        tags: updatedTags
+      });
+    }
+  };
 
   return (
     <AuthContext.Provider 
@@ -123,7 +174,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout, 
         updateUserPreferences,
         addLocation,
-        removeLocation
+        removeLocation,
+        addTag,
+        removeTag
       }}
     >
       {children}

@@ -199,7 +199,7 @@ const Profile = () => {
               <Button 
                 onClick={handleAddTag} 
                 variant="outline"
-                disabled={!newTag.trim()}
+                disabled={!newTag.trim() || (user.preferences?.tags?.length || 0) >= 20}
               >
                 <Plus size={16} className="mr-1" />
                 Add
@@ -231,6 +231,10 @@ const Profile = () => {
                 </p>
               )}
             </div>
+            
+            <p className="text-xs text-muted-foreground">
+              {user.preferences?.tags?.length || 0}/20 tags used
+            </p>
           </div>
 
           <Button onClick={handleSavePreferences}>Save Preferences</Button>
