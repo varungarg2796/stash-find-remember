@@ -31,6 +31,10 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
   ];
   
   const handleFilterClick = (filterId: string) => {
+    if (filterId === activeFilter && !activeSubFilter) {
+      // If clicking the same filter again and no subfilter, do nothing
+      return;
+    }
     onFilterChange(filterId);
   };
   
@@ -91,7 +95,7 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
           ) : (
             <button
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none
-                ${activeFilter === filter.id 
+                ${activeFilter === filter.id && !activeSubFilter
                   ? "bg-primary text-primary-foreground" 
                   : "bg-secondary hover:bg-secondary/80"}`}
               onClick={() => handleFilterClick(filter.id)}

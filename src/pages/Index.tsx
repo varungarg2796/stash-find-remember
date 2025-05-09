@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ViewMode } from "@/types";
@@ -34,8 +33,19 @@ const Index = () => {
   };
 
   const handleFilterChange = (filter: string, subFilter?: string) => {
-    setActiveFilter(filter);
-    setActiveSubFilter(subFilter);
+    // If the filter is the same but subfilter is different, only update subfilter
+    if (filter === activeFilter && subFilter !== activeSubFilter) {
+      setActiveSubFilter(subFilter);
+    } 
+    // If filter is different, update both
+    else if (filter !== activeFilter) {
+      setActiveFilter(filter);
+      setActiveSubFilter(subFilter);
+    }
+    // If filter is "all", clear subfilter
+    if (filter === "all") {
+      setActiveSubFilter(undefined);
+    }
   };
   
   const handleViewChange = (view: ViewMode) => {

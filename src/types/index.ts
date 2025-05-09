@@ -16,7 +16,7 @@ export interface Item {
 
 export interface ItemHistory {
   id: string;
-  action: 'created' | 'updated' | 'gifted' | 'archived' | 'deleted';
+  action: 'created' | 'updated' | 'gifted' | 'archived' | 'deleted' | 'used';
   date: Date;
   note?: string;
 }

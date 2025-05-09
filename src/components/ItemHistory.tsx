@@ -19,6 +19,8 @@ const getActionIcon = (action: string) => {
       return <Gift className="h-4 w-4 text-purple-500" />;
     case 'archived':
       return <Archive className="h-4 w-4 text-gray-500" />;
+    case 'deleted':
+      return <RefreshCw className="h-4 w-4 text-red-500" />;
     default:
       return <Edit className="h-4 w-4 text-gray-500" />;
   }
@@ -36,6 +38,8 @@ const getActionText = (history: ItemHistoryType) => {
       return 'Gifted';
     case 'archived':
       return 'Archived';
+    case 'deleted':
+      return 'Deleted';
     default:
       return 'Modified';
   }
