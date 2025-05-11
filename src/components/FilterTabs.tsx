@@ -30,12 +30,9 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
     { id: "price", label: "By Price", hasSubFilters: true, icon: <DollarSign size={16} className="mr-1" /> }
   ];
   
+  // Updated to properly handle filter clicks
   const handleFilterClick = (filterId: string) => {
-    if (filterId === activeFilter && !activeSubFilter) {
-      // If clicking the same filter again and no subfilter, do nothing
-      return;
-    }
-    // When clicking All Items or switching primary filter, clear any subfilter
+    // If clicking on any filter, clear any subfilters and set the active filter
     onFilterChange(filterId);
   };
   
@@ -96,7 +93,7 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
           ) : (
             <button
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none
-                ${activeFilter === filter.id && !activeSubFilter
+                ${activeFilter === filter.id 
                   ? "bg-primary text-primary-foreground" 
                   : "bg-secondary hover:bg-secondary/80"}`}
               onClick={() => handleFilterClick(filter.id)}

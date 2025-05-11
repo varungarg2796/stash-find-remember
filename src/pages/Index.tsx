@@ -32,19 +32,18 @@ const Index = () => {
     setSearchQuery(query);
   };
 
+  // Fixed filter change handler
   const handleFilterChange = (filter: string, subFilter?: string) => {
-    if (filter === "all") {
-      // If "All Items" is selected, clear any subfilter
-      setActiveFilter(filter);
-      setActiveSubFilter(undefined);
-      return;
-    }
-    
-    // Update the active filter
+    // Always set the active filter first
     setActiveFilter(filter);
     
-    // Update subfilter only if provided, otherwise keep it undefined
-    setActiveSubFilter(subFilter);
+    // If filter is "all", or no subfilter provided, clear the subfilter
+    if (filter === "all" || subFilter === undefined) {
+      setActiveSubFilter(undefined);
+    } else {
+      // Otherwise set the subfilter
+      setActiveSubFilter(subFilter);
+    }
   };
   
   const handleViewChange = (view: ViewMode) => {
