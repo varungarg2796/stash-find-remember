@@ -12,16 +12,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BarChart, MenuIcon, MessageSquareMore, Upload } from "lucide-react";
+import { BarChart, MenuIcon, MessageSquareMore, SortAsc, Upload } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SortOption } from "@/hooks/useItemFiltering";
 
 interface FilterSectionProps {
   searchQuery: string;
   activeFilter: string;
   activeSubFilter?: string;
   viewMode: ViewMode;
+  sortBy: SortOption;
   onSearchChange: (query: string) => void;
   onFilterChange: (filter: string, subFilter?: string) => void;
   onViewChange: (view: ViewMode) => void;
+  onSortChange: (sort: SortOption) => void;
   clearSubFilter: () => void;
 }
 
@@ -30,9 +40,11 @@ const FilterSection = ({
   activeFilter,
   activeSubFilter,
   viewMode,
+  sortBy,
   onSearchChange,
   onFilterChange,
   onViewChange,
+  onSortChange,
   clearSubFilter,
 }: FilterSectionProps) => {
   const navigate = useNavigate();
@@ -49,6 +61,22 @@ const FilterSection = ({
           <h2 className="text-xl font-bold">Your Items</h2>
           
           <div className="flex items-center gap-2">
+            {/* Sort Dropdown */}
+            <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
+              <SelectTrigger className="w-[140px]">
+                <SortAsc className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="name-asc">Name A-Z</SelectItem>
+                <SelectItem value="name-desc">Name Z-A</SelectItem>
+                <SelectItem value="quantity-high">Highest quantity</SelectItem>
+                <SelectItem value="quantity-low">Lowest quantity</SelectItem>
+              </SelectContent>
+            </Select>
+            
             {/* Mobile Action Menu */}
             <div className="block md:hidden">
               <DropdownMenu>

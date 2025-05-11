@@ -12,10 +12,12 @@ const Index = () => {
     activeFilter,
     activeSubFilter,
     viewMode,
+    sortBy,
     filteredItems,
     handleSearch,
     handleFilterChange,
     handleViewChange,
+    handleSortChange,
     clearSubFilter
   } = useItemFiltering();
 
@@ -26,9 +28,11 @@ const Index = () => {
         activeFilter={activeFilter}
         activeSubFilter={activeSubFilter}
         viewMode={viewMode}
+        sortBy={sortBy}
         onSearchChange={handleSearch}
         onFilterChange={handleFilterChange}
         onViewChange={handleViewChange}
+        onSortChange={handleSortChange}
         clearSubFilter={clearSubFilter}
       />
       

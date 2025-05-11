@@ -1,12 +1,16 @@
+
 import { useState } from "react";
 import { Item, ViewMode } from "@/types";
 import { useItems } from "@/context/ItemsContext";
+
+export type SortOption = 'newest' | 'oldest' | 'name-asc' | 'name-desc' | 'quantity-high' | 'quantity-low';
 
 export function useItemFiltering() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [activeSubFilter, setActiveSubFilter] = useState<string | undefined>(undefined);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const { getActiveItems } = useItems();
   
   const activeItems = getActiveItems();
@@ -32,11 +36,15 @@ export function useItemFiltering() {
     setViewMode(view);
   };
 
+  const handleSortChange = (sort: SortOption) => {
+    setSortBy(sort);
+  };
+
   const clearSubFilter = () => {
     setActiveSubFilter(undefined);
   };
 
-  const filteredItems = activeItems.filter(item => {
+  let filteredItems = activeItems.filter(item => {
     // First apply search filter
     const matchesSearch = !searchQuery || 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -71,16 +79,38 @@ export function useItemFiltering() {
         return true;
     }
   });
+  
+  // Apply sorting
+  filteredItems = [...filteredItems].sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'oldest':
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case 'name-asc':
+        return a.name.localeCompare(b.name);
+      case 'name-desc':
+        return b.name.localeCompare(a.name);
+      case 'quantity-high':
+        return b.quantity - a.quantity;
+      case 'quantity-low':
+        return a.quantity - b.quantity;
+      default:
+        return 0;
+    }
+  });
 
   return {
     searchQuery,
     activeFilter,
     activeSubFilter,
     viewMode,
+    sortBy,
     filteredItems,
     handleSearch,
     handleFilterChange,
     handleViewChange,
+    handleSortChange,
     clearSubFilter
   };
 }
