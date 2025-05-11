@@ -33,35 +33,41 @@ const Index = () => {
   };
 
   const handleFilterChange = (filter: string, subFilter?: string) => {
-    // If the filter is the same but subfilter is different, only update subfilter
-    if (filter === activeFilter && subFilter !== activeSubFilter) {
-      setActiveSubFilter(subFilter);
-    } 
-    // If filter is different, update both
-    else if (filter !== activeFilter) {
-      setActiveFilter(filter);
-      setActiveSubFilter(subFilter);
-    }
-    // If filter is "all", clear subfilter
     if (filter === "all") {
+      // If "All Items" is selected, clear any subfilter
+      setActiveFilter(filter);
       setActiveSubFilter(undefined);
+      return;
     }
+    
+    // Update the active filter
+    setActiveFilter(filter);
+    
+    // Update subfilter only if provided, otherwise keep it undefined
+    setActiveSubFilter(subFilter);
   };
   
   const handleViewChange = (view: ViewMode) => {
     setViewMode(view);
   };
 
+  const clearSubFilter = () => {
+    setActiveSubFilter(undefined);
+  };
+
   const filteredItems = activeItems.filter(item => {
-    // Search filter
-    const matchesSearch = searchQuery === "" || 
+    // First apply search filter
+    const matchesSearch = !searchQuery || 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (item.location && item.location.toLowerCase().includes(searchQuery.toLowerCase()));
     
     if (!matchesSearch) return false;
     
-    // Category filters
+    // Then apply category filters
+    if (activeFilter === "all") return true;
+    
     switch (activeFilter) {
       case "tags":
         return activeSubFilter 
@@ -80,7 +86,6 @@ const Index = () => {
           return (item.price === undefined || item.price === 0) && !item.priceless;
         }
         return true;
-      case "all":
       default:
         return true;
     }
@@ -191,10 +196,7 @@ const Index = () => {
             variant="ghost" 
             size="sm" 
             className="ml-2 h-7 text-xs"
-            onClick={() => {
-              setActiveSubFilter(undefined);
-              handleFilterChange(activeFilter);
-            }}
+            onClick={clearSubFilter}
           >
             Clear
           </Button>

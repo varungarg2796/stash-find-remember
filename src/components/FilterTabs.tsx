@@ -35,6 +35,7 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
       // If clicking the same filter again and no subfilter, do nothing
       return;
     }
+    // When clicking All Items or switching primary filter, clear any subfilter
     onFilterChange(filterId);
   };
   

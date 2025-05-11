@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign } from "lucide-react";
+import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign, ArchiveRestore } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -13,6 +13,7 @@ interface ItemListProps {
   items: Item[];
   isArchive?: boolean;
   onDelete?: (id: string) => void;
+  onRestore?: (id: string) => void;
 }
 
 // Function to get date when item was archived
@@ -26,7 +27,7 @@ const getArchivedDate = (item: Item): Date | null => {
   return archivedEvent ? new Date(archivedEvent.date) : null;
 };
 
-const ItemList = ({ items, isArchive = false, onDelete }: ItemListProps) => {
+const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListProps) => {
   const { user } = useAuth();
   const currencySymbol = user?.preferences?.currency === 'EUR' ? '€' : 
                          user?.preferences?.currency === 'GBP' ? '£' : 
@@ -102,7 +103,16 @@ const ItemList = ({ items, isArchive = false, onDelete }: ItemListProps) => {
               </div>
               
               {isArchive ? (
-                <div className="flex flex-col ml-2">
+                <div className="flex flex-col ml-2 space-y-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-green-400 hover:text-green-600 hover:bg-green-50"
+                    onClick={() => onRestore && onRestore(item.id)}
+                    title="Restore item"
+                  >
+                    <ArchiveRestore size={18} />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

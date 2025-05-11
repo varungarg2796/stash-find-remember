@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import ItemList from "@/components/ItemList";
 import { ArrowLeft, Box, Trash2 } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const Archive = () => {
-  const { getArchivedItems, deleteItem } = useItems();
+  const { getArchivedItems, deleteItem, restoreItem } = useItems();
   const navigate = useNavigate();
   const archivedItems = getArchivedItems();
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -32,6 +33,10 @@ const Archive = () => {
     if (window.confirm("Are you sure you want to permanently delete this item?")) {
       deleteItem(id);
     }
+  };
+  
+  const handleRestore = (id: string) => {
+    restoreItem(id, "Restored from archive");
   };
 
   return (
@@ -76,6 +81,7 @@ const Archive = () => {
               items={sortedItems} 
               isArchive={true}
               onDelete={handleDelete}
+              onRestore={handleRestore}
             />
           </div>
         </>
