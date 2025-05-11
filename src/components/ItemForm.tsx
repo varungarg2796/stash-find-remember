@@ -27,7 +27,7 @@ interface ItemFormProps {
 
 const getPlaceholderImage = (name: string = ""): string => {
   const placeholders = [
-    "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png",
+    "/lovable-uploads/wine-glasses.png",
   ];
   
   return placeholders[0];

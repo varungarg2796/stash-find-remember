@@ -93,7 +93,7 @@ const BulkImport = () => {
         quantity: parseInt(row.quantity.toString()) || 1,
         location: row.location.trim(),
         tags: row.tags.split(",").map(tag => tag.trim()).filter(Boolean),
-        imageUrl: "/lovable-uploads/f602ee41-f8c2-4f17-b088-c26c4844f394.png" // Default image
+        imageUrl: "/lovable-uploads/earbuds.png" // Default image
       };
       
       addItem(item);

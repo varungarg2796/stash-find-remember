@@ -33,11 +33,14 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
   // Updated to properly handle filter clicks
   const handleFilterClick = (filterId: string) => {
     // If clicking on any filter, clear any subfilters and set the active filter
-    onFilterChange(filterId);
+    if (filterId !== activeFilter) {
+      onFilterChange(filterId);
+    }
   };
   
-  const handleSubFilterClick = (subFilter: string) => {
-    onFilterChange(activeFilter, subFilter);
+  const handleSubFilterClick = (subFilter: string, parentFilter: string) => {
+    // Pass both the parent filter and subfilter
+    onFilterChange(parentFilter, subFilter);
   };
   
   return (
@@ -61,7 +64,7 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
                   <DropdownMenuItem 
                     key={tag} 
                     className={activeSubFilter === tag ? "bg-muted" : ""}
-                    onClick={() => handleSubFilterClick(tag)}
+                    onClick={() => handleSubFilterClick(tag, filter.id)}
                   >
                     {tag}
                   </DropdownMenuItem>
@@ -70,7 +73,7 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
                   <DropdownMenuItem 
                     key={location} 
                     className={activeSubFilter === location ? "bg-muted" : ""}
-                    onClick={() => handleSubFilterClick(location)}
+                    onClick={() => handleSubFilterClick(location, filter.id)}
                   >
                     {location}
                   </DropdownMenuItem>
@@ -83,7 +86,7 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
                   <DropdownMenuItem 
                     key={priceFilter.id} 
                     className={activeSubFilter === priceFilter.id ? "bg-muted" : ""}
-                    onClick={() => handleSubFilterClick(priceFilter.id)}
+                    onClick={() => handleSubFilterClick(priceFilter.id, filter.id)}
                   >
                     {priceFilter.label}
                   </DropdownMenuItem>
