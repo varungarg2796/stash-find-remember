@@ -11,6 +11,11 @@ import QuantityInput from "./form/QuantityInput";
 import LocationSelector from "./form/LocationSelector";
 import PriceInput from "./form/PriceInput";
 import TagSelector from "./form/TagSelector";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface ItemFormProps {
   initialData?: Partial<Item>;
@@ -37,7 +42,8 @@ const ItemForm = ({
     location: "",
     tags: [],
     price: undefined,
-    priceless: false
+    priceless: false,
+    acquisitionDate: undefined
   }, 
   onSubmit, 
   onCancel,
@@ -77,6 +83,10 @@ const ItemForm = ({
   
   const handleImageChange = (imageUrl: string) => {
     setFormData(prev => ({ ...prev, imageUrl }));
+  };
+  
+  const handleDateChange = (date: Date | undefined) => {
+    setFormData(prev => ({ ...prev, acquisitionDate: date }));
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -126,6 +136,36 @@ const ItemForm = ({
         getPlaceholderImage={getPlaceholderImage}
         itemName={formData.name}
       />
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Acquisition Date
+        </label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !formData.acquisitionDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {formData.acquisitionDate ? format(formData.acquisitionDate, "PPP") : <span>When did you get this item?</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={formData.acquisitionDate}
+              onSelect={handleDateChange}
+              disabled={(date) => date > new Date()}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
       
       <QuantityInput 
         quantity={formData.quantity}

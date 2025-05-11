@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { 
   ArrowLeft, Edit, Trash2, Tag, MapPin, 
   Heart, Gift, Archive, 
-  Calendar, AlertTriangle
+  Calendar, AlertTriangle, ArchiveRestore
 } from "lucide-react";
 import { toast } from "sonner";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -27,14 +27,14 @@ import { getDefaultImage } from "@/utils/imageUtils";
 
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { getItem, deleteItem, updateItem, giftItem, archiveItem } = useItems();
+  const { getItem, deleteItem, updateItem, giftItem, archiveItem, restoreItem } = useItems();
   const { user } = useAuth();
   const navigate = useNavigate();
   
   const item = getItem(id || "");
   const [activeTab, setActiveTab] = useState("details");
   const [actionNote, setActionNote] = useState("");
-  const [actionType, setActionType] = useState<"gift" | "archive" | null>(null);
+  const [actionType, setActionType] = useState<"gift" | "archive" | "restore" | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
   if (!item) {
@@ -62,7 +62,7 @@ const ItemDetail = () => {
     }
   };
 
-  const openActionDialog = (type: "gift" | "archive") => {
+  const openActionDialog = (type: "gift" | "archive" | "restore") => {
     setActionType(type);
     setActionNote("");
     setDialogOpen(true);
@@ -79,6 +79,10 @@ const ItemDetail = () => {
       case "archive":
         archiveItem(item.id, actionNote);
         navigate("/");
+        break;
+      case "restore":
+        restoreItem(item.id, actionNote || "Restored from archive");
+        setDialogOpen(false);
         break;
     }
     
@@ -111,12 +115,12 @@ const ItemDetail = () => {
     if (item.archived) {
       return (
         <Button 
-          onClick={handleDelete}
-          className="w-full"
-          variant="destructive"
+          onClick={() => openActionDialog("restore")}
+          className="w-full mb-4"
+          variant="default"
         >
-          <Trash2 className="mr-2" size={18} />
-          Delete Permanently
+          <ArchiveRestore className="mr-2" size={18} />
+          Restore Item
         </Button>
       );
     }
@@ -209,6 +213,15 @@ const ItemDetail = () => {
             </div>
           </div>
           
+          {item.acquisitionDate && (
+            <div className="mb-3 text-sm text-gray-600">
+              <span className="flex items-center">
+                <Calendar size={14} className="mr-1" />
+                Acquired: {format(new Date(item.acquisitionDate), 'MMM d, yyyy')}
+              </span>
+            </div>
+          )}
+          
           <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="details">Details</TabsTrigger>
@@ -262,7 +275,7 @@ const ItemDetail = () => {
               
               {getActionButton()}
               
-              {!item.archived && (
+              {!item.archived ? (
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button onClick={handleEdit} className="flex-1">
                     <Edit className="mr-2" size={18} />
@@ -273,6 +286,11 @@ const ItemDetail = () => {
                     Delete
                   </Button>
                 </div>
+              ) : (
+                <Button variant="destructive" onClick={handleDelete} className="w-full">
+                  <Trash2 className="mr-2" size={18} />
+                  Delete Permanently
+                </Button>
               )}
             </TabsContent>
             
@@ -289,10 +307,12 @@ const ItemDetail = () => {
             <DialogTitle>
               {actionType === "gift" && "Gift Item"}
               {actionType === "archive" && "Archive Item"}
+              {actionType === "restore" && "Restore Item"}
             </DialogTitle>
             <DialogDescription>
               {actionType === "gift" && "Mark this item as gifted to someone."}
               {actionType === "archive" && "Move this item to the archive."}
+              {actionType === "restore" && "Restore this item from the archive."}
               
               {actionType === "gift" && item.quantity <= 1 && (
                 <div className="flex items-center mt-2 text-amber-600">
@@ -320,6 +340,7 @@ const ItemDetail = () => {
             <Button onClick={executeAction}>
               {actionType === "gift" && "Gift Item"}
               {actionType === "archive" && "Archive Item"}
+              {actionType === "restore" && "Restore Item"}
             </Button>
           </DialogFooter>
         </DialogContent>

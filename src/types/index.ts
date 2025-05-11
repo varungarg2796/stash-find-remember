@@ -12,6 +12,7 @@ export interface Item {
   createdAt: Date;
   archived?: boolean;
   history?: ItemHistory[];
+  acquisitionDate?: Date;
 }
 
 export interface ItemHistory {

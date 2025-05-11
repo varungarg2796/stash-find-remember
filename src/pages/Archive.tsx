@@ -32,11 +32,13 @@ const Archive = () => {
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to permanently delete this item?")) {
       deleteItem(id);
+      toast.success("Item permanently deleted");
     }
   };
   
   const handleRestore = (id: string) => {
     restoreItem(id, "Restored from archive");
+    toast.success("Item restored from archive");
   };
 
   return (
