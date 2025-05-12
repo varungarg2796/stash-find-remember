@@ -1,16 +1,13 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Trash2, Download, Save } from "lucide-react";
+import { ArrowLeft, Plus, Save, Download } from "lucide-react";
 import { toast } from "sonner";
 import { 
   Table, 
   TableBody, 
-  TableCell, 
   TableHead, 
   TableHeader, 
   TableRow 
@@ -22,15 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-interface RowItem {
-  id: string;
-  name: string;
-  description: string;
-  quantity: number;
-  location: string;
-  tags: string;
-}
+import BulkImportRow, { RowItem } from "@/components/form/BulkImportRow";
+import { validateItemName, validateQuantity } from "@/utils/validationUtils";
 
 const SAMPLE_LOCATIONS = ["Wardrobe", "Kitchen", "Bookshelf", "Drawer", "Garage", "Basement", "Attic"];
 
@@ -47,6 +37,7 @@ const BulkImport = () => {
     { id: "1", name: "", description: "", quantity: 1, location: "", tags: "" }
   ]);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [hasValidationErrors, setHasValidationErrors] = useState(false);
   
   const addRow = () => {
     const newRow: RowItem = {
@@ -66,22 +57,92 @@ const BulkImport = () => {
       return;
     }
     setRows(rows.filter(row => row.id !== id));
+    validateAllRows(rows.filter(row => row.id !== id));
   };
   
   const updateRow = (id: string, field: keyof RowItem, value: any) => {
-    setRows(rows.map(row => {
+    const updatedRows = rows.map(row => {
       if (row.id === id) {
         return { ...row, [field]: value };
       }
       return row;
-    }));
+    });
+    
+    setRows(updatedRows);
+    // Validate if field is one we care about
+    if (["name", "quantity", "tags"].includes(field)) {
+      const rowToValidate = updatedRows.find(row => row.id === id);
+      if (rowToValidate) {
+        validateRow(rowToValidate, updatedRows);
+      }
+    }
   };
   
+  const validateRow = (row: RowItem, allRows = rows): RowItem => {
+    const errors: any = {};
+    let hasErrors = false;
+    
+    // Validate name
+    const nameValidation = validateItemName(row.name);
+    if (!nameValidation.isValid) {
+      errors.name = nameValidation.message;
+      hasErrors = true;
+    }
+    
+    // Validate quantity
+    const quantityValidation = validateQuantity(row.quantity);
+    if (!quantityValidation.isValid) {
+      errors.quantity = quantityValidation.message;
+      hasErrors = true;
+    }
+    
+    // Validate tags
+    const tagString = row.tags;
+    if (tagString) {
+      const tagArray = tagString.split(",");
+      if (tagArray.length > 10) {
+        errors.tags = "Maximum 10 tags allowed";
+        hasErrors = true;
+      } else if (tagArray.some(tag => tag.trim().length > 30)) {
+        errors.tags = "Each tag must be less than 30 characters";
+        hasErrors = true;
+      }
+    }
+    
+    // Update the rows state with validation results
+    const updatedRows = allRows.map(r => {
+      if (r.id === row.id) {
+        return { ...r, hasErrors, errors };
+      }
+      return r;
+    });
+    setRows(updatedRows);
+    
+    // Update the overall validation state
+    const anyErrors = updatedRows.some(r => r.hasErrors);
+    setHasValidationErrors(anyErrors);
+    
+    return { ...row, hasErrors, errors };
+  };
+  
+  const validateAllRows = useCallback((rowsToValidate = rows) => {
+    let anyErrors = false;
+    
+    const validatedRows = rowsToValidate.map(row => {
+      const validated = validateRow(row, rowsToValidate);
+      if (validated.hasErrors) anyErrors = true;
+      return validated;
+    });
+    
+    setRows(validatedRows);
+    setHasValidationErrors(anyErrors);
+    return !anyErrors;
+  }, [rows]);
+  
   const handleSaveAll = () => {
-    // Validate input
-    const invalidRows = rows.filter(row => !row.name.trim());
-    if (invalidRows.length > 0) {
-      toast.error("All items must have a name");
+    // Validate all rows first
+    if (!validateAllRows()) {
+      toast.error("Please fix validation errors before saving");
       return;
     }
     
@@ -122,6 +183,51 @@ const BulkImport = () => {
     document.body.removeChild(link);
   };
   
+  // Parse CSV
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      if (!content) return;
+      
+      const lines = content.split('\n');
+      if (lines.length < 2) {
+        toast.error("Invalid CSV format");
+        return;
+      }
+      
+      // Skip the header row
+      const newRows: RowItem[] = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue; // Skip empty lines
+        
+        const values = lines[i].split(',');
+        if (values.length < 3) continue; // Skip invalid lines
+        
+        newRows.push({
+          id: Date.now().toString() + i,
+          name: values[0] || "",
+          description: values[1] || "",
+          quantity: parseInt(values[2]) || 1,
+          location: values[3] || "",
+          tags: values.slice(4).join(',')
+        });
+      }
+      
+      if (newRows.length > 0) {
+        setRows(newRows);
+        toast.success(`Loaded ${newRows.length} items from CSV`);
+      } else {
+        toast.error("No valid items found in CSV");
+      }
+    };
+    
+    reader.readAsText(file);
+  };
+  
   return (
     <div className="max-w-screen-lg mx-auto px-4 py-6">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
@@ -135,7 +241,7 @@ const BulkImport = () => {
           Bulk Import Items
         </h1>
         
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2 justify-end">
           <Button 
             variant="outline" 
             onClick={() => setShowHelpDialog(true)}
@@ -151,6 +257,19 @@ const BulkImport = () => {
             <Download size={16} className="mr-1" />
             Template
           </Button>
+          
+          {/* CSV Upload button */}
+          <div className="relative">
+            <Button variant="outline" className="text-sm">
+              Import CSV
+            </Button>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </div>
         </div>
       </div>
       
@@ -169,68 +288,14 @@ const BulkImport = () => {
             </TableHeader>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>
-                    <Input
-                      value={row.name}
-                      onChange={(e) => updateRow(row.id, "name", e.target.value)}
-                      placeholder="Item name"
-                      className="h-9"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      value={row.description}
-                      onChange={(e) => updateRow(row.id, "description", e.target.value)}
-                      placeholder="Description"
-                      className="h-9"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={row.quantity}
-                      onChange={(e) => updateRow(row.id, "quantity", parseInt(e.target.value) || 1)}
-                      className="h-9"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Select 
-                      value={row.location}
-                      onValueChange={(value) => updateRow(row.id, "location", value)}
-                    >
-                      <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Select location" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableLocations.map((location) => (
-                          <SelectItem key={location} value={location}>
-                            {location}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      value={row.tags}
-                      onChange={(e) => updateRow(row.id, "tags", e.target.value)}
-                      placeholder="tag1, tag2, tag3"
-                      className="h-9"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteRow(row.id)}
-                      className="h-8 w-8 text-destructive hover:text-destructive/90"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                <BulkImportRow
+                  key={row.id}
+                  row={row}
+                  locations={availableLocations}
+                  onUpdate={updateRow}
+                  onDelete={deleteRow}
+                  validateRow={(row) => validateRow(row)}
+                />
               ))}
             </TableBody>
           </Table>
@@ -243,7 +308,10 @@ const BulkImport = () => {
           Add Row
         </Button>
         
-        <Button onClick={handleSaveAll} className="flex items-center">
+        <Button 
+          onClick={handleSaveAll} 
+          className="flex items-center"
+          disabled={hasValidationErrors || rows.length === 0}>
           <Save size={16} className="mr-1" />
           Save All Items
         </Button>
@@ -264,7 +332,7 @@ const BulkImport = () => {
               </ol>
               
               <p className="mt-4 italic text-muted-foreground">
-                Need a template? Click the "Template" button to download a sample CSV template.
+                Need a template? Click the "Template" button to download a sample CSV template or import your own CSV file.
               </p>
             </DialogDescription>
           </DialogHeader>

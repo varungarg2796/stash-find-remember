@@ -13,9 +13,11 @@ import PriceInput from "./form/PriceInput";
 import TagSelector from "./form/TagSelector";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, AlertCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { validateItemForm } from "@/utils/validationUtils";
+import { toast } from "sonner";
 
 interface ItemFormProps {
   initialData?: Partial<Item>;
@@ -51,14 +53,31 @@ const ItemForm = ({
   isEditing = false
 }: ItemFormProps) => {
   const [formData, setFormData] = useState<Omit<Item, "id">>(initialData as Omit<Item, "id">);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when field is edited
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
   
   const handleQuantityChange = (quantity: number) => {
     setFormData(prev => ({ ...prev, quantity }));
+    if (errors.quantity) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.quantity;
+        return newErrors;
+      });
+    }
   };
   
   const handleLocationChange = (location: string) => {
@@ -71,14 +90,35 @@ const ItemForm = ({
       priceless: checked,
       price: checked ? undefined : prev.price 
     }));
+    if (errors.price) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.price;
+        return newErrors;
+      });
+    }
   };
   
   const handlePriceChange = (value: number | undefined) => {
     setFormData(prev => ({ ...prev, price: value }));
+    if (errors.price) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.price;
+        return newErrors;
+      });
+    }
   };
   
   const handleTagsChange = (tags: string[]) => {
     setFormData(prev => ({ ...prev, tags }));
+    if (errors.tags) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.tags;
+        return newErrors;
+      });
+    }
   };
   
   const handleImageChange = (imageUrl: string) => {
@@ -91,6 +131,16 @@ const ItemForm = ({
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
+    // Validate form data
+    const validation = validateItemForm(formData);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
+      setIsSubmitting(false);
+      toast.error("Please fix the errors in the form");
+      return;
+    }
     
     const finalData = {
       ...formData,
@@ -98,6 +148,7 @@ const ItemForm = ({
     };
     
     onSubmit(finalData);
+    setIsSubmitting(false);
   };
 
   return (
@@ -112,8 +163,15 @@ const ItemForm = ({
           value={formData.name}
           onChange={handleChange}
           placeholder="Enter item name"
+          className={errors.name ? "border-destructive" : ""}
           required
         />
+        {errors.name && (
+          <div className="text-destructive text-xs flex items-center mt-1">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {errors.name}
+          </div>
+        )}
       </div>
       
       <div>
@@ -126,8 +184,18 @@ const ItemForm = ({
           value={formData.description}
           onChange={handleChange}
           placeholder="Enter item description"
+          className={errors.description ? "border-destructive" : ""}
           rows={4}
         />
+        {errors.description && (
+          <div className="text-destructive text-xs flex items-center mt-1">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {errors.description}
+          </div>
+        )}
+        <div className="text-xs text-muted-foreground mt-1">
+          {formData.description?.length || 0}/500
+        </div>
       </div>
       
       <ImageUploader
@@ -149,6 +217,7 @@ const ItemForm = ({
                 "w-full justify-start text-left font-normal",
                 !formData.acquisitionDate && "text-muted-foreground"
               )}
+              type="button"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {formData.acquisitionDate ? format(formData.acquisitionDate, "PPP") : <span>When did you get this item?</span>}
@@ -171,6 +240,12 @@ const ItemForm = ({
         quantity={formData.quantity}
         onChange={handleQuantityChange}
       />
+      {errors.quantity && (
+        <div className="text-destructive text-xs flex items-center mt-1">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {errors.quantity}
+        </div>
+      )}
       
       <LocationSelector
         value={formData.location}
@@ -184,12 +259,24 @@ const ItemForm = ({
         onPriceChange={handlePriceChange}
         onPricelessToggle={handlePricelessToggle}
       />
+      {errors.price && (
+        <div className="text-destructive text-xs flex items-center mt-1">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {errors.price}
+        </div>
+      )}
       
       <TagSelector
         selectedTags={formData.tags}
         onChange={handleTagsChange}
         isEditing={isEditing}
       />
+      {errors.tags && (
+        <div className="text-destructive text-xs flex items-center mt-1">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {errors.tags}
+        </div>
+      )}
       
       <div className="flex space-x-4 pt-4">
         <Button 
@@ -200,8 +287,8 @@ const ItemForm = ({
         >
           Cancel
         </Button>
-        <Button type="submit" className="flex-1">
-          {submitLabel}
+        <Button type="submit" className="flex-1" disabled={isSubmitting}>
+          {isSubmitting ? "Submitting..." : submitLabel}
         </Button>
       </div>
     </form>
