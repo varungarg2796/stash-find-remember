@@ -2,8 +2,15 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, AlertCircle } from "lucide-react";
+import { Trash2, AlertCircle, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface RowItem {
   id: string;
@@ -12,11 +19,13 @@ export interface RowItem {
   quantity: number;
   location: string;
   tags: string;
+  price?: number;
   hasErrors?: boolean;
   errors?: {
     name?: string;
     quantity?: string;
     tags?: string;
+    price?: string;
   };
 }
 
@@ -29,13 +38,27 @@ interface BulkImportRowProps {
 }
 
 const BulkImportRow = ({ row, locations, onUpdate, onDelete, validateRow }: BulkImportRowProps) => {
+  const { user } = useAuth();
+  
+  // Common tags from user preferences or default ones
+  const commonTags = user?.preferences?.tags || [
+    "Clothing", "Book", "Electronics", "Furniture", "Kitchen", 
+    "Decor", "Toy", "Tool", "Sport", "Outdoor", "Cosmetic", "Food", "Pet"
+  ];
+
+  // Handle selecting a tag
+  const handleTagSelect = (tag: string) => {
+    const currentTags = row.tags ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+    if (!currentTags.includes(tag)) {
+      const newTags = [...currentTags, tag];
+      onUpdate(row.id, "tags", newTags.join(', '));
+    }
+  };
+
   // Validate on blur
   const handleBlur = (field: keyof RowItem) => {
     if (validateRow) {
-      const validatedRow = validateRow({...row});
-      if (validatedRow.errors && validatedRow.errors[field]) {
-        // Just trigger validation, the parent component will handle updating the row
-      }
+      validateRow({...row});
     }
   };
 
@@ -103,17 +126,49 @@ const BulkImportRow = ({ row, locations, onUpdate, onDelete, validateRow }: Bulk
       </td>
       <td>
         <div>
-          <Input
-            value={row.tags}
-            onChange={(e) => onUpdate(row.id, "tags", e.target.value)}
-            onBlur={() => handleBlur("tags")}
-            placeholder="tag1, tag2, tag3"
-            className={`h-9 ${row.errors?.tags ? "border-destructive" : ""}`}
-          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-9 w-full flex justify-between items-center text-left font-normal">
+                <span className="truncate">{row.tags || "Select tags"}</span>
+                <Tag size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 max-h-60 overflow-auto">
+              {commonTags.map((tag) => (
+                <DropdownMenuItem 
+                  key={tag}
+                  onClick={() => handleTagSelect(tag)}
+                >
+                  {tag}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           {row.errors?.tags && (
             <div className="text-destructive text-xs flex items-center mt-1">
               <AlertCircle className="h-3 w-3 mr-1" />
               {row.errors.tags}
+            </div>
+          )}
+        </div>
+      </td>
+      <td>
+        <div>
+          <Input
+            type="number"
+            min="0"
+            step="0.01"
+            value={row.price !== undefined ? row.price : ""}
+            onChange={(e) => onUpdate(row.id, "price", e.target.value ? parseFloat(e.target.value) : undefined)}
+            onBlur={() => handleBlur("price")}
+            placeholder="Value/Cost"
+            className={`h-9 ${row.errors?.price ? "border-destructive" : ""}`}
+          />
+          {row.errors?.price && (
+            <div className="text-destructive text-xs flex items-center mt-1">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              {row.errors.price}
             </div>
           )}
         </div>

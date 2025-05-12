@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import BulkImportRow, { RowItem } from "@/components/form/BulkImportRow";
-import { validateItemName, validateQuantity } from "@/utils/validationUtils";
+import { validateItemName, validateQuantity, validatePrice } from "@/utils/validationUtils";
 
 const SAMPLE_LOCATIONS = ["Wardrobe", "Kitchen", "Bookshelf", "Drawer", "Garage", "Basement", "Attic"];
 
@@ -34,7 +34,7 @@ const BulkImport = () => {
   const availableLocations = [...new Set([...SAMPLE_LOCATIONS, ...existingLocations])];
   
   const [rows, setRows] = useState<RowItem[]>([
-    { id: "1", name: "", description: "", quantity: 1, location: "", tags: "" }
+    { id: "1", name: "", description: "", quantity: 1, location: "", tags: "", price: undefined }
   ]);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
@@ -46,7 +46,8 @@ const BulkImport = () => {
       description: "",
       quantity: 1,
       location: "",
-      tags: ""
+      tags: "",
+      price: undefined
     };
     setRows([...rows, newRow]);
   };
@@ -70,7 +71,7 @@ const BulkImport = () => {
     
     setRows(updatedRows);
     // Validate if field is one we care about
-    if (["name", "quantity", "tags"].includes(field)) {
+    if (["name", "quantity", "tags", "price"].includes(field)) {
       const rowToValidate = updatedRows.find(row => row.id === id);
       if (rowToValidate) {
         validateRow(rowToValidate, updatedRows);
@@ -94,6 +95,15 @@ const BulkImport = () => {
     if (!quantityValidation.isValid) {
       errors.quantity = quantityValidation.message;
       hasErrors = true;
+    }
+    
+    // Validate price if provided
+    if (row.price !== undefined) {
+      const priceValidation = validatePrice(row.price);
+      if (!priceValidation.isValid) {
+        errors.price = priceValidation.message;
+        hasErrors = true;
+      }
     }
     
     // Validate tags
@@ -154,6 +164,7 @@ const BulkImport = () => {
         quantity: parseInt(row.quantity.toString()) || 1,
         location: row.location.trim(),
         tags: row.tags.split(",").map(tag => tag.trim()).filter(Boolean),
+        price: row.price,
         imageUrl: "/lovable-uploads/earbuds.png" // Default image
       };
       
@@ -166,10 +177,10 @@ const BulkImport = () => {
   
   // Create a template for export
   const generateTemplate = () => {
-    const headers = ["Name", "Description", "Quantity", "Location", "Tags (comma-separated)"];
+    const headers = ["Name", "Description", "Quantity", "Location", "Tags (comma-separated)", "Price/Value"];
     const csvContent = [
       headers.join(","),
-      "Example Item,This is a sample description,1,Kitchen,Kitchen,Electronics"
+      "Example Item,This is a sample description,1,Kitchen,Kitchen,Electronics,49.99"
     ].join("\n");
     
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -213,7 +224,8 @@ const BulkImport = () => {
           description: values[1] || "",
           quantity: parseInt(values[2]) || 1,
           location: values[3] || "",
-          tags: values.slice(4).join(',')
+          tags: values.slice(4, -1).join(','),
+          price: values[values.length-1] ? parseFloat(values[values.length-1]) : undefined
         });
       }
       
@@ -279,10 +291,11 @@ const BulkImport = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[180px]">Name*</TableHead>
-                <TableHead className="w-[220px]">Description</TableHead>
+                <TableHead className="w-[180px]">Description</TableHead>
                 <TableHead className="w-[100px]">Quantity</TableHead>
                 <TableHead className="w-[150px]">Location</TableHead>
-                <TableHead className="w-[200px]">Tags (comma separated)</TableHead>
+                <TableHead className="w-[180px]">Tags</TableHead>
+                <TableHead className="w-[120px]">Value/Cost</TableHead>
                 <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -326,7 +339,8 @@ const BulkImport = () => {
                 <li>Fill in the spreadsheet-like table with your item details</li>
                 <li>Each row represents one item in your inventory</li>
                 <li>Only the Name field is required</li>
-                <li>For Tags, enter comma-separated values (e.g., "Kitchen, Electronics")</li>
+                <li>For Tags, select from the dropdown menu</li>
+                <li>Value/Cost is optional - enter the price if desired</li>
                 <li>Click "Add Row" to add more items</li>
                 <li>Click "Save All Items" when you're ready to add everything to your inventory</li>
               </ol>

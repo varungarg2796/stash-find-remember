@@ -114,6 +114,14 @@
   .error-message {
     @apply text-destructive text-xs flex items-center mt-1 break-words;
   }
+  
+  .card-gradient {
+    @apply bg-gradient-to-br from-white to-gray-50;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
 }
 
 @layer utilities {

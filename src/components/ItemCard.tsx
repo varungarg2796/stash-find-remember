@@ -46,7 +46,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
                          user?.preferences?.currency === 'JPY' ? '¥' : '$';
   
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
       <div className="relative">
         <div className="w-full overflow-hidden">
           <AspectRatio ratio={4/3} className="bg-gray-50">
@@ -54,13 +54,13 @@ const ItemCard = ({ item }: ItemCardProps) => {
               <img 
                 src={imageUrl} 
                 alt={name} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
               />
             ) : defaultImage ? (
               <img 
                 src={defaultImage} 
                 alt={name} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
               />
             ) : (
               <div className={`w-full h-full flex items-center justify-center ${placeholderColor} text-gray-700 text-4xl font-bold`}>
@@ -72,52 +72,52 @@ const ItemCard = ({ item }: ItemCardProps) => {
         
         <Link 
           to={`/edit-item/${id}`}
-          className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full shadow-sm hover:bg-gray-100 transition-colors"
+          className="absolute top-3 right-3 p-2 bg-white/90 rounded-full shadow hover:bg-gray-100 transition-colors hover:shadow-md"
           aria-label="Edit item"
         >
           <Edit size={16} className="text-gray-600" />
         </Link>
         
         {priceless && (
-          <div className="absolute top-2 left-2 flex items-center bg-white/90 px-2 py-1 rounded-full shadow-sm">
-            <Heart size={14} className="text-red-500 mr-1 fill-red-500" />
+          <div className="absolute top-3 left-3 flex items-center bg-white/90 px-3 py-1 rounded-full shadow">
+            <Heart size={16} className="text-red-500 mr-1 fill-red-500" />
             <span className="text-xs font-medium">Priceless</span>
           </div>
         )}
         
         {price && price > 0 && !priceless && (
-          <div className="absolute top-2 left-2 flex items-center bg-white/90 px-2 py-1 rounded-full shadow-sm">
-            <DollarSign size={14} className="text-green-500 mr-1" />
+          <div className="absolute top-3 left-3 flex items-center bg-white/90 px-3 py-1 rounded-full shadow">
+            <DollarSign size={16} className="text-green-500 mr-1" />
             <span className="text-xs font-medium">{currencySymbol}{price.toLocaleString()}</span>
           </div>
         )}
       </div>
       
-      <Link to={`/items/${id}`} className="block p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold line-clamp-1">{name}</h3>
-          <span className="text-sm text-gray-600 font-medium">Qty: {quantity}</span>
+      <Link to={`/items/${id}`} className="block p-5 bg-white">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-lg font-semibold line-clamp-1 text-gray-800">{name}</h3>
+          <span className="text-sm bg-gray-50 text-gray-700 font-medium px-2 py-1 rounded-full">{quantity}</span>
         </div>
         
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-4">
           {tags.slice(0, isMobile ? 1 : 2).map((tag, index) => (
-            <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+            <span key={index} className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-700 font-medium">
               {tag}
             </span>
           ))}
           {tags.length > (isMobile ? 1 : 2) && <span className="text-xs text-gray-500">+{tags.length - (isMobile ? 1 : 2)}</span>}
         </div>
         
-        <div className="flex justify-between items-center text-xs text-gray-500">
+        <div className="flex justify-between items-center text-xs text-gray-500 pt-2 border-t border-gray-100">
           {location && (
             <p className="flex items-center">
-              <ExternalLink size={12} className="mr-1 flex-shrink-0" />
+              <ExternalLink size={14} className="mr-1 flex-shrink-0" />
               <span className="truncate">{location}</span>
             </p>
           )}
           
           <p className="flex items-center ml-auto">
-            <Calendar size={12} className="mr-1 flex-shrink-0" />
+            <Calendar size={14} className="mr-1 flex-shrink-0" />
             <span>{format(new Date(createdAt), 'MMM d, yyyy')}</span>
           </p>
         </div>
