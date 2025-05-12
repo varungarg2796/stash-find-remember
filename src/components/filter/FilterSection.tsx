@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SortOption } from "@/hooks/useItemFiltering";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FilterSectionProps {
   searchQuery: string;
@@ -48,26 +49,27 @@ const FilterSection = ({
   clearSubFilter,
 }: FilterSectionProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <SearchBar onSearch={onSearchChange} />
       </div>
       
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         {/* Top actions row */}
-        <div className="flex justify-between items-center mb-6 gap-2">
-          <h2 className="text-xl font-bold">Your Items</h2>
+        <div className="flex justify-between items-center mb-4 sm:mb-6 gap-2">
+          <h2 className="text-lg sm:text-xl font-bold">Your Items</h2>
           
-          <div className="flex items-center gap-2">
-            {/* Sort Dropdown */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Sort Dropdown - Smaller on mobile */}
             <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
-              <SelectTrigger className="w-[140px]">
-                <SortAsc className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Sort by" />
+              <SelectTrigger className={`${isMobile ? 'w-[100px] h-8 text-xs px-2' : 'w-[140px]'}`}>
+                <SortAsc className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
+                <SelectValue placeholder={isMobile ? "Sort" : "Sort by"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="end" className="z-50 w-[180px]">
                 <SelectItem value="newest">Newest first</SelectItem>
                 <SelectItem value="oldest">Oldest first</SelectItem>
                 <SelectItem value="name-asc">Name A-Z</SelectItem>
@@ -81,12 +83,11 @@ const FilterSection = ({
             <div className="block md:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <MenuIcon size={16} className="mr-1" />
-                    <span className="text-xs">Actions</span>
+                  <Button variant="outline" size="sm" className="h-8 px-2">
+                    <MenuIcon size={16} />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-48 z-50">
                   <DropdownMenuItem onClick={() => navigate("/bulk-import")}>
                     <Upload size={16} className="mr-2" />
                     Bulk Import
@@ -137,38 +138,24 @@ const FilterSection = ({
           </div>
         </div>
         
-        {/* Filter tabs row - separate for desktop and mobile */}
-        <div className="hidden md:block mb-4">
+        <div className="mb-4">
           <FilterTabs 
             onFilterChange={onFilterChange} 
             activeFilter={activeFilter}
             activeSubFilter={activeSubFilter}
           />
         </div>
-        
-        {/* Mobile Filter Tabs - scrollable */}
-        <div className="md:hidden mb-4">
-          <div className="overflow-x-auto pb-2 -mx-4 px-4">
-            <div className="inline-flex min-w-full">
-              <FilterTabs 
-                onFilterChange={onFilterChange} 
-                activeFilter={activeFilter}
-                activeSubFilter={activeSubFilter}
-              />
-            </div>
-          </div>
-        </div>
       </div>
       
       {activeSubFilter && (
-        <div className="mb-4 flex items-center">
-          <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
+        <div className="mb-4 flex items-center flex-wrap">
+          <span className="text-xs sm:text-sm bg-primary/10 text-primary px-2 sm:px-3 py-1 rounded-full">
             Filtering by: {activeSubFilter}
           </span>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="ml-2 h-7 text-xs"
+            className="ml-1 sm:ml-2 h-6 sm:h-7 text-xs"
             onClick={clearSubFilter}
           >
             Clear

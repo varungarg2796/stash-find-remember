@@ -127,4 +127,18 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+  
+  /* Ensure dropdowns are visible on mobile */
+  [data-radix-popper-content-wrapper] {
+    z-index: 50 !important;
+  }
+  
+  /* Responsive text sizes */
+  .mobile-text-xs {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .mobile-text-sm {
+    @apply text-sm sm:text-base;
+  }
 }

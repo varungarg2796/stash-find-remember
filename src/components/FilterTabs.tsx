@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, DollarSign, Filter } from "lucide-react";
 import { useItems } from "@/context/ItemsContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FilterTabsProps {
   onFilterChange: (filter: string, subFilter?: string) => void;
@@ -17,6 +18,7 @@ interface FilterTabsProps {
 
 const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTabsProps) => {
   const { getActiveItems } = useItems();
+  const isMobile = useIsMobile();
   
   // Extract unique tags and locations for subfilters from active items only
   const activeItems = getActiveItems();
@@ -24,10 +26,10 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
   const uniqueLocations = [...new Set(activeItems.map(item => item.location).filter(Boolean))].sort();
   
   const filters = [
-    { id: "all", label: "All Items" },
-    { id: "tags", label: "By Tag", hasSubFilters: true },
-    { id: "location", label: "By Location", hasSubFilters: true },
-    { id: "price", label: "By Price", hasSubFilters: true, icon: <DollarSign size={16} className="mr-1" /> }
+    { id: "all", label: "All Items", mobileLabel: "All" },
+    { id: "tags", label: "By Tag", mobileLabel: "Tags", hasSubFilters: true },
+    { id: "location", label: "By Location", mobileLabel: "Loc", hasSubFilters: true },
+    { id: "price", label: "By Price", mobileLabel: "Price", hasSubFilters: true, icon: <DollarSign size={isMobile ? 14 : 16} className="mr-1" /> }
   ];
   
   // Updated to properly handle filter clicks
@@ -44,20 +46,20 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
   };
   
   return (
-    <div className="flex space-x-2 overflow-x-auto pb-2 no-scrollbar">
+    <div className="flex space-x-1 sm:space-x-2 overflow-x-auto pb-2 no-scrollbar">
       {filters.map((filter) => (
         <div key={filter.id} className="relative">
           {filter.hasSubFilters ? (
             <DropdownMenu>
               <DropdownMenuTrigger 
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none flex items-center
+                className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors focus:outline-none flex items-center
                   ${activeFilter === filter.id 
                     ? "bg-primary text-primary-foreground" 
                     : "bg-secondary hover:bg-secondary/80"}`}
               >
                 {filter.icon}
-                {filter.label}
-                <ChevronDown size={16} className="ml-1 inline" />
+                {isMobile ? filter.mobileLabel : filter.label}
+                <ChevronDown size={isMobile ? 14 : 16} className="ml-1 inline" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="max-h-[300px] overflow-y-auto z-50 bg-popover shadow-md">
                 {filter.id === "tags" && uniqueTags.map(tag => (
@@ -95,13 +97,13 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
             </DropdownMenu>
           ) : (
             <button
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none
+              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors focus:outline-none
                 ${activeFilter === filter.id 
                   ? "bg-primary text-primary-foreground" 
                   : "bg-secondary hover:bg-secondary/80"}`}
               onClick={() => handleFilterClick(filter.id)}
             >
-              {filter.label}
+              {isMobile ? filter.mobileLabel : filter.label}
             </button>
           )}
         </div>
