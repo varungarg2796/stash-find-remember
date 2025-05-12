@@ -101,3 +101,61 @@ export const validateBulkImportRow = (
     errors,
   };
 };
+
+// Add these new utility validation functions
+/**
+ * Validates item name
+ * @param name The name to validate
+ * @returns Object containing validation result and message
+ */
+export const validateItemName = (
+  name: string
+): { isValid: boolean; message: string } => {
+  if (!name || name.trim() === "") {
+    return { isValid: false, message: "Name is required" };
+  } else if (name.length > 100) {
+    return { isValid: false, message: "Name must be 100 characters or less" };
+  }
+  return { isValid: true, message: "" };
+};
+
+/**
+ * Validates item quantity
+ * @param quantity The quantity to validate
+ * @returns Object containing validation result and message
+ */
+export const validateQuantity = (
+  quantity: number
+): { isValid: boolean; message: string } => {
+  if (quantity === undefined || quantity === null) {
+    return { isValid: false, message: "Quantity is required" };
+  } else if (quantity <= 0 || !Number.isInteger(Number(quantity))) {
+    return { isValid: false, message: "Quantity must be a positive whole number" };
+  } else if (quantity > 9999) {
+    return { isValid: false, message: "Quantity must be 9999 or less" };
+  }
+  return { isValid: true, message: "" };
+};
+
+/**
+ * Validates item price
+ * @param price The price to validate
+ * @returns Object containing validation result and message
+ */
+export const validatePrice = (
+  price: number | undefined
+): { isValid: boolean; message: string } => {
+  if (price === undefined || price === null) {
+    return { isValid: true, message: "" };
+  }
+  
+  const numPrice = Number(price);
+  if (isNaN(numPrice)) {
+    return { isValid: false, message: "Price must be a number" };
+  } else if (numPrice < 0) {
+    return { isValid: false, message: "Price cannot be negative" };
+  } else if (numPrice > 1000000) {
+    return { isValid: false, message: "Price must be less than 1,000,000" };
+  }
+  return { isValid: true, message: "" };
+};

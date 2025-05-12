@@ -160,7 +160,7 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                   >
                     <Trash2 size={18} />
                   </Button>
-                  <Link to={`/items/${id}`} className="mt-1">
+                  <Link to={`/items/${item.id}`} className="mt-1">
                     <Button
                       variant="ghost"
                       size="icon"
