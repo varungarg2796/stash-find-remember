@@ -4,6 +4,7 @@ export interface Item {
   name: string;
   description: string;
   imageUrl: string;
+  iconType?: string;
   quantity: number;
   location: string;
   tags: string[];

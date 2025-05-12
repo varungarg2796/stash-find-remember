@@ -4,9 +4,9 @@ import { Item } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
 import { getDefaultImage } from "@/utils/imageUtils";
 import ImageUploader from "./form/ImageUploader";
+import IconSelector from "./form/IconSelector";
 import QuantityInput from "./form/QuantityInput";
 import LocationSelector from "./form/LocationSelector";
 import PriceInput from "./form/PriceInput";
@@ -40,6 +40,7 @@ const ItemForm = ({
     name: "",
     description: "",
     imageUrl: "",
+    iconType: null,
     quantity: 1,
     location: "",
     tags: [],
@@ -55,6 +56,7 @@ const ItemForm = ({
   const [formData, setFormData] = useState<Omit<Item, "id">>(initialData as Omit<Item, "id">);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [useIcon, setUseIcon] = useState<boolean>(!!formData.iconType);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -122,7 +124,32 @@ const ItemForm = ({
   };
   
   const handleImageChange = (imageUrl: string) => {
-    setFormData(prev => ({ ...prev, imageUrl }));
+    setFormData(prev => ({ 
+      ...prev, 
+      imageUrl,
+      // Clear icon type if selecting an image
+      iconType: useIcon ? prev.iconType : null
+    }));
+  };
+  
+  const handleIconChange = (iconType: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      iconType,
+      // Clear image URL if using an icon
+      imageUrl: ""
+    }));
+  };
+  
+  const handleImageMethodToggle = (useIconValue: boolean) => {
+    setUseIcon(useIconValue);
+    if (useIconValue) {
+      // If switching to icon, clear image URL
+      setFormData(prev => ({ ...prev, imageUrl: "", iconType: prev.iconType || "book" }));
+    } else {
+      // If switching to image, clear icon type
+      setFormData(prev => ({ ...prev, iconType: null }));
+    }
   };
   
   const handleDateChange = (date: Date | undefined) => {
@@ -144,7 +171,8 @@ const ItemForm = ({
     
     const finalData = {
       ...formData,
-      imageUrl: formData.imageUrl || getDefaultImage(formData)
+      // Only use default image if not using icon and no image provided
+      imageUrl: !formData.iconType && !formData.imageUrl ? getDefaultImage(formData) : formData.imageUrl
     };
     
     onSubmit(finalData);
@@ -198,12 +226,45 @@ const ItemForm = ({
         </div>
       </div>
       
-      <ImageUploader
-        imageUrl={formData.imageUrl}
-        onImageChange={handleImageChange}
-        getPlaceholderImage={getPlaceholderImage}
-        itemName={formData.name}
-      />
+      <div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Item Visual
+          </label>
+          <div className="flex gap-2">
+            <Button 
+              type="button" 
+              variant={!useIcon ? "default" : "outline"} 
+              onClick={() => handleImageMethodToggle(false)}
+              className="flex-1"
+            >
+              Upload Image
+            </Button>
+            <Button 
+              type="button" 
+              variant={useIcon ? "default" : "outline"} 
+              onClick={() => handleImageMethodToggle(true)}
+              className="flex-1"
+            >
+              Use Icon
+            </Button>
+          </div>
+        </div>
+        
+        {useIcon ? (
+          <IconSelector 
+            selectedIcon={formData.iconType || null} 
+            onSelectIcon={handleIconChange} 
+          />
+        ) : (
+          <ImageUploader
+            imageUrl={formData.imageUrl}
+            onImageChange={handleImageChange}
+            getPlaceholderImage={getPlaceholderImage}
+            itemName={formData.name}
+          />
+        )}
+      </div>
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">

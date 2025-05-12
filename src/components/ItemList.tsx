@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign, ArchiveRestore } from "lucide-react";
+import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign, ArchiveRestore, Book, Armchair, Monitor, Laptop, Tv, Gift, Image as ImageIcon, Camera } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -27,6 +27,38 @@ const getArchivedDate = (item: Item): Date | null => {
   return archivedEvent ? new Date(archivedEvent.date) : null;
 };
 
+// Map of icon types to components
+const iconMap = {
+  book: Book,
+  armchair: Armchair,
+  monitor: Monitor,
+  laptop: Laptop,
+  tv: Tv,
+  gift: Gift,
+  heart: Heart,
+  image: ImageIcon,
+  camera: Camera
+};
+
+// Function to generate a consistent color based on item name
+const getColorForItem = (name: string): string => {
+  const colors = [
+    "bg-blue-200", "bg-green-200", "bg-yellow-200", 
+    "bg-red-200", "bg-purple-200", "bg-pink-200",
+    "bg-indigo-200", "bg-teal-200", "bg-orange-200"
+  ];
+  
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  hash = Math.abs(hash);
+  const index = hash % colors.length;
+  
+  return colors[index];
+};
+
 const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListProps) => {
   const { user } = useAuth();
   const currencySymbol = user?.preferences?.currency === 'EUR' ? '€' : 
@@ -37,9 +69,11 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
     <div className="flex flex-col space-y-3">
       {items.map((item) => {
         const defaultImage = getDefaultImage(item);
+        const IconComponent = item.iconType && iconMap[item.iconType as keyof typeof iconMap];
+        const placeholderColor = getColorForItem(item.name);
         
         return (
-          <div key={item.id} className="bg-white rounded-lg overflow-hidden card-shadow">
+          <div key={item.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
             <div className="flex items-center p-3">
               <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-50 flex-shrink-0">
                 <AspectRatio ratio={1/1}>
@@ -49,6 +83,10 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                       alt={item.name}
                       className="w-full h-full object-cover"
                     />
+                  ) : IconComponent ? (
+                    <div className={`w-full h-full flex items-center justify-center ${placeholderColor}`}>
+                      <IconComponent size={32} className="text-gray-700" />
+                    </div>
                   ) : defaultImage ? (
                     <img
                       src={defaultImage}
@@ -122,7 +160,7 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                   >
                     <Trash2 size={18} />
                   </Button>
-                  <Link to={`/items/${item.id}`} className="mt-1">
+                  <Link to={`/items/${id}`} className="mt-1">
                     <Button
                       variant="ghost"
                       size="icon"

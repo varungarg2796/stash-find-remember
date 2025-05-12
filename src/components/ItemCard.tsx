@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { Edit, ExternalLink, Heart, Calendar, DollarSign } from "lucide-react";
+import { Edit, ExternalLink, Heart, Calendar, DollarSign, Book, Armchair, Monitor, Laptop, Tv, Gift, Image as ImageIcon, Camera } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
@@ -35,8 +35,21 @@ const getColorForItem = (name: string): string => {
   return colors[index];
 };
 
+// Map of icon types to components
+const iconMap = {
+  book: Book,
+  armchair: Armchair,
+  monitor: Monitor,
+  laptop: Laptop,
+  tv: Tv,
+  gift: Gift,
+  heart: Heart,
+  image: ImageIcon,
+  camera: Camera
+};
+
 const ItemCard = ({ item }: ItemCardProps) => {
-  const { id, name, imageUrl, tags, quantity, location, priceless, createdAt, price } = item;
+  const { id, name, imageUrl, iconType, tags, quantity, location, priceless, createdAt, price } = item;
   const placeholderColor = getColorForItem(name);
   const isMobile = useIsMobile();
   const defaultImage = getDefaultImage(item);
@@ -45,8 +58,11 @@ const ItemCard = ({ item }: ItemCardProps) => {
                          user?.preferences?.currency === 'GBP' ? '£' : 
                          user?.preferences?.currency === 'JPY' ? '¥' : '$';
   
+  // Get icon component if iconType is specified
+  const IconComponent = iconType && iconMap[iconType as keyof typeof iconMap];
+  
   return (
-    <div className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+    <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 bg-white transform hover:-translate-y-1 hover:scale-[1.01] transition-transform">
       <div className="relative">
         <div className="w-full overflow-hidden">
           <AspectRatio ratio={4/3} className="bg-gray-50">
@@ -56,6 +72,10 @@ const ItemCard = ({ item }: ItemCardProps) => {
                 alt={name} 
                 className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
               />
+            ) : IconComponent ? (
+              <div className={`w-full h-full flex items-center justify-center ${placeholderColor}`}>
+                <IconComponent size={80} className="text-gray-700" />
+              </div>
             ) : defaultImage ? (
               <img 
                 src={defaultImage} 

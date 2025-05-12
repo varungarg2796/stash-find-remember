@@ -1,94 +1,103 @@
 
-interface ValidationResult {
-  isValid: boolean;
-  message?: string;
-}
+import { Item } from "@/types";
 
-// Validates item name
-export const validateItemName = (name: string): ValidationResult => {
-  if (!name || name.trim().length === 0) {
-    return { isValid: false, message: "Item name is required" };
-  }
-  if (name.length > 50) {
-    return { isValid: false, message: "Item name must be less than 50 characters" };
-  }
-  return { isValid: true };
-};
-
-// Validates description
-export const validateDescription = (description: string): ValidationResult => {
-  if (description && description.length > 500) {
-    return { isValid: false, message: "Description must be less than 500 characters" };
-  }
-  return { isValid: true };
-};
-
-// Validates quantity
-export const validateQuantity = (quantity: number): ValidationResult => {
-  if (!quantity || quantity < 1) {
-    return { isValid: false, message: "Quantity must be at least 1" };
-  }
-  if (quantity > 9999) {
-    return { isValid: false, message: "Quantity cannot exceed 9999" };
-  }
-  return { isValid: true };
-};
-
-// Validates price
-export const validatePrice = (price: number | undefined): ValidationResult => {
-  if (price !== undefined) {
-    if (price < 0) {
-      return { isValid: false, message: "Price cannot be negative" };
-    }
-    if (price > 1000000) {
-      return { isValid: false, message: "Price cannot exceed 1,000,000" };
-    }
-  }
-  return { isValid: true };
-};
-
-// Validates tags
-export const validateTags = (tags: string[]): ValidationResult => {
-  if (tags.some(tag => tag.length > 30)) {
-    return { isValid: false, message: "Each tag must be less than 30 characters" };
-  }
-  if (tags.length > 10) {
-    return { isValid: false, message: "Maximum 10 tags allowed" };
-  }
-  return { isValid: true };
-};
-
-// Validates the entire form
-export const validateItemForm = (data: any): { isValid: boolean; errors: Record<string, string> } => {
+/**
+ * Validates item form data
+ * @param data The item data to validate
+ * @returns Object containing validation result and any errors
+ */
+export const validateItemForm = (
+  data: Partial<Item>
+): { isValid: boolean; errors: Record<string, string> } => {
   const errors: Record<string, string> = {};
-  
-  const nameValidation = validateItemName(data.name);
-  if (!nameValidation.isValid && nameValidation.message) {
-    errors.name = nameValidation.message;
+
+  // Validate name
+  if (!data.name || data.name.trim() === "") {
+    errors.name = "Item name is required";
+  } else if (data.name.length > 100) {
+    errors.name = "Item name must be 100 characters or less";
+  }
+
+  // Validate description (optional but with max length)
+  if (data.description && data.description.length > 500) {
+    errors.description = "Description must be 500 characters or less";
+  }
+
+  // Validate quantity
+  if (data.quantity === undefined || data.quantity === null) {
+    errors.quantity = "Quantity is required";
+  } else if (data.quantity <= 0 || !Number.isInteger(data.quantity)) {
+    errors.quantity = "Quantity must be a positive whole number";
+  } else if (data.quantity > 9999) {
+    errors.quantity = "Quantity must be 9999 or less";
+  }
+
+  // Validate price (if provided)
+  if (data.price !== undefined && data.price !== null) {
+    if (data.price < 0) {
+      errors.price = "Price cannot be negative";
+    } else if (data.price > 1000000) {
+      errors.price = "Price must be less than 1,000,000";
+    }
+  }
+
+  // Validate tags (at least one tag required)
+  if (!data.tags || data.tags.length === 0) {
+    errors.tags = "At least one tag is required";
   }
   
-  const descValidation = validateDescription(data.description);
-  if (!descValidation.isValid && descValidation.message) {
-    errors.description = descValidation.message;
-  }
-  
-  const quantityValidation = validateQuantity(data.quantity);
-  if (!quantityValidation.isValid && quantityValidation.message) {
-    errors.quantity = quantityValidation.message;
-  }
-  
-  const priceValidation = validatePrice(data.price);
-  if (!priceValidation.isValid && priceValidation.message) {
-    errors.price = priceValidation.message;
-  }
-  
-  const tagsValidation = validateTags(data.tags);
-  if (!tagsValidation.isValid && tagsValidation.message) {
-    errors.tags = tagsValidation.message;
-  }
+  // Either an image URL, icon type, or default image is required (handled in ItemForm)
   
   return {
     isValid: Object.keys(errors).length === 0,
-    errors
+    errors,
+  };
+};
+
+/**
+ * Validates bulk import row data
+ * @param data The row data to validate
+ * @returns Object containing validation result and any errors
+ */
+export const validateBulkImportRow = (
+  data: { [key: string]: any }
+): { isValid: boolean; errors: Record<string, string> } => {
+  const errors: Record<string, string> = {};
+
+  // Validate name
+  if (!data.name || data.name.trim() === "") {
+    errors.name = "Name is required";
+  }
+
+  // Validate quantity
+  if (!data.quantity) {
+    errors.quantity = "Quantity is required";
+  } else {
+    const qty = Number(data.quantity);
+    if (isNaN(qty) || qty <= 0 || !Number.isInteger(qty)) {
+      errors.quantity = "Quantity must be a positive whole number";
+    }
+  }
+
+  // Validate tags
+  if (!data.tags || data.tags.trim() === "") {
+    errors.tags = "At least one tag is required";
+  }
+  
+  // Validate price if provided
+  if (data.price !== undefined && data.price !== null && data.price !== "") {
+    const price = Number(data.price);
+    if (isNaN(price)) {
+      errors.price = "Price must be a number";
+    } else if (price < 0) {
+      errors.price = "Price cannot be negative";
+    } else if (price > 1000000) {
+      errors.price = "Price must be less than 1,000,000";
+    }
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
   };
 };

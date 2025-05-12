@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
@@ -7,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { 
   ArrowLeft, Edit, Trash2, Tag, MapPin, 
   Heart, Gift, Archive, 
-  Calendar, AlertTriangle, ArchiveRestore
+  Calendar, AlertTriangle, ArchiveRestore,
+  Book, Armchair, Monitor, Laptop, Tv, Image as ImageIcon, Camera
 } from "lucide-react";
 import { toast } from "sonner";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -24,6 +24,19 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { getDefaultImage } from "@/utils/imageUtils";
+
+// Map of icon types to components
+const iconMap = {
+  book: Book,
+  armchair: Armchair,
+  monitor: Monitor,
+  laptop: Laptop,
+  tv: Tv,
+  gift: Gift,
+  heart: Heart,
+  image: ImageIcon,
+  camera: Camera
+};
 
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -110,6 +123,9 @@ const ItemDetail = () => {
 
   const placeholderColor = getColorForItem(item.name);
   const defaultImage = getDefaultImage(item);
+  
+  // Get icon component if iconType is specified
+  const IconComponent = item.iconType && iconMap[item.iconType as keyof typeof iconMap];
 
   const getActionButton = () => {
     if (item.archived) {
@@ -164,6 +180,10 @@ const ItemDetail = () => {
                 alt={item.name} 
                 className="w-full h-full object-cover"
               />
+            ) : IconComponent ? (
+              <div className={`w-full h-full flex items-center justify-center ${placeholderColor}`}>
+                <IconComponent size={120} className="text-gray-700" />
+              </div>
             ) : defaultImage ? (
               <img 
                 src={defaultImage} 
