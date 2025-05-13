@@ -57,14 +57,36 @@ const ItemForm = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Store the initial values to reference later
+  const [initialIconType] = useState<string | null | undefined>(initialData.iconType);
+  const [initialImageUrl] = useState<string | undefined>(initialData.imageUrl);
+  
   // Determine initial state based on whether we have an iconType or imageUrl
   const [useIcon, setUseIcon] = useState<boolean>(!!initialData.iconType);
   
   // Make sure component properly reacts to initial data changes
   useEffect(() => {
-    setFormData(initialData as Omit<Item, "id">);
-    setUseIcon(!!initialData.iconType);
-  }, [initialData]);
+    // When initialData changes (especially in edit mode), we need to update formData
+    // but preserve the current view mode (icon/image)
+    setFormData(prevData => {
+      // If we're already in a specific mode, keep the appropriate field values
+      if (useIcon) {
+        // In icon mode, preserve the iconType but clear imageUrl
+        return {
+          ...initialData as Omit<Item, "id">,
+          iconType: prevData.iconType || initialData.iconType,
+          imageUrl: ""
+        };
+      } else {
+        // In image mode, preserve the imageUrl but clear iconType
+        return {
+          ...initialData as Omit<Item, "id">,
+          iconType: null,
+          imageUrl: prevData.imageUrl || initialData.imageUrl
+        };
+      }
+    });
+  }, [initialData, useIcon]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -135,34 +157,33 @@ const ItemForm = ({
     setFormData(prev => ({ 
       ...prev, 
       imageUrl,
-      // Clear icon type if selecting an image
-      iconType: useIcon ? prev.iconType : null
     }));
   };
   
-  const handleIconChange = (iconType: string) => {
+  const handleIconChange = (iconType: string | null) => {
     setFormData(prev => ({ 
       ...prev, 
       iconType,
-      // Clear image URL if using an icon
-      imageUrl: ""
     }));
   };
   
   const handleImageMethodToggle = (useIconValue: boolean) => {
     setUseIcon(useIconValue);
     if (useIconValue) {
-      // If switching to icon, clear image URL but don't set a default icon
+      // If switching to icon mode, restore initial iconType if it exists
       setFormData(prev => ({ 
         ...prev, 
-        imageUrl: "", 
-        iconType: null // Don't preselect an icon
+        imageUrl: "",
+        // In edit mode, restore the initial icon if there was one
+        iconType: isEditing && initialIconType ? initialIconType : prev.iconType
       }));
     } else {
-      // If switching to image, clear icon type
+      // If switching to image mode, restore initial imageUrl if it exists
       setFormData(prev => ({ 
         ...prev, 
         iconType: null,
+        // In edit mode, restore the initial image if there was one
+        imageUrl: isEditing && initialImageUrl ? initialImageUrl : prev.imageUrl
       }));
     }
   };

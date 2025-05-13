@@ -1,4 +1,3 @@
-
 import { 
   Book, 
   Armchair, 
@@ -24,6 +23,7 @@ import {
   PawPrint,
   Bike,
   Music,
+  Cpu,
   LucideIcon
 } from "lucide-react";
 
@@ -57,7 +57,8 @@ export const availableIcons: IconOption[] = [
   { name: "plane", component: Plane, label: "Travel" },
   { name: "pawprint", component: PawPrint, label: "Pet" },
   { name: "bike", component: Bike, label: "Sports" },
-  { name: "music", component: Music, label: "Music" }
+  { name: "music", component: Music, label: "Music" },
+  { name: "cpu", component: Cpu, label: "Electronics" }
 ];
 
 export const getIconByName = (name: string | undefined | null): LucideIcon | null => {
@@ -161,7 +162,12 @@ export const getIconForTag = (tag: string): string | null => {
     "photography": "camera",
     "photo": "camera",
     "image": "image",
-    "picture": "image"
+    "picture": "image",
+    "electronics": "cpu",
+    "electronic": "cpu",
+    "gadget": "cpu",
+    "gadgets": "cpu",
+    "tech": "cpu"
   };
 
   if (!tag) return null;
@@ -169,4 +175,3 @@ export const getIconForTag = (tag: string): string | null => {
   const normalizedTag = tag.toLowerCase().trim();
   return tagToIconMap[normalizedTag] || null;
 };
-

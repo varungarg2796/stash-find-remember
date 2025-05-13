@@ -7,10 +7,11 @@ import {
   PopoverTrigger 
 } from "@/components/ui/popover";
 import { availableIcons } from "@/utils/iconUtils";
+import { X } from "lucide-react";
 
 interface IconSelectorProps {
   selectedIcon: string | null;
-  onSelectIcon: (icon: string) => void;
+  onSelectIcon: (icon: string | null) => void;
 }
 
 const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
@@ -41,7 +42,20 @@ const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
                   <span>Select an icon</span>
                 )}
               </div>
-              <span className="text-xs text-muted-foreground">{selectedIcon ? "" : "(optional)"}</span>
+              {selectedIcon && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-5 w-5 rounded-full p-0 text-gray-400 hover:text-gray-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectIcon(null);
+                  }}
+                >
+                  <X size={14} />
+                  <span className="sr-only">Reset selection</span>
+                </Button>
+              )}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[400px] p-3 z-50 bg-white" align="start">
