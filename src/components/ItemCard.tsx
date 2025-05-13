@@ -1,52 +1,17 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { Edit, ExternalLink, Heart, Calendar, DollarSign, Book, Armchair, Monitor, Laptop, Tv, Gift, Image as ImageIcon, Camera } from "lucide-react";
+import { Edit, ExternalLink, Heart, Calendar, DollarSign } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { getDefaultImage } from "@/utils/imageUtils";
 import { useAuth } from "@/context/AuthContext";
+import { getColorForItem, getIconByName } from "@/utils/iconUtils";
 
 interface ItemCardProps {
   item: Item;
 }
-
-// Function to generate a consistent color based on item name
-const getColorForItem = (name: string): string => {
-  const colors = [
-    "bg-blue-200", "bg-green-200", "bg-yellow-200", 
-    "bg-red-200", "bg-purple-200", "bg-pink-200",
-    "bg-indigo-200", "bg-teal-200", "bg-orange-200"
-  ];
-  
-  // Simple hash function to get consistent color
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  
-  // Get positive value
-  hash = Math.abs(hash);
-  
-  // Get index in color array
-  const index = hash % colors.length;
-  
-  return colors[index];
-};
-
-// Map of icon types to components
-const iconMap = {
-  book: Book,
-  armchair: Armchair,
-  monitor: Monitor,
-  laptop: Laptop,
-  tv: Tv,
-  gift: Gift,
-  heart: Heart,
-  image: ImageIcon,
-  camera: Camera
-};
 
 const ItemCard = ({ item }: ItemCardProps) => {
   const { id, name, imageUrl, iconType, tags, quantity, location, priceless, createdAt, price } = item;
@@ -59,7 +24,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
                          user?.preferences?.currency === 'JPY' ? '¥' : '$';
   
   // Get icon component if iconType is specified
-  const IconComponent = iconType && iconMap[iconType as keyof typeof iconMap];
+  const IconComponent = getIconByName(iconType);
   
   return (
     <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 bg-white transform hover:-translate-y-1 hover:scale-[1.01] transition-transform">
@@ -147,3 +112,4 @@ const ItemCard = ({ item }: ItemCardProps) => {
 };
 
 export default ItemCard;
+

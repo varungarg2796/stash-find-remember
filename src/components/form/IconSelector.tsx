@@ -1,28 +1,12 @@
 
 import { useState } from "react";
-import { 
-  Book, Armchair, Monitor, Laptop, 
-  Tv, Gift, Heart, Image as ImageIcon, 
-  Shirt, Camera 
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Popover, 
   PopoverContent, 
   PopoverTrigger 
 } from "@/components/ui/popover";
-
-const icons = [
-  { name: "book", component: Book, label: "Book" },
-  { name: "armchair", component: Armchair, label: "Furniture" },
-  { name: "monitor", component: Monitor, label: "Monitor" },
-  { name: "laptop", component: Laptop, label: "Laptop" },
-  { name: "tv", component: Tv, label: "TV" },
-  { name: "gift", component: Gift, label: "Gift" },
-  { name: "heart", component: Heart, label: "Heart" },
-  { name: "image", component: ImageIcon, label: "Image" },
-  { name: "camera", component: Camera, label: "Camera" }
-];
+import { availableIcons } from "@/utils/iconUtils";
 
 interface IconSelectorProps {
   selectedIcon: string | null;
@@ -33,7 +17,7 @@ const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   
   // Find the selected icon component
-  const selectedIconData = icons.find(icon => icon.name === selectedIcon);
+  const selectedIconData = availableIcons.find(icon => icon.name === selectedIcon);
   
   return (
     <div className="my-4">
@@ -57,9 +41,9 @@ const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-3 z-50 bg-white" align="start">
-            <div className="grid grid-cols-3 gap-2">
-              {icons.map((icon) => (
+          <PopoverContent className="w-[400px] p-3 z-50 bg-white" align="start">
+            <div className="grid grid-cols-4 gap-2 max-h-[300px] overflow-y-auto">
+              {availableIcons.map((icon) => (
                 <Button
                   key={icon.name}
                   variant={selectedIcon === icon.name ? "default" : "outline"}
@@ -84,3 +68,4 @@ const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
 };
 
 export default IconSelector;
+

@@ -1,13 +1,14 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign, ArchiveRestore, Book, Armchair, Monitor, Laptop, Tv, Gift, Image as ImageIcon, Camera } from "lucide-react";
+import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign, ArchiveRestore } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { getDefaultImage } from "@/utils/imageUtils";
 import { useAuth } from "@/context/AuthContext";
+import { getColorForItem, getIconByName } from "@/utils/iconUtils";
 
 interface ItemListProps {
   items: Item[];
@@ -27,38 +28,6 @@ const getArchivedDate = (item: Item): Date | null => {
   return archivedEvent ? new Date(archivedEvent.date) : null;
 };
 
-// Map of icon types to components
-const iconMap = {
-  book: Book,
-  armchair: Armchair,
-  monitor: Monitor,
-  laptop: Laptop,
-  tv: Tv,
-  gift: Gift,
-  heart: Heart,
-  image: ImageIcon,
-  camera: Camera
-};
-
-// Function to generate a consistent color based on item name
-const getColorForItem = (name: string): string => {
-  const colors = [
-    "bg-blue-200", "bg-green-200", "bg-yellow-200", 
-    "bg-red-200", "bg-purple-200", "bg-pink-200",
-    "bg-indigo-200", "bg-teal-200", "bg-orange-200"
-  ];
-  
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  
-  hash = Math.abs(hash);
-  const index = hash % colors.length;
-  
-  return colors[index];
-};
-
 const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListProps) => {
   const { user } = useAuth();
   const currencySymbol = user?.preferences?.currency === 'EUR' ? '€' : 
@@ -69,7 +38,7 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
     <div className="flex flex-col space-y-3">
       {items.map((item) => {
         const defaultImage = getDefaultImage(item);
-        const IconComponent = item.iconType && iconMap[item.iconType as keyof typeof iconMap];
+        const IconComponent = getIconByName(item.iconType);
         const placeholderColor = getColorForItem(item.name);
         
         return (
@@ -200,3 +169,4 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
 };
 
 export default ItemList;
+
