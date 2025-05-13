@@ -29,14 +29,10 @@ const EditItem = () => {
   }
   
   const handleSubmit = (data: Omit<Item, "id">) => {
-    // Ensure we preserve the user's choice of icon or image
+    // Preserve the item ID and update the item
     const updatedItem = {
       ...data,
       id: item.id,
-      // Preserve iconType if user selected an icon
-      iconType: data.iconType || null,
-      // Only use imageUrl if user hasn't selected an icon
-      imageUrl: data.iconType ? "" : data.imageUrl
     };
     
     updateItem(updatedItem);

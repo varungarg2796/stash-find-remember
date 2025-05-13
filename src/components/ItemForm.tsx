@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { validateItemForm } from "@/utils/validationUtils";
 import { toast } from "sonner";
+import { getIconForTag } from "@/utils/iconUtils";
 
 interface ItemFormProps {
   initialData?: Partial<Item>;
@@ -59,7 +60,7 @@ const ItemForm = ({
   // Determine initial state based on whether we have an iconType or imageUrl
   const [useIcon, setUseIcon] = useState<boolean>(!!initialData.iconType);
   
-  // Make sure component properly reacts to initial data changes (useful in the edit item case)
+  // Make sure component properly reacts to initial data changes
   useEffect(() => {
     setFormData(initialData as Omit<Item, "id">);
     setUseIcon(!!initialData.iconType);
@@ -151,18 +152,17 @@ const ItemForm = ({
   const handleImageMethodToggle = (useIconValue: boolean) => {
     setUseIcon(useIconValue);
     if (useIconValue) {
-      // If switching to icon, clear image URL and set a default icon if none exists
+      // If switching to icon, clear image URL but don't set a default icon
       setFormData(prev => ({ 
         ...prev, 
         imageUrl: "", 
-        iconType: prev.iconType || "book" 
+        iconType: null // Don't preselect an icon
       }));
     } else {
       // If switching to image, clear icon type
       setFormData(prev => ({ 
         ...prev, 
         iconType: null,
-        // Keep imageUrl if it exists, otherwise it will remain empty
       }));
     }
   };
@@ -184,12 +184,27 @@ const ItemForm = ({
       return;
     }
     
-    const finalData = {
-      ...formData,
+    // Create a copy of the form data
+    let finalData = { ...formData };
+    
+    // If using icon but no icon is selected, try to find one based on tags
+    if (useIcon && !finalData.iconType && finalData.tags && finalData.tags.length > 0) {
+      for (const tag of finalData.tags) {
+        const suggestedIcon = getIconForTag(tag);
+        if (suggestedIcon) {
+          finalData.iconType = suggestedIcon;
+          break;
+        }
+      }
+    }
+    
+    // Apply final rules
+    finalData = {
+      ...finalData,
       // Only use default image if not using icon and no image provided
-      imageUrl: !formData.iconType && !formData.imageUrl ? getDefaultImage(formData) : formData.imageUrl,
+      imageUrl: useIcon ? "" : (!finalData.imageUrl ? getDefaultImage(finalData) : finalData.imageUrl),
       // Ensure iconType is null if we're not using an icon
-      iconType: useIcon ? formData.iconType : null
+      iconType: useIcon ? finalData.iconType : null
     };
     
     onSubmit(finalData);

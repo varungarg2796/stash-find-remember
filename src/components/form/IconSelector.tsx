@@ -27,18 +27,21 @@ const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
         </label>
       </div>
       
-      <div className="flex gap-3">
+      <div className="w-full">
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
-              {selectedIconData ? (
-                <>
-                  <selectedIconData.component size={16} />
-                  <span>{selectedIconData.label}</span>
-                </>
-              ) : (
-                "Select Icon"
-              )}
+            <Button variant="outline" className="flex items-center gap-2 w-full justify-between">
+              <div className="flex items-center gap-2">
+                {selectedIconData ? (
+                  <>
+                    <selectedIconData.component size={18} />
+                    <span>{selectedIconData.label}</span>
+                  </>
+                ) : (
+                  <span>Select an icon</span>
+                )}
+              </div>
+              <span className="text-xs text-muted-foreground">{selectedIcon ? "" : "(optional)"}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[400px] p-3 z-50 bg-white" align="start">
@@ -68,4 +71,3 @@ const IconSelector = ({ selectedIcon, onSelectIcon }: IconSelectorProps) => {
 };
 
 export default IconSelector;
-
