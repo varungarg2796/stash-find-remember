@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Item } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,7 +55,15 @@ const ItemForm = ({
   const [formData, setFormData] = useState<Omit<Item, "id">>(initialData as Omit<Item, "id">);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [useIcon, setUseIcon] = useState<boolean>(!!formData.iconType);
+  
+  // Determine initial state based on whether we have an iconType or imageUrl
+  const [useIcon, setUseIcon] = useState<boolean>(!!initialData.iconType);
+  
+  // Make sure component properly reacts to initial data changes (useful in the edit item case)
+  useEffect(() => {
+    setFormData(initialData as Omit<Item, "id">);
+    setUseIcon(!!initialData.iconType);
+  }, [initialData]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -144,11 +151,19 @@ const ItemForm = ({
   const handleImageMethodToggle = (useIconValue: boolean) => {
     setUseIcon(useIconValue);
     if (useIconValue) {
-      // If switching to icon, clear image URL
-      setFormData(prev => ({ ...prev, imageUrl: "", iconType: prev.iconType || "book" }));
+      // If switching to icon, clear image URL and set a default icon if none exists
+      setFormData(prev => ({ 
+        ...prev, 
+        imageUrl: "", 
+        iconType: prev.iconType || "book" 
+      }));
     } else {
       // If switching to image, clear icon type
-      setFormData(prev => ({ ...prev, iconType: null }));
+      setFormData(prev => ({ 
+        ...prev, 
+        iconType: null,
+        // Keep imageUrl if it exists, otherwise it will remain empty
+      }));
     }
   };
   
@@ -172,7 +187,9 @@ const ItemForm = ({
     const finalData = {
       ...formData,
       // Only use default image if not using icon and no image provided
-      imageUrl: !formData.iconType && !formData.imageUrl ? getDefaultImage(formData) : formData.imageUrl
+      imageUrl: !formData.iconType && !formData.imageUrl ? getDefaultImage(formData) : formData.imageUrl,
+      // Ensure iconType is null if we're not using an icon
+      iconType: useIcon ? formData.iconType : null
     };
     
     onSubmit(finalData);

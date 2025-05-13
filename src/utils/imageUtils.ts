@@ -31,6 +31,9 @@ const categoryImageMap: Record<string, string> = {
  * @returns URL of the default image
  */
 export const getDefaultImage = (item: Item | Partial<Item>): string => {
+  // If the item specifies an iconType, don't return an image
+  if (item.iconType) return "";
+  
   // If the item has an imageUrl, return it
   if (item.imageUrl) return item.imageUrl;
   
@@ -85,4 +88,3 @@ export const getDefaultImage = (item: Item | Partial<Item>): string => {
   // If no matches, use a generic placeholder
   return "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b";
 };
-

@@ -29,7 +29,17 @@ const EditItem = () => {
   }
   
   const handleSubmit = (data: Omit<Item, "id">) => {
-    updateItem({ ...data, id: item.id });
+    // Ensure we preserve the user's choice of icon or image
+    const updatedItem = {
+      ...data,
+      id: item.id,
+      // Preserve iconType if user selected an icon
+      iconType: data.iconType || null,
+      // Only use imageUrl if user hasn't selected an icon
+      imageUrl: data.iconType ? "" : data.imageUrl
+    };
+    
+    updateItem(updatedItem);
     toast.success("Item updated successfully");
     navigate("/"); // Navigate to home page
   };
