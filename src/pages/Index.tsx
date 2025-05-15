@@ -4,6 +4,7 @@ import AddItemButton from "@/components/AddItemButton";
 import FilterSection from "@/components/filter/FilterSection";
 import ItemsDisplay from "@/components/items/ItemsDisplay";
 import { useItemFiltering } from "@/hooks/useItemFiltering";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -22,27 +23,29 @@ const Index = () => {
   } = useItemFiltering();
 
   return (
-    <div className="max-w-screen-md mx-auto px-4 py-6">
-      <FilterSection 
-        searchQuery={searchQuery}
-        activeFilter={activeFilter}
-        activeSubFilter={activeSubFilter}
-        viewMode={viewMode}
-        sortBy={sortBy}
-        onSearchChange={handleSearch}
-        onFilterChange={handleFilterChange}
-        onViewChange={handleViewChange}
-        onSortChange={handleSortChange}
-        clearSubFilter={clearSubFilter}
-      />
-      
-      <ItemsDisplay 
-        items={filteredItems}
-        viewMode={viewMode}
-      />
-      
-      <AddItemButton onClick={() => navigate("/add-item")} />
-    </div>
+    <TooltipProvider>
+      <div className="max-w-screen-md mx-auto px-4 py-6">
+        <FilterSection 
+          searchQuery={searchQuery}
+          activeFilter={activeFilter}
+          activeSubFilter={activeSubFilter}
+          viewMode={viewMode}
+          sortBy={sortBy}
+          onSearchChange={handleSearch}
+          onFilterChange={handleFilterChange}
+          onViewChange={handleViewChange}
+          onSortChange={handleSortChange}
+          clearSubFilter={clearSubFilter}
+        />
+        
+        <ItemsDisplay 
+          items={filteredItems}
+          viewMode={viewMode}
+        />
+        
+        <AddItemButton onClick={() => navigate("/add-item")} />
+      </div>
+    </TooltipProvider>
   );
 };
 
