@@ -94,7 +94,7 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                 <div className="flex justify-between items-center mt-2">
                   <div className="flex space-x-2 overflow-hidden">
                     {item.tags.slice(0, 2).map((tag, index) => (
-                      <span key={index} className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full truncate font-medium">
+                      <span key={index} className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full truncate font-medium">
                         {tag}
                       </span>
                     ))}
@@ -110,7 +110,7 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                           format(new Date(item.createdAt), 'MMM d, yyyy')}
                       </div>
                     ) : (
-                      <div className="flex items-center text-sm text-indigo-600">
+                      <div className="flex items-center text-sm bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">
                         <Package size={14} className="mr-1" />
                         <span className="font-medium">{item.quantity}</span>
                       </div>
