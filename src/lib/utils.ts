@@ -1,28 +1,33 @@
-
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-// Tag color options for consistent styling across the app
-export const getTagColorClasses = (tag: string) => {
-  // Create a simple hash from the tag string
-  const hash = tag.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  
-  // Color combinations (background + text)
-  const colorOptions = [
-    'bg-indigo-50 text-indigo-700',    // Purple/Indigo
-    'bg-blue-50 text-blue-700',        // Blue
-    'bg-teal-50 text-teal-700',        // Teal
-    'bg-amber-50 text-amber-700',      // Amber
-    'bg-rose-50 text-rose-700',        // Rose
-    'bg-emerald-50 text-emerald-700',  // Emerald
-    'bg-cyan-50 text-cyan-700',        // Cyan
-    'bg-fuchsia-50 text-fuchsia-700',  // Fuchsia
+// Function to generate consistent colors for tags
+export function getTagColor(tag: string): string {
+  // Generate color based on the tag string to ensure consistency
+  const colors = [
+    "#ecd9ff", // Light purple
+    "#d9f2ff", // Light blue
+    "#d9ffea", // Light mint
+    "#fff3d9", // Light orange
+    "#ffd9d9", // Light red
+    "#f2d9ff", // Light magenta
+    "#d9ffff", // Light cyan
+    "#e6ffd9"  // Light green
   ];
   
-  // Return a color based on the hash
-  return colorOptions[hash % colorOptions.length];
-};
+  // Use a simple hash function to determine the color index
+  let hashCode = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hashCode = ((hashCode << 5) - hashCode) + tag.charCodeAt(i);
+    hashCode = hashCode & hashCode; // Convert to 32bit integer
+  }
+  
+  // Get positive value and find index
+  const index = Math.abs(hashCode) % colors.length;
+  
+  return colors[index];
+}

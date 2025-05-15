@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -10,12 +10,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
 import { useAuth } from "@/context/AuthContext";
-import { User, LogOut, Settings, Box } from "lucide-react";
+import { 
+  User, 
+  LogOut, 
+  Settings, 
+  Box, 
+  Home,
+  MessageSquare,
+  FileText,
+  Archive,
+  Menu
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const Header = () => {
   const { user, login, logout } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const handleLogin = () => {
     setIsLoggingIn(true);
@@ -31,28 +53,83 @@ const Header = () => {
     }, 800);
   };
 
+  const navigationItems = [
+    { path: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
+    { path: "/ask", label: "Ask Stasher", icon: <MessageSquare className="h-4 w-4 mr-2" /> },
+    { path: "/bulk-import", label: "Bulk Import", icon: <FileText className="h-4 w-4 mr-2" /> },
+    { path: "/archive", label: "Archive", icon: <Archive className="h-4 w-4 mr-2" /> }
+  ];
+
   return (
     <header className="py-4 px-4 flex justify-between items-center border-b">
-      <Link to="/" className="flex items-center gap-2">
-        <img 
-          src="/stasher-logo.svg" 
-          alt="Stasher Logo" 
-          className="h-8 w-8"
-          onError={(e) => {
-            e.currentTarget.src = "/placeholder.svg";
-          }}
-        />
-        <span className="font-bold text-xl">Stasher</span>
-      </Link>
-      
+      <div className="flex items-center">
+        <Link to="/" className="flex items-center gap-2 mr-6">
+          <img 
+            src="/stasher-logo.svg" 
+            alt="Stasher Logo" 
+            className="h-8 w-8"
+            onError={(e) => {
+              e.currentTarget.src = "/placeholder.svg";
+            }}
+          />
+          <span className="font-bold text-xl">Stasher</span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:block">
+          <NavigationMenu>
+            <NavigationMenuList>
+              {navigationItems.map((item) => (
+                <NavigationMenuItem key={item.path}>
+                  <Link to={item.path}>
+                    <NavigationMenuLink 
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        location.pathname === item.path && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
+      </div>
+
       <div className="flex items-center gap-4">
-        {user && (
-          <Link to="/archive">
-            <Button variant="ghost" size="sm" className="hidden sm:flex items-center">
-              <Box className="mr-2 h-4 w-4" />
-              Archive
-            </Button>
-          </Link>
+        {/* Mobile Navigation Trigger */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="absolute top-16 left-0 right-0 bg-white z-50 border-b shadow-md md:hidden">
+            <nav className="p-4 flex flex-col gap-2">
+              {navigationItems.map((item) => (
+                <Link 
+                  key={item.path} 
+                  to={item.path} 
+                  className={cn(
+                    "flex items-center p-2 rounded-md hover:bg-accent",
+                    location.pathname === item.path && "bg-accent text-accent-foreground"
+                  )}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         )}
         
         {user ? (
@@ -81,12 +158,6 @@ const Header = () => {
                 <Link to="/profile" className="cursor-pointer flex w-full items-center">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>My Profile</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/archive" className="cursor-pointer flex w-full items-center sm:hidden">
-                  <Box className="mr-2 h-4 w-4" />
-                  <span>Archive</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
