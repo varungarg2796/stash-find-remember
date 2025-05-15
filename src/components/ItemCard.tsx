@@ -11,6 +11,7 @@ import { getColorForItem, getIconByName } from "@/utils/iconUtils";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getTagColorClasses } from "@/lib/utils";
 
 interface ItemCardProps {
   item: Item;
@@ -102,7 +103,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
         
         <div className="flex flex-wrap gap-2 mb-2">
           {tags.slice(0, isMobile ? 1 : 2).map((tag, index) => (
-            <span key={index} className="text-xs bg-purple-50 text-purple-700 px-3 py-1 rounded-full font-medium">
+            <span key={index} className={cn("text-xs px-3 py-1 rounded-full font-medium", getTagColorClasses(tag))}>
               {tag}
             </span>
           ))}

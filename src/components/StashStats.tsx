@@ -41,19 +41,36 @@ const StashStats = () => {
     setStats({ totalItems, totalQuantity, uniqueLocations, uniqueTags, totalValue });
   }, [items]);
 
+  // If there are no items, don't render the component
+  if (stats.totalItems === 0) return null;
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-6">
-      <Card className="overflow-hidden">
-        <CollapsibleTrigger className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-all">
+    <Collapsible 
+      open={isOpen} 
+      onOpenChange={setIsOpen} 
+      className="mb-6"
+    >
+      <Card className="overflow-hidden border border-gray-200">
+        <CollapsibleTrigger className="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 transition-all">
           <div className="flex items-center">
-            <h3 className="text-lg font-semibold text-gray-800">Quick Statistics</h3>
+            <h3 className="font-medium text-gray-700">Quick Statistics</h3>
+            <div className="flex ml-4 space-x-3">
+              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full flex items-center">
+                <Package size={12} className="mr-1" />
+                {stats.totalItems} items
+              </span>
+              <span className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full flex items-center">
+                <DollarSign size={12} className="mr-1" />
+                {currencySymbol}{stats.totalValue.toLocaleString()}
+              </span>
+            </div>
           </div>
-          {isOpen ? <ChevronUp className="h-5 w-5 text-gray-600" /> : <ChevronDown className="h-5 w-5 text-gray-600" />}
+          {isOpen ? <ChevronUp className="h-4 w-4 text-gray-600" /> : <ChevronDown className="h-4 w-4 text-gray-600" />}
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="p-4 pt-2">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+          <CardContent className="p-4 pt-3 bg-gray-50">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="flex flex-col border rounded-lg p-3 bg-blue-50">
                 <span className="text-sm text-gray-500 font-medium flex items-center">
                   <Package size={14} className="mr-1 text-blue-600" />
