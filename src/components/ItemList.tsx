@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Item } from "@/types";
-import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign, ArchiveRestore } from "lucide-react";
+import { ArrowRight, Heart, Trash2, Archive, Clock, DollarSign, ArchiveRestore, Package } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { getDefaultImage } from "@/utils/imageUtils";
 import { useAuth } from "@/context/AuthContext";
 import { getColorForItem, getIconByName } from "@/utils/iconUtils";
+import { cn } from "@/lib/utils";
 
 interface ItemListProps {
   items: Item[];
@@ -35,15 +36,15 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                          user?.preferences?.currency === 'JPY' ? '¥' : '$';
                          
   return (
-    <div className="flex flex-col space-y-3">
+    <div className="flex flex-col space-y-4">
       {items.map((item) => {
         const defaultImage = getDefaultImage(item);
         const IconComponent = getIconByName(item.iconType);
         const placeholderColor = getColorForItem(item.name);
         
         return (
-          <div key={item.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all">
-            <div className="flex items-center p-3">
+          <div key={item.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all border border-gray-100">
+            <div className="flex items-center p-4">
               <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-50 flex-shrink-0">
                 <AspectRatio ratio={1/1}>
                   {item.imageUrl ? (
@@ -53,7 +54,7 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                       className="w-full h-full object-cover"
                     />
                   ) : IconComponent ? (
-                    <div className={`w-full h-full flex items-center justify-center ${placeholderColor}`}>
+                    <div className={cn("w-full h-full flex items-center justify-center", placeholderColor)}>
                       <IconComponent size={32} className="text-gray-700" />
                     </div>
                   ) : defaultImage ? (
@@ -70,9 +71,9 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                 </AspectRatio>
               </div>
               
-              <div className="ml-3 flex-grow min-w-0">
+              <div className="ml-4 flex-grow min-w-0">
                 <div className="flex items-center">
-                  <h3 className="text-lg font-semibold truncate">{item.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 truncate">{item.name}</h3>
                   {item.priceless && (
                     <div className="ml-2 flex items-center text-red-500 flex-shrink-0">
                       <Heart size={14} className="fill-current" />
@@ -86,31 +87,40 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                   )}
                 </div>
                 
-                <div className="flex justify-between items-center mt-1">
+                {item.description && (
+                  <p className="text-sm text-gray-600 line-clamp-1 mt-0.5">{item.description}</p>
+                )}
+                
+                <div className="flex justify-between items-center mt-2">
                   <div className="flex space-x-2 overflow-hidden">
-                    {item.tags.slice(0, 1).map((tag, index) => (
-                      <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full truncate">
+                    {item.tags.slice(0, 2).map((tag, index) => (
+                      <span key={index} className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded-full truncate font-medium">
                         {tag}
                       </span>
                     ))}
-                    {item.tags.length > 1 && <span className="text-xs text-gray-500">+{item.tags.length - 1}</span>}
+                    {item.tags.length > 2 && <span className="text-xs text-gray-500">+{item.tags.length - 2}</span>}
                   </div>
                   
-                  {isArchive ? (
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock size={12} className="mr-1" />
-                      {getArchivedDate(item) ? 
-                        format(getArchivedDate(item) as Date, 'MMM d, yyyy') : 
-                        format(new Date(item.createdAt), 'MMM d, yyyy')}
-                    </div>
-                  ) : (
-                    <span className="text-sm text-gray-600 flex-shrink-0">Qty: {item.quantity}</span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {isArchive ? (
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock size={12} className="mr-1" />
+                        {getArchivedDate(item) ? 
+                          format(getArchivedDate(item) as Date, 'MMM d, yyyy') : 
+                          format(new Date(item.createdAt), 'MMM d, yyyy')}
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-sm text-indigo-600">
+                        <Package size={14} className="mr-1" />
+                        <span className="font-medium">{item.quantity}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               
               {isArchive ? (
-                <div className="flex flex-col ml-2 space-y-1">
+                <div className="flex flex-col ml-3 space-y-1">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -129,7 +139,7 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                   >
                     <Trash2 size={18} />
                   </Button>
-                  <Link to={`/items/${item.id}`} className="mt-1">
+                  <Link to={`/items/${item.id}`}>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -141,8 +151,8 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
                   </Link>
                 </div>
               ) : (
-                <Link to={`/items/${item.id}`}>
-                  <ArrowRight size={18} className="text-gray-400 ml-2 flex-shrink-0" />
+                <Link to={`/items/${item.id}`} className="ml-2 flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100">
+                  <ArrowRight size={18} className="text-indigo-500" />
                 </Link>
               )}
             </div>
@@ -169,4 +179,3 @@ const ItemList = ({ items, isArchive = false, onDelete, onRestore }: ItemListPro
 };
 
 export default ItemList;
-
