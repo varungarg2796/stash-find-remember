@@ -62,14 +62,14 @@ const Header = () => {
   ];
 
   return (
-    <header className="py-4 px-4 flex items-center border-b">
+    <header className="py-4 px-4 flex items-center border-b relative">
       {/* Mobile Menu Trigger - Left Side */}
       <div className="md:hidden">
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="mr-2"
+          className="mr-2 p-2"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -78,13 +78,14 @@ const Header = () => {
       {/* Navigation - Left Side */}
       <div className="hidden md:block">
         <NavigationMenu>
-          <NavigationMenuList>
+          <NavigationMenuList className="gap-1">
             {navigationItems.map((item) => (
               <NavigationMenuItem key={item.path}>
                 <Link to={item.path}>
                   <NavigationMenuLink 
                     className={cn(
                       navigationMenuTriggerStyle(),
+                      "px-3 py-1.5 text-sm",
                       location.pathname === item.path && "bg-accent text-accent-foreground"
                     )}
                   >
@@ -98,8 +99,8 @@ const Header = () => {
         </NavigationMenu>
       </div>
 
-      {/* Logo & Tagline - Center */}
-      <div className="flex flex-col items-center justify-center mx-auto">
+      {/* Logo & Tagline - Center - Now absolute positioned for perfect centering */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center">
         <Link to="/" className="flex items-center gap-2">
           <img 
             src="/stasher-logo.svg" 
@@ -123,6 +124,7 @@ const Header = () => {
               variant="outline" 
               size="sm" 
               className={cn(
+                "px-3 py-1.5 text-sm",
                 location.pathname === "/archive" && "bg-accent text-accent-foreground"
               )}
             >
@@ -138,7 +140,7 @@ const Header = () => {
               <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -146,7 +148,7 @@ const Header = () => {
               <div className="flex items-center justify-start gap-2 p-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user.name}</p>
@@ -173,6 +175,7 @@ const Header = () => {
             variant="default" 
             size="sm"
             disabled={isLoggingIn}
+            className="px-3 py-1.5 text-sm"
           >
             {isLoggingIn ? "Logging in..." : "Login"}
             {!isLoggingIn && <User className="ml-2 h-4 w-4" />}
