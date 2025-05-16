@@ -30,9 +30,19 @@ import {
   MessageSquare,
   FileText,
   Archive,
-  Menu
+  Menu,
+  HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose
+} from "@/components/ui/sheet";
 
 const Header = () => {
   const { user, login, logout } = useAuth();
@@ -117,21 +127,61 @@ const Header = () => {
 
       {/* User Menu - Right Side (Always) */}
       <div className="flex items-center gap-4 ml-auto">
-        {/* Archive Button - Desktop only */}
+        {/* How Stasher Works Button - Desktop only */}
         <div className="hidden md:block">
-          <Link to="/archive">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className={cn(
-                "px-3 py-1.5 text-sm",
-                location.pathname === "/archive" && "bg-accent text-accent-foreground"
-              )}
-            >
-              <Archive className="h-4 w-4 mr-2" />
-              Archive
-            </Button>
-          </Link>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="px-3 py-1.5 text-sm"
+              >
+                <HelpCircle className="h-4 w-4 mr-2" />
+                How Stasher Works
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>How to Use Stasher</SheetTitle>
+                <SheetDescription>
+                  Learn how to get the most out of Stasher
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Add Items</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Click the "+" button to add new items to your inventory.
+                    Take photos, add descriptions, and categorize your belongings.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Search & Filter</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Use the search bar to quickly find items. Filter by location,
+                    category, or tags.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Bulk Import</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Have many items? Use our bulk import feature to add multiple
+                    items at once using a spreadsheet format.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Ask Stasher</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Not sure where something is? Ask our AI assistant to help
+                    locate items in your inventory.
+                  </p>
+                </div>
+                <SheetClose asChild>
+                  <Button className="w-full mt-4">Got it</Button>
+                </SheetClose>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
         
         {user ? (
@@ -160,6 +210,12 @@ const Header = () => {
                 <Link to="/profile" className="cursor-pointer flex w-full items-center">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>My Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/archive" className="cursor-pointer flex w-full items-center">
+                  <Archive className="mr-2 h-4 w-4" />
+                  <span>Archive</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -201,17 +257,59 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
-            <Link 
-              to="/archive" 
-              className={cn(
-                "flex items-center p-2 rounded-md hover:bg-accent",
-                location.pathname === "/archive" && "bg-accent text-accent-foreground"
-              )}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Archive className="h-4 w-4 mr-2" />
-              Archive
-            </Link>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button 
+                  variant="ghost"
+                  className="justify-start p-2 h-auto font-normal hover:bg-accent"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <HelpCircle className="h-4 w-4 mr-2" />
+                  How Stasher Works
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>How to Use Stasher</SheetTitle>
+                  <SheetDescription>
+                    Learn how to get the most out of Stasher
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 space-y-6">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Add Items</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Click the "+" button to add new items to your inventory.
+                      Take photos, add descriptions, and categorize your belongings.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Search & Filter</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Use the search bar to quickly find items. Filter by location,
+                      category, or tags.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Bulk Import</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Have many items? Use our bulk import feature to add multiple
+                      items at once using a spreadsheet format.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium">Ask Stasher</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Not sure where something is? Ask our AI assistant to help
+                      locate items in your inventory.
+                    </p>
+                  </div>
+                  <SheetClose asChild>
+                    <Button className="w-full mt-4">Got it</Button>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
           </nav>
         </div>
       )}
