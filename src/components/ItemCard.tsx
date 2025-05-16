@@ -10,7 +10,7 @@ interface ItemCardProps {
 }
 
 const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
-  const { id, name, image, location, quantity, tags, description } = item;
+  const { id, name, imageUrl, location, quantity, tags, description } = item;
   
   // Generate a placeholder image with the first letter of the item name
   const placeholderImage = `https://via.placeholder.com/150/6B7280/FFFFFF?text=${name.charAt(0)}`;
@@ -27,7 +27,7 @@ const ItemCard: React.FC<ItemCardProps> = ({ item }) => {
           <div className="relative">
             <div className="w-full h-48 bg-gray-200 overflow-hidden">
               <img 
-                src={image || placeholderImage} 
+                src={imageUrl || placeholderImage} 
                 alt={name}
                 className="w-full h-full object-cover" 
                 onError={(e) => {

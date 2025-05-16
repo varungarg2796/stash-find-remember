@@ -6,9 +6,17 @@ import { getTagColor } from '@/lib/utils';
 
 interface ItemListProps {
   items: Item[];
+  isArchive?: boolean;
+  onDelete?: (id: string) => void;
+  onRestore?: (id: string) => void;
 }
 
-const ItemList: React.FC<ItemListProps> = ({ items }) => {
+const ItemList: React.FC<ItemListProps> = ({ 
+  items, 
+  isArchive = false,
+  onDelete,
+  onRestore
+}) => {
   return (
     <div className="space-y-3">
       {items.map(item => {
@@ -23,7 +31,7 @@ const ItemList: React.FC<ItemListProps> = ({ items }) => {
             <div className="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow flex items-start gap-4">
               <div className="flex-shrink-0 w-16 h-16 bg-gray-100 rounded overflow-hidden">
                 <img 
-                  src={item.image || placeholderImage} 
+                  src={item.imageUrl || placeholderImage} 
                   alt={item.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
