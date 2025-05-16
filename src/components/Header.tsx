@@ -59,7 +59,6 @@ const Header = () => {
     { path: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
     { path: "/ask", label: "Ask Stasher", icon: <MessageSquare className="h-4 w-4 mr-2" /> },
     { path: "/bulk-import", label: "Bulk Import", icon: <FileText className="h-4 w-4 mr-2" /> },
-    { path: "/archive", label: "Archive", icon: <Archive className="h-4 w-4 mr-2" /> }
   ];
 
   return (
@@ -117,6 +116,22 @@ const Header = () => {
 
       {/* User Menu - Right Side (Always) */}
       <div className="flex items-center gap-4 ml-auto">
+        {/* Archive Button - Desktop only */}
+        <div className="hidden md:block">
+          <Link to="/archive">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className={cn(
+                location.pathname === "/archive" && "bg-accent text-accent-foreground"
+              )}
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              Archive
+            </Button>
+          </Link>
+        </div>
+        
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -183,6 +198,17 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
+            <Link 
+              to="/archive" 
+              className={cn(
+                "flex items-center p-2 rounded-md hover:bg-accent",
+                location.pathname === "/archive" && "bg-accent text-accent-foreground"
+              )}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              Archive
+            </Link>
           </nav>
         </div>
       )}
