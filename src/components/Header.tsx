@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,7 @@ const Header = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const handleLogin = () => {
     setIsLoggingIn(true);
@@ -61,9 +63,45 @@ const Header = () => {
   ];
 
   return (
-    <header className="py-4 px-4 flex justify-between items-center border-b">
-      <div className="flex items-center">
-        <Link to="/" className="flex items-center gap-2 mr-6">
+    <header className="py-4 px-4 flex items-center border-b">
+      {/* Mobile Menu Trigger - Left Side */}
+      <div className="md:hidden">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="mr-2"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Navigation - Left Side */}
+      <div className="hidden md:block">
+        <NavigationMenu>
+          <NavigationMenuList>
+            {navigationItems.map((item) => (
+              <NavigationMenuItem key={item.path}>
+                <Link to={item.path}>
+                  <NavigationMenuLink 
+                    className={cn(
+                      navigationMenuTriggerStyle(),
+                      location.pathname === item.path && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            ))}
+          </NavigationMenuList>
+        </NavigationMenu>
+      </div>
+
+      {/* Logo & Tagline - Center */}
+      <div className="flex flex-col items-center justify-center mx-auto">
+        <Link to="/" className="flex items-center gap-2">
           <img 
             src="/stasher-logo.svg" 
             alt="Stasher Logo" 
@@ -74,64 +112,11 @@ const Header = () => {
           />
           <span className="font-bold text-xl">Stasher</span>
         </Link>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:block">
-          <NavigationMenu>
-            <NavigationMenuList>
-              {navigationItems.map((item) => (
-                <NavigationMenuItem key={item.path}>
-                  <Link to={item.path}>
-                    <NavigationMenuLink 
-                      className={cn(
-                        navigationMenuTriggerStyle(),
-                        location.pathname === item.path && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
+        <span className="text-xs text-muted-foreground hidden sm:block">Organize your belongings with ease</span>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Mobile Navigation Trigger */}
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-
-        {/* Mobile Navigation Menu */}
-        {mobileMenuOpen && (
-          <div className="absolute top-16 left-0 right-0 bg-white z-50 border-b shadow-md md:hidden">
-            <nav className="p-4 flex flex-col gap-2">
-              {navigationItems.map((item) => (
-                <Link 
-                  key={item.path} 
-                  to={item.path} 
-                  className={cn(
-                    "flex items-center p-2 rounded-md hover:bg-accent",
-                    location.pathname === item.path && "bg-accent text-accent-foreground"
-                  )}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.icon}
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        )}
-        
+      {/* User Menu - Right Side (Always) */}
+      <div className="flex items-center gap-4 ml-auto">
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -179,6 +164,28 @@ const Header = () => {
           </Button>
         )}
       </div>
+
+      {/* Mobile Navigation Menu - Slide down from top */}
+      {mobileMenuOpen && (
+        <div className="absolute top-16 left-0 right-0 bg-white z-50 border-b shadow-md md:hidden">
+          <nav className="p-4 flex flex-col gap-2">
+            {navigationItems.map((item) => (
+              <Link 
+                key={item.path} 
+                to={item.path} 
+                className={cn(
+                  "flex items-center p-2 rounded-md hover:bg-accent",
+                  location.pathname === item.path && "bg-accent text-accent-foreground"
+                )}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
