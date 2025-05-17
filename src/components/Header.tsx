@@ -95,7 +95,7 @@ const Header = () => {
                   <NavigationMenuLink 
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      "px-3 py-1.5 text-sm",
+                      "px-2 py-1.5 text-xs",
                       location.pathname === item.path && "bg-accent text-accent-foreground"
                     )}
                   >
@@ -126,7 +126,7 @@ const Header = () => {
       </div>
 
       {/* User Menu - Right Side (Always) */}
-      <div className="flex items-center gap-4 ml-auto">
+      <div className="flex items-center gap-2 ml-auto">
         {/* How Stasher Works Button - Desktop only */}
         <div className="hidden md:block">
           <Sheet>
@@ -134,9 +134,9 @@ const Header = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="px-3 py-1.5 text-sm"
+                className="px-2 py-1 text-xs"
               >
-                <HelpCircle className="h-4 w-4 mr-2" />
+                <HelpCircle className="h-3 w-3 mr-1" />
                 How Stasher Works
               </Button>
             </SheetTrigger>
@@ -190,7 +190,7 @@ const Header = () => {
               <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</AvatarFallback>
+                  <AvatarFallback>{user.name ? user.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase() : "U"}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -198,7 +198,7 @@ const Header = () => {
               <div className="flex items-center justify-start gap-2 p-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</AvatarFallback>
+                  <AvatarFallback>{user.name ? user.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase() : "U"}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user.name}</p>
