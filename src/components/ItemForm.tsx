@@ -27,71 +27,61 @@ interface ItemFormProps {
   isEditing?: boolean;
 }
 
-const getPlaceholderImage = (name: string = ""): string => {
-  const placeholders = [
-    "/lovable-uploads/wine-glasses.png",
-  ];
-  
-  return placeholders[0];
+// Define default initial data outside the component for a stable reference
+const defaultInitialItemData: Omit<Item, "id"> = {
+  name: "",
+  description: "",
+  imageUrl: "",
+  iconType: null,
+  quantity: 1,
+  location: "",
+  tags: [],
+  price: undefined,
+  priceless: false,
+  acquisitionDate: undefined,
+  createdAt: new Date()
 };
 
-const ItemForm = ({ 
-  initialData = {
-    name: "",
-    description: "",
-    imageUrl: "",
-    iconType: null,
-    quantity: 1,
-    location: "",
-    tags: [],
-    price: undefined,
-    priceless: false,
-    acquisitionDate: undefined
-  }, 
-  onSubmit, 
+const getPlaceholderImage = (name: string = ""): string => {
+  // Corrected placeholder image path if needed, or ensure it exists.
+  // Assuming you meant wine-glasses.jpg based on your public folder.
+  return "/lovable-uploads/wine-glasses.jpg";
+};
+
+const ItemForm = ({
+  initialData: initialDataProp = defaultInitialItemData, // Use the stable default
+  onSubmit,
   onCancel,
   submitLabel,
   isEditing = false
 }: ItemFormProps) => {
-  const [formData, setFormData] = useState<Omit<Item, "id">>(initialData as Omit<Item, "id">);
+  const [formData, setFormData] = useState<Omit<Item, "id">>({ ...defaultInitialItemData, ...initialDataProp });
+  const [useIcon, setUseIcon] = useState<boolean>(!!initialDataProp.iconType);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Store the initial values to reference later
-  const [initialIconType] = useState<string | null | undefined>(initialData.iconType);
-  const [initialImageUrl] = useState<string | undefined>(initialData.imageUrl);
-  
-  // Determine initial state based on whether we have an iconType or imageUrl
-  const [useIcon, setUseIcon] = useState<boolean>(!!initialData.iconType);
-  
-  // Make sure component properly reacts to initial data changes
+
+  // Effect to reset the form if initialDataProp changes (e.g., for editing a different item)
   useEffect(() => {
-    // When initialData changes (especially in edit mode), we need to update formData
-    // but preserve the current view mode (icon/image)
-    setFormData(prevData => {
-      // If we're already in a specific mode, keep the appropriate field values
+    setFormData({ ...defaultInitialItemData, ...initialDataProp });
+    setUseIcon(!!initialDataProp.iconType); // Also reset useIcon based on the new initial data
+  }, [initialDataProp]); // Dependency only on the prop itself
+
+  // Effect to handle UI changes when toggling between icon and image
+  useEffect(() => {
+    setFormData(prev => {
       if (useIcon) {
-        // In icon mode, preserve the iconType but clear imageUrl
-        return {
-          ...initialData as Omit<Item, "id">,
-          iconType: prevData.iconType || initialData.iconType,
-          imageUrl: ""
-        };
+        // When switching to icon mode, clear imageUrl. Icon value is handled by IconSelector.
+        return { ...prev, imageUrl: "" };
       } else {
-        // In image mode, preserve the imageUrl but clear iconType
-        return {
-          ...initialData as Omit<Item, "id">,
-          iconType: null,
-          imageUrl: prevData.imageUrl || initialData.imageUrl
-        };
+        // When switching to image mode, clear iconType. Image value is handled by ImageUploader.
+        return { ...prev, iconType: null };
       }
     });
-  }, [initialData, useIcon]);
-  
+  }, [useIcon]); // Only depends on useIcon
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when field is edited
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -100,7 +90,7 @@ const ItemForm = ({
       });
     }
   };
-  
+
   const handleQuantityChange = (quantity: number) => {
     setFormData(prev => ({ ...prev, quantity }));
     if (errors.quantity) {
@@ -111,16 +101,16 @@ const ItemForm = ({
       });
     }
   };
-  
+
   const handleLocationChange = (location: string) => {
     setFormData(prev => ({ ...prev, location }));
   };
-  
+
   const handlePricelessToggle = (checked: boolean) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       priceless: checked,
-      price: checked ? undefined : prev.price 
+      price: checked ? undefined : prev.price
     }));
     if (errors.price) {
       setErrors(prev => {
@@ -130,7 +120,7 @@ const ItemForm = ({
       });
     }
   };
-  
+
   const handlePriceChange = (value: number | undefined) => {
     setFormData(prev => ({ ...prev, price: value }));
     if (errors.price) {
@@ -141,7 +131,7 @@ const ItemForm = ({
       });
     }
   };
-  
+
   const handleTagsChange = (tags: string[]) => {
     setFormData(prev => ({ ...prev, tags }));
     if (errors.tags) {
@@ -152,51 +142,34 @@ const ItemForm = ({
       });
     }
   };
-  
+
   const handleImageChange = (imageUrl: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       imageUrl,
     }));
   };
-  
+
   const handleIconChange = (iconType: string | null) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       iconType,
     }));
   };
-  
+
   const handleImageMethodToggle = (useIconValue: boolean) => {
     setUseIcon(useIconValue);
-    if (useIconValue) {
-      // If switching to icon mode, restore initial iconType if it exists
-      setFormData(prev => ({ 
-        ...prev, 
-        imageUrl: "",
-        // In edit mode, restore the initial icon if there was one
-        iconType: isEditing && initialIconType ? initialIconType : prev.iconType
-      }));
-    } else {
-      // If switching to image mode, restore initial imageUrl if it exists
-      setFormData(prev => ({ 
-        ...prev, 
-        iconType: null,
-        // In edit mode, restore the initial image if there was one
-        imageUrl: isEditing && initialImageUrl ? initialImageUrl : prev.imageUrl
-      }));
-    }
+    // The actual formData update for imageUrl/iconType will happen in the useEffect listening to useIcon
   };
-  
+
   const handleDateChange = (date: Date | undefined) => {
     setFormData(prev => ({ ...prev, acquisitionDate: date }));
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Validate form data
+
     const validation = validateItemForm(formData);
     if (!validation.isValid) {
       setErrors(validation.errors);
@@ -204,11 +177,9 @@ const ItemForm = ({
       toast.error("Please fix the errors in the form");
       return;
     }
-    
-    // Create a copy of the form data
+
     let finalData = { ...formData };
-    
-    // If using icon but no icon is selected, try to find one based on tags
+
     if (useIcon && !finalData.iconType && finalData.tags && finalData.tags.length > 0) {
       for (const tag of finalData.tags) {
         const suggestedIcon = getIconForTag(tag);
@@ -218,16 +189,13 @@ const ItemForm = ({
         }
       }
     }
-    
-    // Apply final rules
+
     finalData = {
       ...finalData,
-      // Only use default image if not using icon and no image provided
       imageUrl: useIcon ? "" : (!finalData.imageUrl ? getDefaultImage(finalData) : finalData.imageUrl),
-      // Ensure iconType is null if we're not using an icon
       iconType: useIcon ? finalData.iconType : null
     };
-    
+
     onSubmit(finalData);
     setIsSubmitting(false);
   };
@@ -254,7 +222,7 @@ const ItemForm = ({
           </div>
         )}
       </div>
-      
+
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
           Description
@@ -278,24 +246,24 @@ const ItemForm = ({
           {formData.description?.length || 0}/500
         </div>
       </div>
-      
+
       <div>
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Item Visual
           </label>
           <div className="flex gap-2">
-            <Button 
-              type="button" 
-              variant={!useIcon ? "default" : "outline"} 
+            <Button
+              type="button"
+              variant={!useIcon ? "default" : "outline"}
               onClick={() => handleImageMethodToggle(false)}
               className="flex-1"
             >
               Upload Image
             </Button>
-            <Button 
-              type="button" 
-              variant={useIcon ? "default" : "outline"} 
+            <Button
+              type="button"
+              variant={useIcon ? "default" : "outline"}
               onClick={() => handleImageMethodToggle(true)}
               className="flex-1"
             >
@@ -303,11 +271,11 @@ const ItemForm = ({
             </Button>
           </div>
         </div>
-        
+
         {useIcon ? (
-          <IconSelector 
-            selectedIcon={formData.iconType || null} 
-            onSelectIcon={handleIconChange} 
+          <IconSelector
+            selectedIcon={formData.iconType || null}
+            onSelectIcon={handleIconChange}
           />
         ) : (
           <ImageUploader
@@ -318,7 +286,7 @@ const ItemForm = ({
           />
         )}
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Acquisition Date
@@ -349,8 +317,8 @@ const ItemForm = ({
           </PopoverContent>
         </Popover>
       </div>
-      
-      <QuantityInput 
+
+      <QuantityInput
         quantity={formData.quantity}
         onChange={handleQuantityChange}
       />
@@ -360,13 +328,13 @@ const ItemForm = ({
           {errors.quantity}
         </div>
       )}
-      
+
       <LocationSelector
         value={formData.location}
         onChange={handleLocationChange}
         isEditing={isEditing}
       />
-      
+
       <PriceInput
         price={formData.price}
         priceless={!!formData.priceless}
@@ -379,7 +347,7 @@ const ItemForm = ({
           {errors.price}
         </div>
       )}
-      
+
       <TagSelector
         selectedTags={formData.tags}
         onChange={handleTagsChange}
@@ -391,12 +359,12 @@ const ItemForm = ({
           {errors.tags}
         </div>
       )}
-      
+
       <div className="flex space-x-4 pt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
-          className="flex-1" 
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
           onClick={onCancel}
         >
           Cancel
