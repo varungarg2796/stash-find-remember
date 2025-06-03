@@ -19,7 +19,8 @@ import {
   Star,
   Users,
   Globe,
-  Shield
+  Shield,
+  Box
 } from "lucide-react";
 import { useState } from "react";
 
