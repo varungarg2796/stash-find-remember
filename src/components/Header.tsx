@@ -60,12 +60,12 @@ const Header = () => {
   const navigationItems = [
     { path: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
     { path: "/my-stash", label: "My Stash", icon: <Box className="h-4 w-4 mr-2" /> },
-    { path: "/collections", label: "My Collections", icon: <Share className="h-4 w-4 mr-2" /> },
+    { path: "/collections", label: "Collections", icon: <Share className="h-4 w-4 mr-2" /> },
     { path: "/about", label: "About", icon: <Info className="h-4 w-4 mr-2" /> },
   ];
 
   return (
-    <header className="py-4 px-4 flex items-center border-b relative">
+    <header className="py-3 px-4 flex items-center border-b relative">
       {/* Mobile Menu Trigger - Left Side */}
       <div className="md:hidden">
         <Button 
@@ -78,22 +78,22 @@ const Header = () => {
         </Button>
       </div>
 
-      {/* Navigation - Left Side */}
-      <div className="hidden md:block">
+      {/* Navigation - Left Side - Reduced padding and spacing */}
+      <div className="hidden md:block flex-shrink-0">
         <NavigationMenu>
-          <NavigationMenuList className="gap-1">
+          <NavigationMenuList className="gap-0.5">
             {navigationItems.map((item) => (
               <NavigationMenuItem key={item.path + item.label}>
                 <Link to={item.path}>
                   <NavigationMenuLink 
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      "px-2 py-1.5 text-xs",
+                      "px-1.5 py-1 text-xs h-auto min-w-0",
                       location.pathname === item.path && "bg-accent text-accent-foreground"
                     )}
                   >
-                    {item.icon}
-                    {item.label}
+                    <span className="hidden lg:block mr-1">{item.icon}</span>
+                    <span className="truncate">{item.label}</span>
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -102,24 +102,26 @@ const Header = () => {
         </NavigationMenu>
       </div>
 
-      {/* Logo & Tagline - Center - Now absolute positioned for perfect centering */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center">
-        <Link to="/" className="flex items-center gap-2">
-          <img 
-            src="/stasher-logo.svg" 
-            alt="Stasher Logo" 
-            className="h-8 w-8"
-            onError={(e) => {
-              e.currentTarget.src = "/placeholder.svg";
-            }}
-          />
-          <span className="font-bold text-xl">Stasher</span>
-        </Link>
-        <span className="text-xs text-muted-foreground hidden sm:block">Organize your belongings with ease</span>
+      {/* Logo & Tagline - Center - Better responsive handling */}
+      <div className="flex-1 flex justify-center items-center min-w-0">
+        <div className="flex flex-col items-center justify-center">
+          <Link to="/" className="flex items-center gap-2">
+            <img 
+              src="/stasher-logo.svg" 
+              alt="Stasher Logo" 
+              className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0"
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder.svg";
+              }}
+            />
+            <span className="font-bold text-lg sm:text-xl truncate">Stasher</span>
+          </Link>
+          <span className="text-xs text-muted-foreground hidden sm:block text-center">Organize your belongings with ease</span>
+        </div>
       </div>
 
-      {/* User Menu - Right Side (Always) */}
-      <div className="flex items-center gap-2 ml-auto">
+      {/* User Menu - Right Side - Flex shrink to prevent overflow */}
+      <div className="flex items-center gap-2 flex-shrink-0">
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -179,17 +181,17 @@ const Header = () => {
             variant="default" 
             size="sm"
             disabled={isLoggingIn}
-            className="px-3 py-1.5 text-sm"
+            className="px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
           >
             {isLoggingIn ? "Logging in..." : "Login"}
-            {!isLoggingIn && <User className="ml-2 h-4 w-4" />}
+            {!isLoggingIn && <User className="ml-1 h-3 w-3 sm:ml-2 sm:h-4 sm:w-4" />}
           </Button>
         )}
       </div>
 
       {/* Mobile Navigation Menu - Slide down from top */}
       {mobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-white z-50 border-b shadow-md md:hidden">
+        <div className="absolute top-full left-0 right-0 bg-white z-50 border-b shadow-md md:hidden">
           <nav className="p-4 flex flex-col gap-2">
             {navigationItems.map((item) => (
               <Link 
