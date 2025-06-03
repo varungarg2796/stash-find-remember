@@ -31,7 +31,6 @@ import {
   FileText,
   Archive,
   Menu,
-  HelpCircle,
   Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -68,7 +67,7 @@ const Header = () => {
 
   const navigationItems = [
     { path: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
-    { path: "/", label: "My Stash", icon: <Box className="h-4 w-4 mr-2" /> },
+    { path: "/my-stash", label: "My Stash", icon: <Box className="h-4 w-4 mr-2" /> },
     { path: "/about", label: "About", icon: <Info className="h-4 w-4 mr-2" /> },
   ];
 
@@ -135,63 +134,6 @@ const Header = () => {
 
       {/* User Menu - Right Side (Always) */}
       <div className="flex items-center gap-2 ml-auto">
-        {/* How Stasher Works Button - Desktop only */}
-        <div className="hidden md:block">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="px-2 py-1 text-xs h-7"
-              >
-                <HelpCircle className="h-3 w-3 mr-1" />
-                How Stasher Works
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>How to Use Stasher</SheetTitle>
-                <SheetDescription>
-                  Learn how to get the most out of Stasher
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-6 space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Add Items</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Click the "+" button to add new items to your inventory.
-                    Take photos, add descriptions, and categorize your belongings.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Search & Filter</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Use the search bar to quickly find items. Filter by location,
-                    category, or tags.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Bulk Import</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Have many items? Use our bulk import feature to add multiple
-                    items at once using a spreadsheet format.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Ask Stasher</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Not sure where something is? Ask our AI assistant to help
-                    locate items in your inventory.
-                  </p>
-                </div>
-                <SheetClose asChild>
-                  <Button className="w-full mt-4">Got it</Button>
-                </SheetClose>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-        
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -265,59 +207,6 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button 
-                  variant="ghost"
-                  className="justify-start p-2 h-auto font-normal hover:bg-accent"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <HelpCircle className="h-4 w-4 mr-2" />
-                  How Stasher Works
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>How to Use Stasher</SheetTitle>
-                  <SheetDescription>
-                    Learn how to get the most out of Stasher
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium">Add Items</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Click the "+" button to add new items to your inventory.
-                      Take photos, add descriptions, and categorize your belongings.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium">Search & Filter</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Use the search bar to quickly find items. Filter by location,
-                      category, or tags.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium">Bulk Import</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Have many items? Use our bulk import feature to add multiple
-                      items at once using a spreadsheet format.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium">Ask Stasher</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Not sure where something is? Ask our AI assistant to help
-                      locate items in your inventory.
-                    </p>
-                  </div>
-                  <SheetClose asChild>
-                    <Button className="w-full mt-4">Got it</Button>
-                  </SheetClose>
-                </div>
-              </SheetContent>
-            </Sheet>
           </nav>
         </div>
       )}

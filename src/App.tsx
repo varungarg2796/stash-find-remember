@@ -9,6 +9,8 @@ import { ItemsProvider } from "@/context/ItemsContext";
 import { AuthProvider } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Index from "./pages/Index";
+import MyStash from "./pages/MyStash";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import ItemDetail from "./pages/ItemDetail";
 import AddItem from "./pages/AddItem";
@@ -36,6 +38,8 @@ const App = () => {
                   <main className="flex-1">
                     <Routes>
                       <Route path="/" element={<Index />} />
+                      <Route path="/my-stash" element={<MyStash />} />
+                      <Route path="/about" element={<About />} />
                       <Route path="/items/:id" element={<ItemDetail />} />
                       <Route path="/add-item" element={<AddItem />} />
                       <Route path="/edit-item/:id" element={<EditItem />} />
