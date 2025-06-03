@@ -35,15 +35,6 @@ import {
   Share
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose
-} from "@/components/ui/sheet";
 
 const Header = () => {
   const { user, login, logout } = useAuth();
@@ -69,6 +60,7 @@ const Header = () => {
   const navigationItems = [
     { path: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
     { path: "/my-stash", label: "My Stash", icon: <Box className="h-4 w-4 mr-2" /> },
+    { path: "/collections", label: "My Collections", icon: <Share className="h-4 w-4 mr-2" /> },
     { path: "/about", label: "About", icon: <Info className="h-4 w-4 mr-2" /> },
   ];
 
@@ -154,12 +146,6 @@ const Header = () => {
                 <Link to="/profile" className="cursor-pointer flex w-full items-center">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>My Profile</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/collections" className="cursor-pointer flex w-full items-center">
-                  <Share className="mr-2 h-4 w-4" />
-                  <span>My Collections</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
