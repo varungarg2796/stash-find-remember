@@ -13,7 +13,8 @@ import {
   Archive,
   Smartphone,
   Tag,
-  MapPin
+  MapPin,
+  Share
 } from "lucide-react";
 import { useState } from "react";
 
@@ -48,6 +49,11 @@ const LandingPage = () => {
       description: "Take photos and add detailed descriptions to keep track of everything."
     },
     {
+      icon: <Share className="h-8 w-8 text-indigo-600" />,
+      title: "Sharable Collections",
+      description: "Create collections and share them with friends, family, or publicly."
+    },
+    {
       icon: <Tag className="h-8 w-8 text-indigo-600" />,
       title: "Smart Tagging",
       description: "Organize with custom tags and categories for easy organization."
@@ -61,11 +67,6 @@ const LandingPage = () => {
       icon: <MessageSquare className="h-8 w-8 text-indigo-600" />,
       title: "AI Assistant",
       description: "Ask Stasher to help you find items using natural language."
-    },
-    {
-      icon: <FileText className="h-8 w-8 text-indigo-600" />,
-      title: "Bulk Import",
-      description: "Import multiple items at once using spreadsheet formats."
     }
   ];
 
@@ -78,22 +79,22 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* Hero Section */}
-      <div className="max-w-6xl mx-auto px-4 py-12 sm:py-20">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl sm:text-6xl font-bold text-gray-900 mb-6">
+      <div className="max-w-6xl mx-auto px-4 py-8 sm:py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
             Never Lose Track of
             <span className="text-indigo-600 block">Your Belongings Again</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Stasher helps you organize, track, and find all your personal items with ease. 
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto px-4">
+            Stasher helps you organize, track, and share all your personal items with ease. 
             From seasonal decorations to important documents, know exactly where everything is.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
             {user ? (
               <Button 
                 onClick={() => navigate("/add-item")}
                 size="lg"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 text-lg"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 sm:px-8 py-3 text-base sm:text-lg w-full sm:w-auto"
               >
                 <PlusCircle className="mr-2 h-5 w-5" />
                 Add Your First Item
@@ -102,7 +103,7 @@ const LandingPage = () => {
               <Button 
                 onClick={handleLogin}
                 size="lg"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 text-lg"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 sm:px-8 py-3 text-base sm:text-lg w-full sm:w-auto"
                 disabled={isLoggingIn}
               >
                 {isLoggingIn ? "Creating account..." : "Get Started Free"}
@@ -113,7 +114,7 @@ const LandingPage = () => {
               onClick={() => navigate("/about")}
               variant="outline"
               size="lg"
-              className="px-8 py-3 text-lg"
+              className="px-6 sm:px-8 py-3 text-base sm:text-lg w-full sm:w-auto"
             >
               Learn More
             </Button>
@@ -121,17 +122,17 @@ const LandingPage = () => {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16 px-4">
           {features.map((feature, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
-              <CardContent className="p-6 text-center">
-                <div className="flex justify-center mb-4">
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="flex justify-center mb-3 sm:mb-4">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   {feature.description}
                 </p>
               </CardContent>
@@ -140,12 +141,12 @@ const LandingPage = () => {
         </div>
 
         {/* CTA Section */}
-        <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-          <CardContent className="p-8 sm:p-12 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+        <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white mx-4">
+          <CardContent className="p-6 sm:p-8 lg:p-12 text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
               Ready to Get Organized?
             </h2>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="text-lg sm:text-xl mb-6 sm:mb-8 opacity-90">
               Join thousands of users who have transformed how they manage their belongings.
             </p>
             {user ? (
@@ -153,7 +154,7 @@ const LandingPage = () => {
                 onClick={() => navigate("/add-item")}
                 size="lg"
                 variant="secondary"
-                className="px-8 py-3 text-lg bg-white text-indigo-600 hover:bg-gray-100"
+                className="px-6 sm:px-8 py-3 text-base sm:text-lg bg-white text-indigo-600 hover:bg-gray-100 w-full sm:w-auto"
               >
                 <PlusCircle className="mr-2 h-5 w-5" />
                 Start Adding Items
@@ -163,7 +164,7 @@ const LandingPage = () => {
                 onClick={handleLogin}
                 size="lg"
                 variant="secondary"
-                className="px-8 py-3 text-lg bg-white text-indigo-600 hover:bg-gray-100"
+                className="px-6 sm:px-8 py-3 text-base sm:text-lg bg-white text-indigo-600 hover:bg-gray-100 w-full sm:w-auto"
                 disabled={isLoggingIn}
               >
                 {isLoggingIn ? "Creating account..." : "Sign Up Now"}

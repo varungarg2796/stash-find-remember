@@ -1,267 +1,273 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger 
 } from "@/components/ui/accordion";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
 import { 
-  PlusCircle, 
-  User, 
+  ArrowLeft, 
   Search, 
+  Smartphone, 
+  Tag, 
+  MapPin, 
   MessageSquare, 
-  FileText, 
-  Archive,
-  Smartphone,
-  Tag,
-  MapPin,
+  FileText,
+  Share,
   Shield,
-  Zap,
-  Heart
+  Clock,
+  Users
 } from "lucide-react";
-import { useState } from "react";
 
 const About = () => {
   const navigate = useNavigate();
-  const { user, login } = useAuth();
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  const handleLogin = () => {
-    setIsLoggingIn(true);
-    setTimeout(() => {
-      login({
-        id: "user-1",
-        name: "John Doe",
-        email: "john@example.com",
-        avatarUrl: "https://i.pravatar.cc/150?u=user-1"
-      });
-      setIsLoggingIn(false);
-    }, 800);
-  };
-
-  const features = [
-    {
-      icon: <Search className="h-6 w-6 text-indigo-600" />,
-      title: "Smart Search & Filter",
-      description: "Find items instantly using our powerful search. Filter by category, location, tags, or any custom criteria."
-    },
-    {
-      icon: <Smartphone className="h-6 w-6 text-indigo-600" />,
-      title: "Photo Documentation",
-      description: "Take high-quality photos of your items with automatic compression. Visual inventory makes finding things easier."
-    },
-    {
-      icon: <Tag className="h-6 w-6 text-indigo-600" />,
-      title: "Flexible Organization",
-      description: "Create custom tags, categories, and locations. Organize your way with unlimited flexibility."
-    },
-    {
-      icon: <MapPin className="h-6 w-6 text-indigo-600" />,
-      title: "Location Tracking",
-      description: "Never forget where you put something. Track exact locations down to specific rooms, boxes, or shelves."
-    },
-    {
-      icon: <MessageSquare className="h-6 w-6 text-indigo-600" />,
-      title: "AI-Powered Assistant",
-      description: "Ask questions in natural language: 'Where are my winter boots?' and get instant answers."
-    },
-    {
-      icon: <FileText className="h-6 w-6 text-indigo-600" />,
-      title: "Bulk Operations",
-      description: "Import hundreds of items at once using CSV files. Perfect for large collections or moving."
-    }
-  ];
-
-  const howItWorksSteps = [
-    {
-      step: "1",
-      title: "Add Items",
-      content: "Click the '+' button to add new items to your inventory. Take photos, add descriptions, set locations, and categorize your belongings. You can add everything from electronics to seasonal decorations."
-    },
-    {
-      step: "2", 
-      title: "Search & Filter",
-      content: "Use the search bar to quickly find items by name, description, or tags. Apply filters by category, location, or any custom criteria to narrow down your results instantly."
-    },
-    {
-      step: "3",
-      title: "Organize Smartly", 
-      content: "Create custom locations like 'Garage Shelf 2' or 'Bedroom Closet Top'. Use tags for themes like 'Holiday', 'Electronics', or 'Important Documents' to group related items."
-    },
-    {
-      step: "4",
-      title: "Ask Stasher",
-      content: "Can't remember where something is? Ask our AI assistant questions like 'Where did I put my passport?' or 'Show me all my holiday decorations' and get instant answers."
-    },
-    {
-      step: "5",
-      title: "Bulk Import",
-      content: "Have many items to add? Use our bulk import feature to upload a spreadsheet with hundreds of items at once. Perfect for cataloging collections or when moving homes."
-    },
-    {
-      step: "6",
-      title: "Archive & History",
-      content: "Archive items you no longer need without deleting them. Keep a complete history of your belongings and easily restore items if needed."
-    }
-  ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-12">
-      {/* Hero Section */}
-      <div className="text-center space-y-6">
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
-          About <span className="text-indigo-600">Stasher</span>
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          The smart way to organize, track, and find all your personal belongings. 
-          Never lose track of your stuff again with our intelligent inventory system.
-        </p>
+    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
+      <div className="flex items-center mb-6 sm:mb-8">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => navigate(-1)}
+          className="mr-2"
+        >
+          <ArrowLeft size={18} />
+        </Button>
+        <h1 className="text-2xl sm:text-3xl font-bold">About Stasher</h1>
       </div>
 
-      {/* Mission Section */}
-      <Card>
-        <CardContent className="p-8">
-          <div className="text-center space-y-4">
-            <Heart className="h-12 w-12 text-red-500 mx-auto" />
-            <h2 className="text-2xl font-bold text-gray-900">Our Mission</h2>
-            <p className="text-lg text-gray-600">
-              We believe everyone deserves an organized life. Stasher was built to solve the universal problem 
-              of forgetting where we put our belongings. From important documents to seasonal items, 
-              we help you stay organized and stress-free.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Features Grid */}
-      <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center text-gray-900">Powerful Features</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {features.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    {feature.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* How Stasher Works */}
-      <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center text-gray-900">How Stasher Works</h2>
+      <div className="space-y-6 sm:space-y-8">
+        {/* Mission Statement */}
         <Card>
-          <CardContent className="p-6">
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl">Our Mission</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+              Stasher is designed to help you take control of your belongings and never lose track of what you own. 
+              Whether you're organizing your home, managing collections, or sharing items with others, 
+              Stasher provides the tools you need to stay organized in our increasingly complex world.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* How Stasher Works */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl">How Stasher Works</CardTitle>
+          </CardHeader>
+          <CardContent>
             <Accordion type="single" collapsible className="w-full">
-              {howItWorksSteps.map((step, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
-                    <div className="flex items-center space-x-3">
-                      <div className="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                        {step.step}
-                      </div>
-                      <span className="text-lg font-medium">{step.title}</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-4 pb-4 pl-11">
-                    <p className="text-gray-600 leading-relaxed">
-                      {step.content}
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+              <AccordionItem value="step-1">
+                <AccordionTrigger className="text-left">
+                  <div className="flex items-center">
+                    <Smartphone className="h-5 w-5 mr-2 text-indigo-600" />
+                    1. Add Your Items
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 pt-2">
+                    <p>Start by adding items to your digital inventory:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
+                      <li>Take photos or choose icons for visual identification</li>
+                      <li>Add detailed descriptions and notes</li>
+                      <li>Set quantities and track values</li>
+                      <li>Assign locations where items are stored</li>
+                      <li>Add custom tags for easy categorization</li>
+                    </ul>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="step-2">
+                <AccordionTrigger className="text-left">
+                  <div className="flex items-center">
+                    <Tag className="h-5 w-5 mr-2 text-indigo-600" />
+                    2. Organize & Categorize
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 pt-2">
+                    <p>Use our powerful organization tools:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
+                      <li>Create custom tags and categories</li>
+                      <li>Set up locations throughout your home</li>
+                      <li>Filter items by type, location, or value</li>
+                      <li>Sort by date added, name, or custom criteria</li>
+                    </ul>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="step-3">
+                <AccordionTrigger className="text-left">
+                  <div className="flex items-center">
+                    <Share className="h-5 w-5 mr-2 text-indigo-600" />
+                    3. Create Collections & Share
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 pt-2">
+                    <p>Group items into collections and share them with others:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
+                      <li>Create themed collections (e.g., "Books to Lend", "Vintage Cameras")</li>
+                      <li>Generate shareable links for any collection</li>
+                      <li>Control what information is visible to viewers</li>
+                      <li>Set password protection or make collections public</li>
+                      <li>Allow others to comment or contact you about items</li>
+                    </ul>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="step-4">
+                <AccordionTrigger className="text-left">
+                  <div className="flex items-center">
+                    <Search className="h-5 w-5 mr-2 text-indigo-600" />
+                    4. Search & Find
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-3 pt-2">
+                    <p>Quickly locate any item in your inventory:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
+                      <li>Use the smart search to find items by name, description, or tags</li>
+                      <li>Ask our AI assistant using natural language</li>
+                      <li>Filter by location to find items in specific rooms</li>
+                      <li>Browse by categories and tags</li>
+                    </ul>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Why Choose Stasher */}
-      <div className="space-y-6">
-        <h2 className="text-3xl font-bold text-center text-gray-900">Why Choose Stasher?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Shield className="h-8 w-8 text-green-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Secure & Private</h3>
-              <p className="text-gray-600">Your data is encrypted and stored securely. We never share your personal inventory information.</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Zap className="h-8 w-8 text-yellow-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Lightning Fast</h3>
-              <p className="text-gray-600">Find any item in seconds with our optimized search engine and smart filtering system.</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Smartphone className="h-8 w-8 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Mobile First</h3>
-              <p className="text-gray-600">Designed for mobile use. Add items on the go and access your inventory anywhere, anytime.</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        {/* Key Features */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl">Key Features</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3">
+                  <Search className="h-6 w-6 text-indigo-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">Smart Search</h3>
+                    <p className="text-sm text-muted-foreground">Find anything instantly with powerful search and filtering.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Share className="h-6 w-6 text-indigo-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">Sharable Collections</h3>
+                    <p className="text-sm text-muted-foreground">Create and share collections with customizable privacy settings.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <MessageSquare className="h-6 w-6 text-indigo-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">AI Assistant</h3>
+                    <p className="text-sm text-muted-foreground">Ask questions in natural language to find your items.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-6 w-6 text-indigo-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">Location Tracking</h3>
+                    <p className="text-sm text-muted-foreground">Remember exactly where you stored each item.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <FileText className="h-6 w-6 text-indigo-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">Bulk Import</h3>
+                    <p className="text-sm text-muted-foreground">Import multiple items at once using spreadsheets.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <Smartphone className="h-6 w-6 text-indigo-600 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold">Photo Inventory</h3>
+                    <p className="text-sm text-muted-foreground">Visual organization with photos and custom icons.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* CTA Section */}
-      <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <CardContent className="p-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Organized?</h2>
-          <p className="text-xl mb-6 opacity-90">
-            Join thousands of users who have transformed how they manage their belongings.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {user ? (
-              <>
-                <Button 
-                  onClick={() => navigate("/my-stash")}
-                  size="lg"
-                  variant="secondary"
-                  className="bg-white text-indigo-600 hover:bg-gray-100"
-                >
-                  View My Stash
-                </Button>
-                <Button 
-                  onClick={() => navigate("/add-item")}
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-indigo-600"
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Add Item
-                </Button>
-              </>
-            ) : (
-              <Button 
-                onClick={handleLogin}
-                size="lg"
-                variant="secondary"
-                className="bg-white text-indigo-600 hover:bg-gray-100"
-                disabled={isLoggingIn}
-              >
-                {isLoggingIn ? "Creating account..." : "Get Started Free"}
-                {!isLoggingIn && <User className="ml-2 h-4 w-4" />}
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        {/* Collection Sharing Features */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl">Collection Sharing</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                Create themed collections and share them with others for various purposes:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <Users className="h-5 w-5 text-green-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Showcase Collections</h4>
+                      <p className="text-sm text-muted-foreground">Share your prized possessions with friends and family.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Insurance Documentation</h4>
+                      <p className="text-sm text-muted-foreground">Securely share inventories with insurance providers.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-start space-x-3">
+                    <Clock className="h-5 w-5 text-purple-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Trading & Selling</h4>
+                      <p className="text-sm text-muted-foreground">Create collections of items you want to trade or sell.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <FileText className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium">Lending Libraries</h4>
+                      <p className="text-sm text-muted-foreground">Share what you're willing to lend to others.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Get Started */}
+        <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-none">
+          <CardContent className="p-6 sm:p-8 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Ready to Get Started?</h2>
+            <p className="text-muted-foreground mb-4 sm:mb-6">
+              Start organizing your belongings today and never lose track of your items again.
+            </p>
+            <Button 
+              onClick={() => navigate("/")}
+              size="lg"
+              className="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto"
+            >
+              Get Started Now
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

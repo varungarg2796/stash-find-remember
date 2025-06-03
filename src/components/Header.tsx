@@ -31,7 +31,8 @@ import {
   FileText,
   Archive,
   Menu,
-  Info
+  Info,
+  Share
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -71,13 +72,6 @@ const Header = () => {
     { path: "/about", label: "About", icon: <Info className="h-4 w-4 mr-2" /> },
   ];
 
-  const userOnlyItems = user ? [
-    { path: "/ask", label: "Ask Stasher", icon: <MessageSquare className="h-4 w-4 mr-2" /> },
-    { path: "/bulk-import", label: "Bulk Import", icon: <FileText className="h-4 w-4 mr-2" /> },
-  ] : [];
-
-  const allNavigationItems = [...navigationItems, ...userOnlyItems];
-
   return (
     <header className="py-4 px-4 flex items-center border-b relative">
       {/* Mobile Menu Trigger - Left Side */}
@@ -96,7 +90,7 @@ const Header = () => {
       <div className="hidden md:block">
         <NavigationMenu>
           <NavigationMenuList className="gap-1">
-            {allNavigationItems.map((item) => (
+            {navigationItems.map((item) => (
               <NavigationMenuItem key={item.path + item.label}>
                 <Link to={item.path}>
                   <NavigationMenuLink 
@@ -163,6 +157,24 @@ const Header = () => {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
+                <Link to="/collections" className="cursor-pointer flex w-full items-center">
+                  <Share className="mr-2 h-4 w-4" />
+                  <span>My Collections</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/ask" className="cursor-pointer flex w-full items-center">
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  <span>Ask Stasher</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/bulk-import" className="cursor-pointer flex w-full items-center">
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>Bulk Import</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to="/archive" className="cursor-pointer flex w-full items-center">
                   <Archive className="mr-2 h-4 w-4" />
                   <span>Archive</span>
@@ -193,7 +205,7 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="absolute top-16 left-0 right-0 bg-white z-50 border-b shadow-md md:hidden">
           <nav className="p-4 flex flex-col gap-2">
-            {allNavigationItems.map((item) => (
+            {navigationItems.map((item) => (
               <Link 
                 key={item.path + item.label} 
                 to={item.path} 
