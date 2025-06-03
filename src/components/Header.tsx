@@ -31,7 +31,8 @@ import {
   FileText,
   Archive,
   Menu,
-  HelpCircle
+  HelpCircle,
+  Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -67,9 +68,16 @@ const Header = () => {
 
   const navigationItems = [
     { path: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
+    { path: "/", label: "My Stash", icon: <Box className="h-4 w-4 mr-2" /> },
+    { path: "/about", label: "About", icon: <Info className="h-4 w-4 mr-2" /> },
+  ];
+
+  const userOnlyItems = user ? [
     { path: "/ask", label: "Ask Stasher", icon: <MessageSquare className="h-4 w-4 mr-2" /> },
     { path: "/bulk-import", label: "Bulk Import", icon: <FileText className="h-4 w-4 mr-2" /> },
-  ];
+  ] : [];
+
+  const allNavigationItems = [...navigationItems, ...userOnlyItems];
 
   return (
     <header className="py-4 px-4 flex items-center border-b relative">
@@ -89,8 +97,8 @@ const Header = () => {
       <div className="hidden md:block">
         <NavigationMenu>
           <NavigationMenuList className="gap-1">
-            {navigationItems.map((item) => (
-              <NavigationMenuItem key={item.path}>
+            {allNavigationItems.map((item) => (
+              <NavigationMenuItem key={item.path + item.label}>
                 <Link to={item.path}>
                   <NavigationMenuLink 
                     className={cn(
@@ -134,7 +142,7 @@ const Header = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="px-2 py-1 text-xs"
+                className="px-2 py-1 text-xs h-7"
               >
                 <HelpCircle className="h-3 w-3 mr-1" />
                 How Stasher Works
@@ -243,9 +251,9 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="absolute top-16 left-0 right-0 bg-white z-50 border-b shadow-md md:hidden">
           <nav className="p-4 flex flex-col gap-2">
-            {navigationItems.map((item) => (
+            {allNavigationItems.map((item) => (
               <Link 
-                key={item.path} 
+                key={item.path + item.label} 
                 to={item.path} 
                 className={cn(
                   "flex items-center p-2 rounded-md hover:bg-accent",
