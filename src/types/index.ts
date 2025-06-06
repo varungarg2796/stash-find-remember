@@ -27,6 +27,7 @@ export interface Collection {
   id: string;
   name: string;
   description?: string;
+  coverImage?: string;
   items: CollectionItem[];
   shareSettings: ShareSettings;
   createdAt: Date;

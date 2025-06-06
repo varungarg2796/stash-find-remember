@@ -13,6 +13,7 @@ type CollectionsContextType = {
   removeItemFromCollection: (collectionId: string, itemId: string) => void;
   updateShareSettings: (collectionId: string, settings: ShareSettings) => void;
   getSharedCollection: (shareId: string) => Collection | undefined;
+  reorderCollectionItems: (collectionId: string, items: CollectionItem[]) => void;
 };
 
 const CollectionsContext = createContext<CollectionsContextType | undefined>(undefined);
@@ -116,6 +117,21 @@ export const CollectionsProvider = ({ children }: { children: React.ReactNode })
     toast.success("Item removed from collection");
   };
 
+  const reorderCollectionItems = (collectionId: string, items: CollectionItem[]) => {
+    setCollections((prev) =>
+      prev.map((collection) => {
+        if (collection.id === collectionId) {
+          return {
+            ...collection,
+            items: items.map((item, index) => ({ ...item, order: index })),
+            updatedAt: new Date()
+          };
+        }
+        return collection;
+      })
+    );
+  };
+
   const updateShareSettings = (collectionId: string, settings: ShareSettings) => {
     setCollections((prev) =>
       prev.map((collection) => {
@@ -149,7 +165,8 @@ export const CollectionsProvider = ({ children }: { children: React.ReactNode })
         addItemToCollection,
         removeItemFromCollection,
         updateShareSettings,
-        getSharedCollection
+        getSharedCollection,
+        reorderCollectionItems
       }}
     >
       {children}
