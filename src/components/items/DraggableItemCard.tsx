@@ -42,7 +42,7 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
             <img 
               src={item.imageUrl} 
               alt={item.name}
-              className="w-12 h-12 object-cover rounded flex-shrink-0"
+              className="w-10 h-10 object-cover rounded flex-shrink-0"
             />
             <div className="flex-1 min-w-0">
               <h3 className="font-medium truncate">{item.name}</h3>
@@ -70,7 +70,7 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
         <img 
           src={item.imageUrl} 
           alt={item.name}
-          className="w-full aspect-square object-cover"
+          className="w-full h-32 object-cover"
         />
         <div
           {...attributes}
