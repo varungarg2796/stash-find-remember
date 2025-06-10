@@ -67,11 +67,13 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
   return (
     <Card ref={setNodeRef} style={style} className="touch-manipulation">
       <div className="relative">
-        <img 
-          src={item.imageUrl} 
-          alt={item.name}
-          className="w-full h-56 object-cover rounded-t-lg"
-        />
+        <div className="aspect-square">
+          <img 
+            src={item.imageUrl} 
+            alt={item.name}
+            className="w-full h-full object-cover rounded-t-lg"
+          />
+        </div>
         <div
           {...attributes}
           {...listeners}

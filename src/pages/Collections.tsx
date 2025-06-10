@@ -8,15 +8,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Share, Edit, Trash2, Users, Globe, Heart, Sparkles, FolderOpen } from "lucide-react";
+import { ArrowLeft, Plus, Share, Edit, Trash2, Users, Globe, Heart, Sparkles, FolderOpen, Archive } from "lucide-react";
 
 const Collections = () => {
   const { user, login } = useAuth();
-  const { collections, addCollection, deleteCollection } = useCollections();
+  const { collections, addCollection, deleteCollection, updateCollection } = useCollections();
   const navigate = useNavigate();
   const [newCollectionName, setNewCollectionName] = useState("");
   const [newCollectionDescription, setNewCollectionDescription] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [editingCollection, setEditingCollection] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
   const handleQuickLogin = () => {
     login({
@@ -46,7 +49,7 @@ const Collections = () => {
         <Card className="mb-8 bg-gradient-to-r from-violet-50 to-purple-50 border-none">
           <CardContent className="p-8">
             <div className="text-center">
-              <FolderOpen className="mx-auto h-16 w-16 text-purple-600 mb-4" />
+              <Archive className="mx-auto h-16 w-16 text-purple-600 mb-4" />
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Curate & Share Your Collections</h2>
               <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
                 Create beautiful collections of your favorite items and share them with friends, family, or the entire community. 
@@ -174,6 +177,34 @@ const Collections = () => {
     }
   };
 
+  const handleEditCollection = (collection: any) => {
+    setEditingCollection(collection.id);
+    setEditName(collection.name);
+    setEditDescription(collection.description || "");
+  };
+
+  const handleSaveEdit = () => {
+    if (editingCollection && editName.trim()) {
+      const collection = collections.find(c => c.id === editingCollection);
+      if (collection) {
+        updateCollection({
+          ...collection,
+          name: editName.trim(),
+          description: editDescription.trim() || undefined
+        });
+      }
+      setEditingCollection(null);
+      setEditName("");
+      setEditDescription("");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCollection(null);
+    setEditName("");
+    setEditDescription("");
+  };
+
   return (
     <div className="max-w-screen-xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-8">
@@ -187,7 +218,7 @@ const Collections = () => {
             <ArrowLeft size={18} />
           </Button>
           <div className="flex items-center gap-3">
-            <FolderOpen className="h-8 w-8 text-purple-600" />
+            <Archive className="h-8 w-8 text-purple-600" />
             <h1 className="text-3xl font-bold">My Collections</h1>
           </div>
         </div>
@@ -238,7 +269,7 @@ const Collections = () => {
       {collections.length === 0 ? (
         <Card className="text-center py-16">
           <CardContent>
-            <FolderOpen className="mx-auto h-16 w-16 text-muted-foreground mb-6" />
+            <Archive className="mx-auto h-16 w-16 text-muted-foreground mb-6" />
             <h3 className="text-2xl font-semibold mb-3">No Collections Yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Create your first collection to group and share your items with others. Collections help you organize items by themes, occasions, or any way you like.
@@ -292,54 +323,85 @@ const Collections = () => {
             <Card key={collection.id} className="hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between text-lg">
-                  <span className="truncate">{collection.name}</span>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => navigate(`/collections/${collection.id}`)}
-                      className="h-8 w-8"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteCollection(collection.id)}
-                      className="h-8 w-8"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {editingCollection === collection.id ? (
+                    <div className="w-full space-y-2">
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="text-sm"
+                        maxLength={50}
+                      />
+                      <Textarea
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        placeholder="Description (optional)"
+                        className="text-sm"
+                        maxLength={200}
+                        rows={2}
+                      />
+                      <div className="flex gap-1">
+                        <Button onClick={handleSaveEdit} size="sm" className="flex-1">
+                          Save
+                        </Button>
+                        <Button onClick={handleCancelEdit} variant="outline" size="sm" className="flex-1">
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="truncate">{collection.name}</span>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditCollection(collection)}
+                          className="h-8 w-8"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteCollection(collection.id)}
+                          className="h-8 w-8"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                {collection.description && (
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {collection.description}
-                  </p>
-                )}
-                <div className="flex items-center justify-between text-sm mb-4">
-                  <span className="text-muted-foreground font-medium">
-                    {collection.items.length} item{collection.items.length !== 1 ? 's' : ''}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    {collection.shareSettings.isEnabled && (
-                      <Share className="h-3 w-3 text-green-600" />
-                    )}
-                    <span className={collection.shareSettings.isEnabled ? "text-green-600 font-medium" : "text-muted-foreground"}>
-                      {collection.shareSettings.isEnabled ? "Shared" : "Private"}
+              {editingCollection !== collection.id && (
+                <CardContent className="pt-0">
+                  {collection.description && (
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {collection.description}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-sm mb-4">
+                    <span className="text-muted-foreground font-medium">
+                      {collection.items.length} item{collection.items.length !== 1 ? 's' : ''}
                     </span>
+                    <div className="flex items-center gap-1">
+                      {collection.shareSettings.isEnabled && (
+                        <Share className="h-3 w-3 text-green-600" />
+                      )}
+                      <span className={collection.shareSettings.isEnabled ? "text-green-600 font-medium" : "text-muted-foreground"}>
+                        {collection.shareSettings.isEnabled ? "Shared" : "Private"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <Button 
-                  className="w-full" 
-                  variant="outline"
-                  onClick={() => navigate(`/collections/${collection.id}`)}
-                >
-                  View Collection
-                </Button>
-              </CardContent>
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => navigate(`/collections/${collection.id}`)}
+                  >
+                    View Collection
+                  </Button>
+                </CardContent>
+              )}
             </Card>
           ))}
         </div>
