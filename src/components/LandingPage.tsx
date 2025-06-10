@@ -1,15 +1,19 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useItems } from "@/context/ItemsContext";
+import { useCollections } from "@/context/CollectionsContext";
 import { 
   PlusCircle, 
   Search, 
   ArrowRight,
   Box,
-  Sparkles
+  Sparkles,
+  FolderOpen,
+  Settings,
+  ChevronRight
 } from "lucide-react";
 import { useState } from "react";
 
@@ -17,6 +21,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const { items } = useItems();
+  const { collections } = useCollections();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const handleLogin = () => {
@@ -112,18 +117,92 @@ const LandingPage = () => {
             </Card>
           </div>
 
-          {/* Welcome message for logged in users */}
+          {/* User-specific content when logged in */}
           {user && (
-            <div className="mt-16 p-6 bg-white/60 rounded-2xl border border-gray-200 max-w-lg mx-auto">
-              <h2 className="text-lg font-medium text-gray-900 mb-2">
-                Welcome back, {user.name.split(' ')[0]}
-              </h2>
-              <p className="text-gray-600 text-sm">
-                {items.length > 0 
-                  ? `You have ${items.length} item${items.length === 1 ? '' : 's'} in your stash.`
-                  : "Ready to add your first item?"
-                }
-              </p>
+            <div className="mt-16 space-y-6">
+              {/* Welcome message */}
+              <div className="p-6 bg-white/60 rounded-2xl border border-gray-200 max-w-lg mx-auto">
+                <h2 className="text-lg font-medium text-gray-900 mb-2">
+                  Welcome back, {user.name.split(' ')[0]}
+                </h2>
+                <p className="text-gray-600 text-sm mb-4">
+                  {items.length > 0 
+                    ? `You have ${items.length} item${items.length === 1 ? '' : 's'} in your stash.`
+                    : "Ready to add your first item?"
+                  }
+                </p>
+              </div>
+
+              {/* Quick Navigation Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                <Card 
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 border border-blue-200 bg-blue-50/50"
+                  onClick={() => navigate("/my-stash")}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center justify-between text-lg text-blue-900">
+                      <div className="flex items-center gap-2">
+                        <Box className="h-5 w-5" />
+                        <span>My Stash</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-blue-700 mb-2">
+                      {items.length} items organized
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      View and manage your inventory
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card 
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 border border-purple-200 bg-purple-50/50"
+                  onClick={() => navigate("/collections")}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center justify-between text-lg text-purple-900">
+                      <div className="flex items-center gap-2">
+                        <FolderOpen className="h-5 w-5" />
+                        <span>Collections</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-purple-700 mb-2">
+                      {collections.length} collections created
+                    </p>
+                    <p className="text-xs text-purple-600">
+                      Curate and share themed groups
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Profile Configuration Recommendation */}
+              {items.length === 0 && (
+                <Card className="max-w-lg mx-auto border border-amber-200 bg-amber-50/50">
+                  <CardContent className="p-6 text-center">
+                    <Settings className="mx-auto h-8 w-8 text-amber-600 mb-3" />
+                    <h3 className="font-medium text-amber-900 mb-2">Configure Your Stash</h3>
+                    <p className="text-sm text-amber-700 mb-4">
+                      Set up your profile and preferences to get the most out of Stasher.
+                    </p>
+                    <Button 
+                      onClick={() => navigate("/profile")}
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                    >
+                      <Settings className="mr-2 h-3 w-3" />
+                      Go to Profile
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 

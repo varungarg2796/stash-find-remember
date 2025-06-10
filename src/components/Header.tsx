@@ -32,7 +32,8 @@ import {
   Archive,
   Menu,
   Info,
-  Share
+  Share,
+  FolderOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +61,7 @@ const Header = () => {
   const navigationItems = [
     { path: "/", label: "Home", icon: <Home className="h-4 w-4 mr-2" /> },
     { path: "/my-stash", label: "My Stash", icon: <Box className="h-4 w-4 mr-2" /> },
-    { path: "/collections", label: "Collections", icon: <Archive className="h-4 w-4 mr-2" /> },
+    { path: "/collections", label: "Collections", icon: <FolderOpen className="h-4 w-4 mr-2" /> },
     { path: "/about", label: "About", icon: <Info className="h-4 w-4 mr-2" /> },
   ];
 
