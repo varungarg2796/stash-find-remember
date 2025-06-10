@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from "react";
 import { Item, ItemHistory } from "@/types";
 import { toast } from "sonner";
@@ -52,6 +53,7 @@ const initialItems: Item[] = [
     quantity: 1,
     location: "Drawer",
     createdAt: new Date("2024-03-10"),
+    expiryDate: new Date("2025-03-10"), // Example expiry date
     history: [
       { id: "h4", action: "created", date: new Date("2024-03-10") }
     ]

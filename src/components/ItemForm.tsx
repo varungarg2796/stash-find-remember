@@ -39,6 +39,7 @@ const defaultInitialItemData: Omit<Item, "id"> = {
   price: undefined,
   priceless: false,
   acquisitionDate: undefined,
+  expiryDate: undefined,
   createdAt: new Date()
 };
 
@@ -164,6 +165,10 @@ const ItemForm = ({
 
   const handleDateChange = (date: Date | undefined) => {
     setFormData(prev => ({ ...prev, acquisitionDate: date }));
+  };
+
+  const handleExpiryDateChange = (date: Date | undefined) => {
+    setFormData(prev => ({ ...prev, expiryDate: date }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -311,6 +316,37 @@ const ItemForm = ({
               selected={formData.acquisitionDate}
               onSelect={handleDateChange}
               disabled={(date) => date > new Date()}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Expiry Date (Optional)
+        </label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !formData.expiryDate && "text-muted-foreground"
+              )}
+              type="button"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {formData.expiryDate ? format(formData.expiryDate, "PPP") : <span>When does this item expire?</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={formData.expiryDate}
+              onSelect={handleExpiryDateChange}
+              disabled={(date) => date < new Date()}
               initialFocus
               className={cn("p-3 pointer-events-auto")}
             />

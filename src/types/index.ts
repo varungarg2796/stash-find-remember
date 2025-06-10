@@ -1,4 +1,3 @@
-
 export interface Item {
   id: string;
   name: string;
@@ -14,6 +13,7 @@ export interface Item {
   archived?: boolean;
   history?: ItemHistory[];
   acquisitionDate?: Date;
+  expiryDate?: Date;
 }
 
 export interface ItemHistory {

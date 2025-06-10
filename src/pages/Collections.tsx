@@ -49,7 +49,7 @@ const Collections = () => {
         <Card className="mb-8 bg-gradient-to-r from-violet-50 to-purple-50 border-none">
           <CardContent className="p-8">
             <div className="text-center">
-              <Archive className="mx-auto h-16 w-16 text-purple-600 mb-4" />
+              <FolderOpen className="mx-auto h-16 w-16 text-purple-600 mb-4" />
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Curate & Share Your Collections</h2>
               <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
                 Create beautiful collections of your favorite items and share them with friends, family, or the entire community. 
@@ -97,7 +97,7 @@ const Collections = () => {
         {/* Example collections to show what's possible */}
         <div className="mb-6">
           <h3 className="text-2xl font-semibold mb-6 text-gray-700">Example Collections</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 title: "Vintage Camera Collection",
@@ -123,7 +123,7 @@ const Collections = () => {
             ].map((collection, index) => (
               <Card key={index} className={`${collection.theme} border-dashed border-2 border-gray-300 opacity-75 hover:opacity-90 transition-opacity`}>
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-lg">
+                  <CardTitle className="flex items-center justify-between text-base sm:text-lg">
                     <span className="truncate">{collection.title}</span>
                     <div className="flex gap-1">
                       <div className="w-6 h-6 bg-gray-200 rounded"></div>
@@ -207,7 +207,7 @@ const Collections = () => {
 
   return (
     <div className="max-w-screen-xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div className="flex items-center">
           <Button 
             variant="ghost" 
@@ -218,19 +218,19 @@ const Collections = () => {
             <ArrowLeft size={18} />
           </Button>
           <div className="flex items-center gap-3">
-            <Archive className="h-8 w-8 text-purple-600" />
-            <h1 className="text-3xl font-bold">My Collections</h1>
+            <FolderOpen className="h-8 w-8 text-purple-600" />
+            <h1 className="text-2xl sm:text-3xl font-bold">My Collections</h1>
           </div>
         </div>
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               New Collection
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="mx-4">
             <DialogHeader>
               <DialogTitle>Create New Collection</DialogTitle>
             </DialogHeader>
@@ -269,7 +269,7 @@ const Collections = () => {
       {collections.length === 0 ? (
         <Card className="text-center py-16">
           <CardContent>
-            <Archive className="mx-auto h-16 w-16 text-muted-foreground mb-6" />
+            <FolderOpen className="mx-auto h-16 w-16 text-muted-foreground mb-6" />
             <h3 className="text-2xl font-semibold mb-3">No Collections Yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               Create your first collection to group and share your items with others. Collections help you organize items by themes, occasions, or any way you like.
@@ -281,7 +281,7 @@ const Collections = () => {
                   Create Your First Collection
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="mx-4">
                 <DialogHeader>
                   <DialogTitle>Create New Collection</DialogTitle>
                 </DialogHeader>
@@ -318,11 +318,11 @@ const Collections = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {collections.map((collection) => (
             <Card key={collection.id} className="hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between text-lg">
+                <CardTitle className="flex items-center justify-between text-base sm:text-lg">
                   {editingCollection === collection.id ? (
                     <div className="w-full space-y-2">
                       <Input
@@ -350,8 +350,8 @@ const Collections = () => {
                     </div>
                   ) : (
                     <>
-                      <span className="truncate">{collection.name}</span>
-                      <div className="flex gap-1">
+                      <span className="truncate pr-2">{collection.name}</span>
+                      <div className="flex gap-1 flex-shrink-0">
                         <Button
                           variant="ghost"
                           size="icon"
