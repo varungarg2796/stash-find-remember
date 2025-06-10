@@ -29,45 +29,43 @@ const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthProvider>
-            <ItemsProvider>
-              <CollectionsProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                  <div className="flex flex-col min-h-screen">
-                    <Header />
-                    <main className="flex-1">
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/my-stash" element={<MyStash />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/items/:id" element={<ItemDetail />} />
-                        <Route path="/add-item" element={<AddItem />} />
-                        <Route path="/edit-item/:id" element={<EditItem />} />
-                        <Route path="/stats" element={<Stats />} />
-                        <Route path="/ask" element={<AskStasher />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/archive" element={<Archive />} />
-                        <Route path="/bulk-import" element={<BulkImport />} />
-                        <Route path="/collections" element={<Collections />} />
-                        <Route path="/collections/:id" element={<CollectionDetail />} />
-                        <Route path="/share/collection/:shareId" element={<SharedCollection />} />
-                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </main>
-                  </div>
-                </BrowserRouter>
-              </CollectionsProvider>
-            </ItemsProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <ItemsProvider>
+            <CollectionsProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <div className="flex flex-col min-h-screen">
+                  <Header />
+                  <main className="flex-1">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/my-stash" element={<MyStash />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/items/:id" element={<ItemDetail />} />
+                      <Route path="/add-item" element={<AddItem />} />
+                      <Route path="/edit-item/:id" element={<EditItem />} />
+                      <Route path="/stats" element={<Stats />} />
+                      <Route path="/ask" element={<AskStasher />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/archive" element={<Archive />} />
+                      <Route path="/bulk-import" element={<BulkImport />} />
+                      <Route path="/collections" element={<Collections />} />
+                      <Route path="/collections/:id" element={<CollectionDetail />} />
+                      <Route path="/share/collection/:shareId" element={<SharedCollection />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                </div>
+              </BrowserRouter>
+            </CollectionsProvider>
+          </ItemsProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
