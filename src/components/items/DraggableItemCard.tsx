@@ -30,8 +30,8 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
   if (viewMode === 'list') {
     return (
       <Card ref={setNodeRef} style={style} className="touch-manipulation">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-3">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
             <div
               {...attributes}
               {...listeners}
@@ -42,12 +42,12 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
             <img 
               src={item.imageUrl} 
               alt={item.name}
-              className="w-12 h-12 object-cover rounded flex-shrink-0"
+              className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium truncate">{item.name}</h3>
+              <h3 className="font-medium text-lg truncate">{item.name}</h3>
               {item.collectionNote && (
-                <p className="text-sm text-muted-foreground truncate">{item.collectionNote}</p>
+                <p className="text-sm text-muted-foreground truncate mt-1">{item.collectionNote}</p>
               )}
             </div>
             <Button
@@ -70,7 +70,7 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
         <img 
           src={item.imageUrl} 
           alt={item.name}
-          className="w-full h-48 object-cover"
+          className="w-full h-56 object-cover rounded-t-lg"
         />
         <div
           {...attributes}
@@ -88,10 +88,10 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <CardContent className="p-3">
-        <h3 className="font-medium truncate">{item.name}</h3>
+      <CardContent className="p-4">
+        <h3 className="font-medium text-lg truncate">{item.name}</h3>
         {item.collectionNote && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{item.collectionNote}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-2">{item.collectionNote}</p>
         )}
       </CardContent>
     </Card>

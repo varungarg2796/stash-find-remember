@@ -170,10 +170,12 @@ const MyStash = () => {
             clearSubFilter={clearSubFilter}
           />
           
-          {/* Items display section */}
+          {/* Items display section with pagination */}
           <ItemsDisplay 
             items={filteredItems}
             viewMode={viewMode}
+            enablePagination={true}
+            itemsPerPage={12}
           />
         </div>
         

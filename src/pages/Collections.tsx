@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ArrowLeft, Plus, Share, Edit, Trash2, Users, Globe, Heart, Sparkles } from "lucide-react";
+import { ArrowLeft, Plus, Share, Edit, Trash2, Users, Globe, Heart, Sparkles, FolderOpen } from "lucide-react";
 
 const Collections = () => {
   const { user, login } = useAuth();
@@ -29,7 +30,7 @@ const Collections = () => {
   // Show placeholder content for non-logged-in users
   if (!user) {
     return (
-      <div className="max-w-screen-lg mx-auto px-4 py-6">
+      <div className="max-w-screen-xl mx-auto px-4 py-6">
         <div className="flex items-center mb-6">
           <Button 
             variant="ghost" 
@@ -42,35 +43,35 @@ const Collections = () => {
           <h1 className="text-3xl font-bold">Collections</h1>
         </div>
 
-        <Card className="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 border-none">
+        <Card className="mb-8 bg-gradient-to-r from-violet-50 to-purple-50 border-none">
           <CardContent className="p-8">
             <div className="text-center">
-              <Share className="mx-auto h-16 w-16 text-purple-600 mb-4" />
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Share Your Passions with the World</h2>
+              <FolderOpen className="mx-auto h-16 w-16 text-purple-600 mb-4" />
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Curate & Share Your Collections</h2>
               <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
                 Create beautiful collections of your favorite items and share them with friends, family, or the entire community. 
                 Discover amazing collections from other passionate collectors!
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <Heart className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Curated Lists</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-xl shadow-sm">
+                  <Heart className="h-10 w-10 text-red-500 mx-auto mb-3" />
+                  <h3 className="font-semibold mb-2 text-lg">Curated Lists</h3>
                   <p className="text-sm text-gray-600">Organize items by theme or passion</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <Users className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Share & Discover</h3>
+                <div className="bg-white p-6 rounded-xl shadow-sm">
+                  <Users className="h-10 w-10 text-blue-500 mx-auto mb-3" />
+                  <h3 className="font-semibold mb-2 text-lg">Share & Discover</h3>
                   <p className="text-sm text-gray-600">Connect with like-minded collectors</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <Globe className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Public or Private</h3>
+                <div className="bg-white p-6 rounded-xl shadow-sm">
+                  <Globe className="h-10 w-10 text-green-500 mx-auto mb-3" />
+                  <h3 className="font-semibold mb-2 text-lg">Public or Private</h3>
                   <p className="text-sm text-gray-600">Choose your privacy settings</p>
                 </div>
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <Sparkles className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Beautiful Layouts</h3>
+                <div className="bg-white p-6 rounded-xl shadow-sm">
+                  <Sparkles className="h-10 w-10 text-yellow-500 mx-auto mb-3" />
+                  <h3 className="font-semibold mb-2 text-lg">Beautiful Layouts</h3>
                   <p className="text-sm text-gray-600">Showcase items in style</p>
                 </div>
               </div>
@@ -92,8 +93,8 @@ const Collections = () => {
 
         {/* Example collections to show what's possible */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-4 text-gray-700">Example Collections</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h3 className="text-2xl font-semibold mb-6 text-gray-700">Example Collections</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 title: "Vintage Camera Collection",
@@ -117,9 +118,9 @@ const Collections = () => {
                 theme: "bg-gradient-to-br from-green-50 to-emerald-100"
               }
             ].map((collection, index) => (
-              <Card key={index} className={`${collection.theme} border-dashed border-2 border-gray-300 opacity-75`}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between text-base">
+              <Card key={index} className={`${collection.theme} border-dashed border-2 border-gray-300 opacity-75 hover:opacity-90 transition-opacity`}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between text-lg">
                     <span className="truncate">{collection.title}</span>
                     <div className="flex gap-1">
                       <div className="w-6 h-6 bg-gray-200 rounded"></div>
@@ -127,24 +128,24 @@ const Collections = () => {
                     </div>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                <CardContent className="pt-0">
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                     {collection.description}
                   </p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">
+                  <div className="flex items-center justify-between text-sm mb-4">
+                    <span className="text-gray-500 font-medium">
                       {collection.items} items
                     </span>
                     <div className="flex items-center gap-1">
                       {collection.isPublic && (
                         <Share className="h-3 w-3 text-green-600" />
                       )}
-                      <span className={collection.isPublic ? "text-green-600" : "text-gray-500"}>
+                      <span className={collection.isPublic ? "text-green-600 font-medium" : "text-gray-500"}>
                         {collection.isPublic ? "Public" : "Private"}
                       </span>
                     </div>
                   </div>
-                  <div className="mt-3 h-8 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
                 </CardContent>
               </Card>
             ))}
@@ -174,8 +175,8 @@ const Collections = () => {
   };
 
   return (
-    <div className="max-w-screen-lg mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-screen-xl mx-auto px-4 py-6">
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center">
           <Button 
             variant="ghost" 
@@ -185,12 +186,15 @@ const Collections = () => {
           >
             <ArrowLeft size={18} />
           </Button>
-          <h1 className="text-3xl font-bold">My Collections</h1>
+          <div className="flex items-center gap-3">
+            <FolderOpen className="h-8 w-8 text-purple-600" />
+            <h1 className="text-3xl font-bold">My Collections</h1>
+          </div>
         </div>
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-purple-600 hover:bg-purple-700">
               <Plus className="mr-2 h-4 w-4" />
               New Collection
             </Button>
@@ -232,16 +236,16 @@ const Collections = () => {
       </div>
 
       {collections.length === 0 ? (
-        <Card className="text-center py-12">
+        <Card className="text-center py-16">
           <CardContent>
-            <Share className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Collections Yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Create your first collection to group and share your items with others.
+            <FolderOpen className="mx-auto h-16 w-16 text-muted-foreground mb-6" />
+            <h3 className="text-2xl font-semibold mb-3">No Collections Yet</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Create your first collection to group and share your items with others. Collections help you organize items by themes, occasions, or any way you like.
             </p>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button className="bg-purple-600 hover:bg-purple-700">
                   <Plus className="mr-2 h-4 w-4" />
                   Create Your First Collection
                 </Button>
@@ -283,17 +287,18 @@ const Collections = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {collections.map((collection) => (
-            <Card key={collection.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+            <Card key={collection.id} className="hover:shadow-lg transition-all duration-200 hover:scale-105">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-lg">
                   <span className="truncate">{collection.name}</span>
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => navigate(`/collections/${collection.id}`)}
+                      className="h-8 w-8"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -301,33 +306,34 @@ const Collections = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteCollection(collection.id)}
+                      className="h-8 w-8"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 {collection.description && (
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                     {collection.description}
                   </p>
                 )}
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
+                <div className="flex items-center justify-between text-sm mb-4">
+                  <span className="text-muted-foreground font-medium">
                     {collection.items.length} item{collection.items.length !== 1 ? 's' : ''}
                   </span>
                   <div className="flex items-center gap-1">
                     {collection.shareSettings.isEnabled && (
                       <Share className="h-3 w-3 text-green-600" />
                     )}
-                    <span className={collection.shareSettings.isEnabled ? "text-green-600" : "text-muted-foreground"}>
+                    <span className={collection.shareSettings.isEnabled ? "text-green-600 font-medium" : "text-muted-foreground"}>
                       {collection.shareSettings.isEnabled ? "Shared" : "Private"}
                     </span>
                   </div>
                 </div>
                 <Button 
-                  className="w-full mt-3" 
+                  className="w-full" 
                   variant="outline"
                   onClick={() => navigate(`/collections/${collection.id}`)}
                 >
