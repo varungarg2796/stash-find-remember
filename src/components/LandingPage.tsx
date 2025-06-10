@@ -134,7 +134,7 @@ const LandingPage = () => {
               </div>
 
               {/* Quick Navigation Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
                 <Card 
                   className="cursor-pointer hover:shadow-md transition-all duration-200 border border-blue-200 bg-blue-50/50"
                   onClick={() => navigate("/my-stash")}
@@ -166,7 +166,7 @@ const LandingPage = () => {
                     <CardTitle className="flex items-center justify-between text-lg text-purple-900">
                       <div className="flex items-center gap-2">
                         <FolderOpen className="h-5 w-5" />
-                        <span>Collections</span>
+                        <span>My Collections</span>
                       </div>
                       <ChevronRight className="h-4 w-4" />
                     </CardTitle>
@@ -177,6 +177,29 @@ const LandingPage = () => {
                     </p>
                     <p className="text-xs text-purple-600">
                       Curate and share themed groups
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card 
+                  className="cursor-pointer hover:shadow-md transition-all duration-200 border border-green-200 bg-green-50/50"
+                  onClick={() => navigate("/profile")}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center justify-between text-lg text-green-900">
+                      <div className="flex items-center gap-2">
+                        <Settings className="h-5 w-5" />
+                        <span>Settings</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-green-700 mb-2">
+                      Configure preferences
+                    </p>
+                    <p className="text-xs text-green-600">
+                      Customize your experience
                     </p>
                   </CardContent>
                 </Card>

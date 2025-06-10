@@ -1,3 +1,4 @@
+
 import { 
   Book, 
   Armchair, 
@@ -24,6 +25,7 @@ import {
   Bike,
   Music,
   Cpu,
+  Box,
   LucideIcon
 } from "lucide-react";
 
@@ -34,6 +36,7 @@ export interface IconOption {
 }
 
 export const availableIcons: IconOption[] = [
+  { name: "box", component: Box, label: "Box" },
   { name: "book", component: Book, label: "Book" },
   { name: "armchair", component: Armchair, label: "Furniture" },
   { name: "monitor", component: Monitor, label: "Monitor" },

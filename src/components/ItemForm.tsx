@@ -61,7 +61,7 @@ const ItemForm = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Effect to reset the form if initialDataProp changes (e.g., for editing a different item)
+  // Effect to reset the form if initialDataProp changes
   useEffect(() => {
     setFormData({ ...defaultInitialItemData, ...initialDataProp });
     setUseIcon(!!initialDataProp.iconType); // Also reset useIcon based on the new initial data
@@ -185,21 +185,30 @@ const ItemForm = ({
 
     let finalData = { ...formData };
 
-    if (useIcon && !finalData.iconType && finalData.tags && finalData.tags.length > 0) {
-      for (const tag of finalData.tags) {
-        const suggestedIcon = getIconForTag(tag);
-        if (suggestedIcon) {
-          finalData.iconType = suggestedIcon;
-          break;
+    // Smart fallback system for image/icon
+    if (useIcon) {
+      // If using icon mode but no icon selected, try to auto-suggest based on tags
+      if (!finalData.iconType && finalData.tags && finalData.tags.length > 0) {
+        for (const tag of finalData.tags) {
+          const suggestedIcon = getIconForTag(tag);
+          if (suggestedIcon) {
+            finalData.iconType = suggestedIcon;
+            break;
+          }
         }
       }
+      // If still no icon, use a default one
+      if (!finalData.iconType) {
+        finalData.iconType = "box"; // Default fallback icon
+      }
+      finalData.imageUrl = "";
+    } else {
+      // If using image mode but no image selected, get default image
+      if (!finalData.imageUrl) {
+        finalData.imageUrl = getDefaultImage(finalData);
+      }
+      finalData.iconType = null;
     }
-
-    finalData = {
-      ...finalData,
-      imageUrl: useIcon ? "" : (!finalData.imageUrl ? getDefaultImage(finalData) : finalData.imageUrl),
-      iconType: useIcon ? finalData.iconType : null
-    };
 
     onSubmit(finalData);
     setIsSubmitting(false);
@@ -264,7 +273,7 @@ const ItemForm = ({
               onClick={() => handleImageMethodToggle(false)}
               className="flex-1"
             >
-              Upload Image
+              📷 Upload Image
             </Button>
             <Button
               type="button"
@@ -272,9 +281,15 @@ const ItemForm = ({
               onClick={() => handleImageMethodToggle(true)}
               className="flex-1"
             >
-              Use Icon
+              🎨 Use Icon
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {useIcon 
+              ? "Choose an icon to represent your item"
+              : "Upload a photo or we'll provide a smart default"
+            }
+          </p>
         </div>
 
         {useIcon ? (
@@ -286,7 +301,7 @@ const ItemForm = ({
           <ImageUploader
             imageUrl={formData.imageUrl}
             onImageChange={handleImageChange}
-            getPlaceholderImage={getPlaceholderImage}
+            getPlaceholderImage={() => getDefaultImage(formData)}
             itemName={formData.name}
           />
         )}
@@ -414,3 +429,5 @@ const ItemForm = ({
 };
 
 export default ItemForm;
+
+</initial_code>

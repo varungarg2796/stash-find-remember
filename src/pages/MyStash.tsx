@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import AddItemButton from "@/components/AddItemButton";
 import FilterSection from "@/components/filter/FilterSection";
@@ -11,8 +10,10 @@ import { useItems } from "@/context/ItemsContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Package, Camera, MapPin, Tag, Star } from "lucide-react";
+import { useNavigationHelper } from "@/hooks/useNavigationHelper";
 
 const MyStash = () => {
+  const { navigateWithState } = useNavigationHelper();
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const { items } = useItems();
@@ -39,6 +40,10 @@ const MyStash = () => {
       email: "john@example.com",
       avatarUrl: "https://i.pravatar.cc/150?u=user-1"
     });
+  };
+
+  const handleAddItem = () => {
+    navigateWithState("/add-item", "/my-stash");
   };
 
   // Show placeholder content for non-logged-in users
@@ -138,7 +143,7 @@ const MyStash = () => {
                 </p>
                 <div className="mt-4">
                   <Button 
-                    onClick={() => navigate("/add-item")}
+                    onClick={handleAddItem}
                     variant="default" 
                     className="bg-indigo-600 hover:bg-indigo-700"
                   >
@@ -180,7 +185,7 @@ const MyStash = () => {
         </div>
         
         {/* Fixed action button */}
-        <AddItemButton onClick={() => navigate("/add-item")} />
+        <AddItemButton onClick={handleAddItem} />
       </div>
     </TooltipProvider>
   );

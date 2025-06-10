@@ -56,7 +56,7 @@ const StashStats = () => {
       color: "text-purple-600"
     },
     {
-      title: "Categories",
+      title: "Tags",
       value: uniqueTags,
       icon: Tag,
       color: "text-orange-600"
