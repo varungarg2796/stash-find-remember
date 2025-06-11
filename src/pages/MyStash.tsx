@@ -58,6 +58,11 @@ const MyStash = () => {
     navigateWithState("/add-item", "/my-stash");
   };
 
+  const handleClearFilters = () => {
+    handleSearch("");
+    handleFilterChange("all");
+  };
+
   // Show placeholder content for non-logged-in users
   if (!user) {
     return (
@@ -202,6 +207,10 @@ const MyStash = () => {
               viewMode={viewMode}
               enablePagination={true}
               itemsPerPage={itemsPerPage}
+              searchQuery={searchQuery}
+              activeFilter={activeFilter}
+              onClearFilters={handleClearFilters}
+              onAddItem={handleAddItem}
             />
           )}
         </div>
@@ -214,3 +223,5 @@ const MyStash = () => {
 };
 
 export default MyStash;
+
+}

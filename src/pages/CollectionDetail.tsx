@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Share, Copy, Eye, Settings, Grid, List } from "lucide-react";
+import { ArrowLeft, Plus, Share, Copy, Eye, Settings, Grid, List, Package } from "lucide-react";
 import { toast } from "sonner";
 import ViewToggle from "@/components/ViewToggle";
 import CoverImageUploader from "@/components/form/CoverImageUploader";
@@ -68,10 +68,28 @@ const CollectionDetail = () => {
 
   if (!collection && !isLoading) {
     return (
-      <div className="max-w-screen-lg mx-auto px-4 py-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Collection Not Found</h1>
-          <Button onClick={() => navigate("/collections")}>Back to Collections</Button>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-screen-md mx-auto px-4 py-6">
+          <div className="text-center py-12 animate-fade-in">
+            <div className="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <Package className="h-10 w-10 text-gray-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-3">Collection Not Found</h1>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              The collection you're looking for doesn't exist or may have been removed.
+            </p>
+            <div className="space-y-3">
+              <Button onClick={() => navigate("/collections")} size="lg">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Collections
+              </Button>
+              <div>
+                <Button onClick={() => navigate("/my-stash")} variant="outline">
+                  Go to My Stash
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
