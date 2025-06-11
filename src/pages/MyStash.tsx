@@ -1,9 +1,9 @@
-
 import { useNavigate } from "react-router-dom";
 import AddItemButton from "@/components/AddItemButton";
 import FilterSection from "@/components/filter/FilterSection";
 import ItemsDisplay from "@/components/items/ItemsDisplay";
 import StashStats from "@/components/StashStats";
+import ItemCardSkeleton from "@/components/ItemCardSkeleton";
 import { useItemFiltering } from "@/hooks/useItemFiltering";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
@@ -12,12 +12,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Package, Camera, MapPin, Tag, Star } from "lucide-react";
 import { useNavigationHelper } from "@/hooks/useNavigationHelper";
+import { useState, useEffect } from "react";
 
 const MyStash = () => {
   const { navigateWithState } = useNavigationHelper();
   const navigate = useNavigate();
   const { user, login } = useAuth();
   const { items } = useItems();
+  const [isLoading, setIsLoading] = useState(true);
   const {
     searchQuery,
     activeFilter,
@@ -33,6 +35,15 @@ const MyStash = () => {
   } = useItemFiltering();
 
   const hasItems = items.length > 0;
+  const itemsPerPage = 12;
+
+  // Simulate loading state for demonstration
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleQuickLogin = () => {
     login({
@@ -134,7 +145,7 @@ const MyStash = () => {
     <TooltipProvider>
       <div className="max-w-screen-md mx-auto px-4 py-6 animate-fade-in-up">
         {/* Welcome card for first-time users */}
-        {!hasItems && (
+        {!hasItems && !isLoading && (
           <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-none animate-scale-in">
             <CardContent className="p-6">
               <div className="text-left">
@@ -158,35 +169,45 @@ const MyStash = () => {
         )}
 
         {/* Quick Stats - Only show when there are items */}
-        {hasItems && <StashStats />}
+        {hasItems && !isLoading && <StashStats />}
         
         {/* Main content section with improved spacing and organization */}
         <div className="space-y-6">
           {/* Search and filters section */}
-          <FilterSection 
-            searchQuery={searchQuery}
-            activeFilter={activeFilter}
-            activeSubFilter={activeSubFilter}
-            viewMode={viewMode}
-            sortBy={sortBy}
-            onSearchChange={handleSearch}
-            onFilterChange={handleFilterChange}
-            onViewChange={handleViewChange}
-            onSortChange={handleSortChange}
-            clearSubFilter={clearSubFilter}
-          />
+          {!isLoading && (
+            <FilterSection 
+              searchQuery={searchQuery}
+              activeFilter={activeFilter}
+              activeSubFilter={activeSubFilter}
+              viewMode={viewMode}
+              sortBy={sortBy}
+              onSearchChange={handleSearch}
+              onFilterChange={handleFilterChange}
+              onViewChange={handleViewChange}
+              onSortChange={handleSortChange}
+              clearSubFilter={clearSubFilter}
+            />
+          )}
           
-          {/* Items display section with pagination */}
-          <ItemsDisplay 
-            items={filteredItems}
-            viewMode={viewMode}
-            enablePagination={true}
-            itemsPerPage={12}
-          />
+          {/* Loading skeletons or items display */}
+          {isLoading ? (
+            <div className={viewMode === "grid" ? "grid grid-cols-2 gap-4" : "space-y-4"}>
+              {Array.from({ length: itemsPerPage }).map((_, index) => (
+                <ItemCardSkeleton key={index} viewMode={viewMode} />
+              ))}
+            </div>
+          ) : (
+            <ItemsDisplay 
+              items={filteredItems}
+              viewMode={viewMode}
+              enablePagination={true}
+              itemsPerPage={itemsPerPage}
+            />
+          )}
         </div>
         
         {/* Fixed action button */}
-        <AddItemButton onClick={handleAddItem} />
+        {!isLoading && <AddItemButton onClick={handleAddItem} />}
       </div>
     </TooltipProvider>
   );

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -16,6 +15,7 @@ import { toast } from "sonner";
 import ViewToggle from "@/components/ViewToggle";
 import CoverImageUploader from "@/components/form/CoverImageUploader";
 import DraggableItemCard from "@/components/items/DraggableItemCard";
+import ItemCardSkeleton from "@/components/ItemCardSkeleton";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { ViewMode } from "@/types";
@@ -35,6 +35,7 @@ const CollectionDetail = () => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [shareSettings, setShareSettings] = useState(collection?.shareSettings);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [isLoading, setIsLoading] = useState(true);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -52,6 +53,12 @@ const CollectionDetail = () => {
     setCollection(updatedCollection);
     setShareSettings(updatedCollection?.shareSettings);
     setEditCoverImage(updatedCollection?.coverImage || "");
+    
+    // Simulate loading for collection items
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
   }, [id, getCollection]);
 
   if (!user) {
@@ -59,7 +66,7 @@ const CollectionDetail = () => {
     return null;
   }
 
-  if (!collection) {
+  if (!collection && !isLoading) {
     return (
       <div className="max-w-screen-lg mx-auto px-4 py-6">
         <div className="text-center">
@@ -70,15 +77,15 @@ const CollectionDetail = () => {
     );
   }
 
-  const collectionItems = collection.items
+  const collectionItems = collection?.items
     .sort((a, b) => a.order - b.order)
     .map(collectionItem => {
       const item = items.find(i => i.id === collectionItem.itemId);
       return item ? { ...item, collectionNote: collectionItem.collectionNote } : null;
-    }).filter(Boolean);
+    }).filter(Boolean) || [];
 
   const availableItems = items.filter(item => 
-    !collection.items.some(ci => ci.itemId === item.id)
+    !collection?.items.some(ci => ci.itemId === item.id)
   );
 
   const handleSaveName = () => {
@@ -107,7 +114,7 @@ const CollectionDetail = () => {
         order: index
       }));
       
-      reorderCollectionItems(collection.id, updatedCollectionItems);
+      reorderCollectionItems(collection!.id, updatedCollectionItems);
     }
   };
 
@@ -140,86 +147,88 @@ const CollectionDetail = () => {
               <ArrowLeft size={18} />
             </Button>
             
-            <div className="flex gap-2">
-              <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-sm mx-4">
-                  <DialogHeader>
-                    <DialogTitle>Share Collection</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="enable-sharing"
-                        checked={shareSettings?.isEnabled || false}
-                        onCheckedChange={(checked) => 
-                          setShareSettings(prev => prev ? {...prev, isEnabled: checked} : undefined)
-                        }
-                      />
-                      <Label htmlFor="enable-sharing">Enable Public Sharing</Label>
-                    </div>
-                    
-                    {shareSettings?.isEnabled && (
-                      <>
-                        <div className="space-y-2">
-                          <Label>Share Link</Label>
-                          <div className="flex gap-2">
-                            <Input 
-                              value={`${window.location.origin}/share/collection/${shareSettings.shareId}`}
-                              readOnly 
-                              className="text-xs"
-                            />
-                            <Button onClick={copyShareLink} size="icon" variant="outline">
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label>Visible Information</Label>
-                          <div className="space-y-2">
-                            {Object.entries(shareSettings.displaySettings).map(([key, value]) => (
-                              <div key={key} className="flex items-center space-x-2">
-                                <Switch
-                                  checked={value}
-                                  onCheckedChange={(checked) => 
-                                    setShareSettings(prev => prev ? {
-                                      ...prev,
-                                      displaySettings: {...prev.displaySettings, [key]: checked}
-                                    } : undefined)
-                                  }
-                                />
-                                <Label className="text-sm capitalize">
-                                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                                </Label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    
-                    <Button onClick={handleShareSettingsUpdate} className="w-full">
-                      Update Settings
+            {collection && (
+              <div className="flex gap-2">
+                <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="animate-scale-in">
+                      <Settings className="h-4 w-4" />
                     </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              
-              {collection.shareSettings.isEnabled && (
-                <Button onClick={copyShareLink} size="sm">
-                  <Share className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-sm mx-4 animate-scale-in">
+                    <DialogHeader>
+                      <DialogTitle>Share Collection</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="enable-sharing"
+                          checked={shareSettings?.isEnabled || false}
+                          onCheckedChange={(checked) => 
+                            setShareSettings(prev => prev ? {...prev, isEnabled: checked} : undefined)
+                          }
+                        />
+                        <Label htmlFor="enable-sharing">Enable Public Sharing</Label>
+                      </div>
+                      
+                      {shareSettings?.isEnabled && (
+                        <>
+                          <div className="space-y-2">
+                            <Label>Share Link</Label>
+                            <div className="flex gap-2">
+                              <Input 
+                                value={`${window.location.origin}/share/collection/${shareSettings.shareId}`}
+                                readOnly 
+                                className="text-xs"
+                              />
+                              <Button onClick={copyShareLink} size="icon" variant="outline">
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Visible Information</Label>
+                            <div className="space-y-2">
+                              {Object.entries(shareSettings.displaySettings).map(([key, value]) => (
+                                <div key={key} className="flex items-center space-x-2">
+                                  <Switch
+                                    checked={value}
+                                    onCheckedChange={(checked) => 
+                                      setShareSettings(prev => prev ? {
+                                        ...prev,
+                                        displaySettings: {...prev.displaySettings, [key]: checked}
+                                      } : undefined)
+                                    }
+                                  />
+                                  <Label className="text-sm capitalize">
+                                    {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                  </Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      
+                      <Button onClick={handleShareSettingsUpdate} className="w-full">
+                        Update Settings
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                
+                {collection.shareSettings.isEnabled && (
+                  <Button onClick={copyShareLink} size="sm">
+                    <Share className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Collection title and edit */}
-          {isEditingName ? (
+          {collection && (isEditingName ? (
             <div className="space-y-3">
               <Input
                 value={editName}
@@ -262,7 +271,7 @@ const CollectionDetail = () => {
                 <p className="text-sm text-muted-foreground mt-1">{collection.description}</p>
               )}
             </div>
-          )}
+          ))}
         </div>
       </div>
 
@@ -270,8 +279,10 @@ const CollectionDetail = () => {
         {/* Collection items section */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Items ({collectionItems.length})</h2>
-            {collectionItems.length > 0 && (
+            <h2 className="text-lg font-semibold">
+              Items {!isLoading && `(${collectionItems.length})`}
+            </h2>
+            {!isLoading && collectionItems.length > 0 && (
               <ViewToggle 
                 activeView={viewMode}
                 onViewChange={setViewMode}
@@ -279,7 +290,13 @@ const CollectionDetail = () => {
             )}
           </div>
           
-          {collectionItems.length === 0 ? (
+          {isLoading ? (
+            <div className={viewMode === "grid" ? "grid grid-cols-2 gap-3" : "space-y-3"}>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <ItemCardSkeleton key={index} viewMode={viewMode} />
+              ))}
+            </div>
+          ) : collectionItems.length === 0 ? (
             <Card className="text-center py-8">
               <CardContent>
                 <p className="text-muted-foreground mb-4">No items in this collection yet.</p>
@@ -308,7 +325,7 @@ const CollectionDetail = () => {
                       key={item.id}
                       item={item}
                       viewMode={viewMode}
-                      onRemove={() => removeItemFromCollection(collection.id, item.id)}
+                      onRemove={() => removeItemFromCollection(collection!.id, item.id)}
                     />
                   ))}
                 </div>
@@ -318,7 +335,7 @@ const CollectionDetail = () => {
         </div>
 
         {/* Add items section */}
-        {availableItems.length > 0 && (
+        {!isLoading && collection && availableItems.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Add Items</h2>
             <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -352,7 +369,7 @@ const CollectionDetail = () => {
         )}
 
         {/* Preview shared view button */}
-        {collection.shareSettings.isEnabled && (
+        {!isLoading && collection?.shareSettings.isEnabled && (
           <div className="text-center">
             <Button 
               variant="outline" 

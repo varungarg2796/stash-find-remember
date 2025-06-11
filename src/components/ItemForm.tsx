@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Item } from "@/types";
 import { Input } from "@/components/ui/input";
@@ -172,7 +171,7 @@ const ItemForm = ({
     setFormData(prev => ({ ...prev, expiryDate: date }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -211,8 +210,11 @@ const ItemForm = ({
       finalData.iconType = null;
     }
 
-    onSubmit(finalData);
-    setIsSubmitting(false);
+    try {
+      await onSubmit(finalData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -418,10 +420,15 @@ const ItemForm = ({
           variant="outline"
           className="flex-1"
           onClick={onCancel}
+          disabled={isSubmitting}
         >
           Cancel
         </Button>
-        <Button type="submit" className="flex-1" disabled={isSubmitting}>
+        <Button 
+          type="submit" 
+          className="flex-1" 
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Submitting..." : submitLabel}
         </Button>
       </div>
