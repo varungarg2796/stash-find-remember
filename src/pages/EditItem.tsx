@@ -6,18 +6,20 @@ import { ArrowLeft, Edit } from "lucide-react";
 import ItemForm from "@/components/ItemForm";
 import { Item } from "@/types";
 import { toast } from "sonner";
+import { useNavigationHelper } from "@/hooks/useNavigationHelper";
 
 const EditItem = () => {
   const { id } = useParams<{ id: string }>();
   const { getItem, updateItem } = useItems();
   const navigate = useNavigate();
+  const { navigateAfterItemAction } = useNavigationHelper();
   
   const item = getItem(id || "");
   
   if (!item) {
     return (
       <div className="max-w-screen-md mx-auto px-4 py-6">
-        <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
+        <Button variant="ghost" onClick={() => navigate("/my-stash")} className="mb-4">
           <ArrowLeft className="mr-2" size={18} />
           Back
         </Button>
@@ -37,16 +39,16 @@ const EditItem = () => {
     
     updateItem(updatedItem);
     toast.success("Item updated successfully");
-    navigate("/"); // Navigate to home page
+    navigateAfterItemAction();
   };
   
   const handleCancel = () => {
-    navigate("/"); // Navigate to home page
+    navigateAfterItemAction();
   };
 
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">
-      <Button variant="ghost" onClick={() => navigate("/")} className="mb-4">
+      <Button variant="ghost" onClick={() => navigate("/my-stash")} className="mb-4">
         <ArrowLeft className="mr-2" size={18} />
         Back
       </Button>

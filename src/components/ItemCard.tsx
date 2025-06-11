@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useNavigationHelper } from "@/hooks/useNavigationHelper";
 
 interface ItemCardProps {
   item: Item;
@@ -45,6 +47,7 @@ interface ItemCardProps {
 
 const ItemCard = ({ item }: ItemCardProps) => {
   const navigate = useNavigate();
+  const { navigateWithState } = useNavigationHelper();
   const { useItem, giftItem, archiveItem, deleteItem } = useItems();
   const [showUseDialog, setShowUseDialog] = useState(false);
   const [showGiftDialog, setShowGiftDialog] = useState(false);
@@ -77,6 +80,10 @@ const ItemCard = ({ item }: ItemCardProps) => {
     deleteItem(item.id);
     setShowDeleteDialog(false);
     toast.success("Item deleted successfully");
+  };
+
+  const handleEdit = () => {
+    navigateWithState(`/edit-item/${item.id}`, "/my-stash");
   };
 
   // Check if item is expiring soon (within 7 days) or expired
@@ -144,7 +151,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate(`/items/${item.id}/edit`)}>
+                  <DropdownMenuItem onClick={handleEdit}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>

@@ -6,19 +6,21 @@ import { ArrowLeft, Plus } from "lucide-react";
 import ItemForm from "@/components/ItemForm";
 import { Item } from "@/types";
 import { toast } from "sonner";
+import { useNavigationHelper } from "@/hooks/useNavigationHelper";
 
 const AddItem = () => {
   const { addItem } = useItems();
   const navigate = useNavigate();
+  const { navigateAfterItemAction } = useNavigationHelper();
   
   const handleSubmit = (data: Omit<Item, "id">) => {
     addItem(data);
     toast.success("Item added successfully");
-    navigate("/");
+    navigateAfterItemAction();
   };
   
   const handleCancel = () => {
-    navigate("/");
+    navigateAfterItemAction();
   };
 
   return (
