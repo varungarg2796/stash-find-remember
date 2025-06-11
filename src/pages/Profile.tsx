@@ -60,7 +60,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-screen-md mx-auto px-4 py-6">
+    <div className="max-w-screen-md mx-auto px-4 py-6 animate-fade-in-up">
       <div className="flex items-center mb-6">
         <Button 
           variant="ghost" 
@@ -73,12 +73,12 @@ const Profile = () => {
         <h1 className="text-3xl font-bold">My Profile</h1>
       </div>
 
-      <div className="bg-card p-6 rounded-lg shadow-sm">
+      <div className="bg-card p-6 rounded-lg shadow-sm animate-scale-in">
         <div className="flex items-center gap-4 mb-6">
           <img 
             src={user.avatarUrl || "/placeholder.svg"} 
             alt={user.name}
-            className="w-20 h-20 rounded-full object-cover"
+            className="w-20 h-20 rounded-full object-cover transition-transform duration-200 hover:scale-105"
           />
           <div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>
@@ -96,10 +96,10 @@ const Profile = () => {
                   value={theme}
                   onValueChange={(value: "light" | "dark") => setTheme(value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="transition-all duration-200 hover:scale-[1.02]">
                     <SelectValue placeholder="Select theme" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="animate-scale-in">
                     <SelectItem value="light">Light</SelectItem>
                     <SelectItem value="dark">Dark</SelectItem>
                   </SelectContent>
@@ -111,10 +111,10 @@ const Profile = () => {
                   value={currency}
                   onValueChange={(value) => setCurrency(value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="transition-all duration-200 hover:scale-[1.02]">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="animate-scale-in">
                     <SelectItem value="USD">USD ($)</SelectItem>
                     <SelectItem value="EUR">EUR (€)</SelectItem>
                     <SelectItem value="GBP">GBP (£)</SelectItem>
@@ -138,12 +138,13 @@ const Profile = () => {
                 onChange={(e) => setNewLocation(e.target.value)}
                 onKeyPress={(e) => handleKeyPress(e, handleAddLocation)}
                 maxLength={30}
-                className="flex-grow"
+                className="flex-grow transition-all duration-200 focus:scale-[1.02]"
               />
               <Button 
                 onClick={handleAddLocation} 
                 variant="outline"
                 disabled={!newLocation.trim() || (user.preferences?.locations?.length || 0) >= 20}
+                className="transition-all duration-200 hover:scale-105"
               >
                 <Plus size={16} className="mr-1" />
                 Add
@@ -151,18 +152,19 @@ const Profile = () => {
             </div>
             
             <div className="flex flex-wrap gap-2 mt-2">
-              {user.preferences?.locations?.map((location) => (
+              {user.preferences?.locations?.map((location, index) => (
                 <Badge 
                   key={location} 
                   variant="outline"
-                  className="flex items-center gap-1 px-3 py-1.5"
+                  className="flex items-center gap-1 px-3 py-1.5 animate-slide-in-from-left transition-all duration-200 hover:scale-105"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <Tag size={12} className="mr-1" />
                   {location}
                   <Button
                     variant="ghost" 
                     size="icon"
-                    className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground"
+                    className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground transition-colors duration-200"
                     onClick={() => removeLocation(location)}
                   >
                     <X size={12} />
@@ -194,12 +196,13 @@ const Profile = () => {
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyPress={(e) => handleKeyPress(e, handleAddTag)}
                 maxLength={30}
-                className="flex-grow"
+                className="flex-grow transition-all duration-200 focus:scale-[1.02]"
               />
               <Button 
                 onClick={handleAddTag} 
                 variant="outline"
                 disabled={!newTag.trim() || (user.preferences?.tags?.length || 0) >= 20}
+                className="transition-all duration-200 hover:scale-105"
               >
                 <Plus size={16} className="mr-1" />
                 Add
@@ -207,18 +210,19 @@ const Profile = () => {
             </div>
             
             <div className="flex flex-wrap gap-2 mt-2">
-              {user.preferences?.tags?.map((tag) => (
+              {user.preferences?.tags?.map((tag, index) => (
                 <Badge 
                   key={tag} 
                   variant="outline"
-                  className="flex items-center gap-1 px-3 py-1.5"
+                  className="flex items-center gap-1 px-3 py-1.5 animate-slide-in-from-left transition-all duration-200 hover:scale-105"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <Tag size={12} className="mr-1" />
                   {tag}
                   <Button
                     variant="ghost" 
                     size="icon"
-                    className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground"
+                    className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground transition-colors duration-200"
                     onClick={() => removeTag(tag)}
                   >
                     <X size={12} />
@@ -237,7 +241,12 @@ const Profile = () => {
             </p>
           </div>
 
-          <Button onClick={handleSavePreferences}>Save Preferences</Button>
+          <Button 
+            onClick={handleSavePreferences}
+            className="transition-all duration-200 hover:scale-105"
+          >
+            Save Preferences
+          </Button>
         </div>
       </div>
     </div>

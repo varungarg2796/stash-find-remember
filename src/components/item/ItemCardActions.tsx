@@ -59,7 +59,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
     <>
       {/* Use Dialog */}
       <AlertDialog open={showUseDialog} onOpenChange={setShowUseDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="animate-scale-in">
           <AlertDialogHeader>
             <AlertDialogTitle>Mark as Used</AlertDialogTitle>
             <AlertDialogDescription>
@@ -75,6 +75,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
               placeholder="Add a note (optional)"
               value={actionNote}
               onChange={(e) => setActionNote(e.target.value)}
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
           </div>
           <AlertDialogFooter>
@@ -86,7 +87,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
 
       {/* Gift Dialog */}
       <AlertDialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="animate-scale-in">
           <AlertDialogHeader>
             <AlertDialogTitle>Gift Item</AlertDialogTitle>
             <AlertDialogDescription>
@@ -102,6 +103,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
               placeholder="Enter recipient's name (optional)"
               value={giftRecipient}
               onChange={(e) => setGiftRecipient(e.target.value)}
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
             <label htmlFor="note" className="text-right inline-block w-16 pr-1 text-sm font-medium text-gray-700">
               Note:
@@ -111,6 +113,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
               placeholder="Add a note (optional)"
               value={actionNote}
               onChange={(e) => setActionNote(e.target.value)}
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
           </div>
           <AlertDialogFooter>
@@ -125,7 +128,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
 
       {/* Archive Dialog */}
       <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="animate-scale-in">
           <AlertDialogHeader>
             <AlertDialogTitle>Archive Item</AlertDialogTitle>
             <AlertDialogDescription>
@@ -141,6 +144,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
               placeholder="Add a note (optional)"
               value={actionNote}
               onChange={(e) => setActionNote(e.target.value)}
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
           </div>
           <AlertDialogFooter>
@@ -152,7 +156,7 @@ const ItemCardActions = ({ item, onUse, onGift, onArchive, onDelete }: ItemCardA
 
       {/* Delete Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="animate-scale-in">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Item</AlertDialogTitle>
             <AlertDialogDescription>

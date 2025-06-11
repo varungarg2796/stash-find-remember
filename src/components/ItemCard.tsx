@@ -37,7 +37,7 @@ interface ItemCardProps {
 
 const ItemCard = ({ item }: ItemCardProps) => {
   const navigate = useNavigate();
-  const { navigateWithState, navigateAfterItemAction } = useNavigationHelper();
+  const { navigateWithState } = useNavigationHelper();
   const { useItem, giftItem, archiveItem, deleteItem } = useItems();
 
   const handleUse = (note?: string) => {
@@ -48,18 +48,18 @@ const ItemCard = ({ item }: ItemCardProps) => {
   const handleGift = (note?: string) => {
     giftItem(item.id, note);
     if (item.quantity <= 1) {
-      navigateAfterItemAction();
+      navigate("/my-stash");
     }
   };
 
   const handleArchive = (note?: string) => {
     archiveItem(item.id, note);
-    navigateAfterItemAction();
+    navigate("/my-stash");
   };
 
   const handleDelete = () => {
     deleteItem(item.id);
-    navigateAfterItemAction();
+    navigate("/my-stash");
     toast.success("Item deleted successfully");
   };
 
@@ -76,7 +76,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
   const isExpired = item.expiryDate && isBefore(item.expiryDate, new Date());
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 hover:scale-105 cursor-pointer relative">
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer relative animate-scale-in">
       <ItemCardImage 
         item={item} 
         onClick={handleCardClick}
@@ -100,7 +100,7 @@ const ItemCard = ({ item }: ItemCardProps) => {
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="animate-scale-in">
                 <DropdownMenuItem onClick={handleEdit}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit

@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import AddItemButton from "@/components/AddItemButton";
 import FilterSection from "@/components/filter/FilterSection";
@@ -50,7 +51,7 @@ const MyStash = () => {
   if (!user) {
     return (
       <TooltipProvider>
-        <div className="max-w-screen-md mx-auto px-4 py-6">
+        <div className="max-w-screen-md mx-auto px-4 py-6 animate-fade-in-up">
           <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-none">
             <CardContent className="p-8">
               <div className="text-center">
@@ -131,10 +132,10 @@ const MyStash = () => {
 
   return (
     <TooltipProvider>
-      <div className="max-w-screen-md mx-auto px-4 py-6">
+      <div className="max-w-screen-md mx-auto px-4 py-6 animate-fade-in-up">
         {/* Welcome card for first-time users */}
         {!hasItems && (
-          <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-none">
+          <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-none animate-scale-in">
             <CardContent className="p-6">
               <div className="text-left">
                 <h2 className="text-2xl font-bold text-gray-800">Let's add your first item! 🚀</h2>
