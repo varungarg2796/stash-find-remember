@@ -36,8 +36,8 @@ export const validateItemForm = (
   if (data.price !== undefined && data.price !== null) {
     if (data.price < 0) {
       errors.price = "Price cannot be negative";
-    } else if (data.price > 1000000) {
-      errors.price = "Price must be less than 1,000,000";
+    } else if (data.price > 100000000) {
+      errors.price = "Price must be less than 100,000,000";
     }
   }
 
@@ -91,8 +91,8 @@ export const validateBulkImportRow = (
       errors.price = "Price must be a number";
     } else if (price < 0) {
       errors.price = "Price cannot be negative";
-    } else if (price > 1000000) {
-      errors.price = "Price must be less than 1,000,000";
+    } else if (price > 100000000) {
+      errors.price = "Price must be less than 100,000,000";
     }
   }
 
@@ -154,8 +154,8 @@ export const validatePrice = (
     return { isValid: false, message: "Price must be a number" };
   } else if (numPrice < 0) {
     return { isValid: false, message: "Price cannot be negative" };
-  } else if (numPrice > 1000000) {
-    return { isValid: false, message: "Price must be less than 1,000,000" };
+  } else if (numPrice > 100000000) {
+    return { isValid: false, message: "Price must be less than 100,000,000" };
   }
   return { isValid: true, message: "" };
 };

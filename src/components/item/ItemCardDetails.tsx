@@ -15,7 +15,7 @@ const ItemCardDetails = ({ item, isExpired, isExpiringSoon }: ItemCardDetailsPro
   const { user } = useAuth();
   const currency = user?.preferences?.currency || 'INR';
 
-  // Format currency based on user preference
+  // Format currency based on user preference with compact notation for large values
   const formatCurrency = (amount: number) => {
     const currencyConfig = {
       'INR': { locale: 'en-IN', currency: 'INR' },
@@ -25,11 +25,15 @@ const ItemCardDetails = ({ item, isExpired, isExpiringSoon }: ItemCardDetailsPro
 
     const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
     
+    // Use compact notation for values over 1 million to prevent overflow
+    const useCompact = amount >= 1000000;
+    
     return new Intl.NumberFormat(config.locale, {
       style: 'currency',
       currency: config.currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: useCompact ? 1 : 2,
+      notation: useCompact ? 'compact' : 'standard',
     }).format(amount);
   };
 
@@ -82,7 +86,7 @@ const ItemCardDetails = ({ item, isExpired, isExpiringSoon }: ItemCardDetailsPro
 
       {/* Price */}
       {item.price && !item.priceless && (
-        <div className="text-sm font-medium text-green-600">
+        <div className="text-sm font-medium text-green-600 truncate" title={formatCurrency(item.price)}>
           {formatCurrency(item.price)}
         </div>
       )}

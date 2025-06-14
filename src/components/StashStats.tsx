@@ -31,7 +31,7 @@ const StashStats = () => {
   // Get unique tags
   const uniqueTags = new Set(activeItems.flatMap(item => item.tags)).size;
 
-  // Format currency based on user preference
+  // Format currency based on user preference with compact notation for large values
   const formatCurrency = (amount: number) => {
     const currencyConfig = {
       'INR': { locale: 'en-IN', currency: 'INR' },
@@ -41,11 +41,15 @@ const StashStats = () => {
 
     const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
     
+    // Use compact notation for values over 1 million to prevent overflow
+    const useCompact = amount >= 1000000;
+    
     return new Intl.NumberFormat(config.locale, {
       style: 'currency',
       currency: config.currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: useCompact ? 1 : 2,
+      notation: useCompact ? 'compact' : 'standard',
     }).format(amount);
   };
 
@@ -119,7 +123,9 @@ const StashStats = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-0 pb-3 px-3">
-                <div className="text-lg sm:text-xl font-bold">{stat.value}</div>
+                <div className="text-lg sm:text-xl font-bold truncate" title={typeof stat.value === 'string' ? stat.value : stat.value.toString()}>
+                  {stat.value}
+                </div>
               </CardContent>
             </Card>
           ))}
