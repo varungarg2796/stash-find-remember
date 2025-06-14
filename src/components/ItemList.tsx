@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { Item } from '@/types';
 import { getTagColor } from '@/lib/utils';
 import { getIconByName } from '@/utils/iconUtils';
-import { Package } from 'lucide-react';
+import { Package, Clock } from 'lucide-react';
+import { format, isAfter, isBefore, addDays } from 'date-fns';
 
 interface ItemListProps {
   items: Item[];
@@ -24,6 +25,11 @@ const ItemList: React.FC<ItemListProps> = ({
       {items.map(item => {
         const IconComponent = getIconByName(item.iconType);
         
+        // Check expiry status
+        const now = new Date();
+        const isExpired = item.expiryDate && isBefore(item.expiryDate, now);
+        const isExpiringSoon = item.expiryDate && !isExpired && isBefore(item.expiryDate, addDays(now, 30));
+        
         return (
           <Link 
             to={`/items/${item.id}`} 
@@ -31,7 +37,7 @@ const ItemList: React.FC<ItemListProps> = ({
             className="block"
           >
             <div className="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow flex items-start gap-3 sm:gap-4">
-              <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded overflow-hidden">
+              <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded overflow-hidden relative">
                 {item.imageUrl ? (
                   <img 
                     src={item.imageUrl} 
@@ -50,15 +56,28 @@ const ItemList: React.FC<ItemListProps> = ({
                     <Package className="h-6 w-6 sm:h-8 sm:w-8 text-slate-400" />
                   </div>
                 )}
+                
+                {/* Quantity badge */}
+                {item.quantity && item.quantity > 1 && (
+                  <div className="absolute -top-1 -right-1 bg-indigo-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold">
+                    {item.quantity}
+                  </div>
+                )}
               </div>
               
               <div className="flex-grow min-w-0">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
                   <h3 className="font-semibold text-base sm:text-lg truncate">{item.name}</h3>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {item.quantity && item.quantity > 1 && (
-                      <span className="bg-indigo-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                        {item.quantity}x
+                    {/* Expiry status indicator */}
+                    {isExpired && (
+                      <span className="bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                        Expired
+                      </span>
+                    )}
+                    {isExpiringSoon && !isExpired && (
+                      <span className="bg-yellow-500 text-white px-2 py-1 rounded-md text-xs font-medium">
+                        Expires Soon
                       </span>
                     )}
                     {item.price && !item.priceless && (
@@ -78,6 +97,16 @@ const ItemList: React.FC<ItemListProps> = ({
                   <p className="text-sm text-gray-500 mt-1">
                     {item.location}
                   </p>
+                )}
+                
+                {/* Expiry Date */}
+                {item.expiryDate && (
+                  <div className={`flex items-center text-sm mt-1 ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-yellow-600' : 'text-gray-500'}`}>
+                    <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">
+                      {isExpired ? 'Expired' : 'Expires'} {format(item.expiryDate, "MMM d, yyyy")}
+                    </span>
+                  </div>
                 )}
                 
                 {item.description && (
