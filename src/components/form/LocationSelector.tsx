@@ -24,11 +24,11 @@ interface LocationSelectorProps {
 const LocationSelector = ({ value, onChange, isEditing = false }: LocationSelectorProps) => {
   const { user } = useAuth();
   
-  // Get locations from user preferences
-  const locations = user?.preferences?.locations || [
+  // Get locations from user preferences, filtering out empty strings
+  const locations = (user?.preferences?.locations || [
     "Kitchen", "Bedroom", "Wardrobe", "Drawer", 
     "Garage", "Attic", "Basement", "Other"
-  ];
+  ]).filter(loc => loc && loc.trim() !== "");
 
   return (
     <div>

@@ -25,11 +25,11 @@ interface TagSelectorProps {
 const TagSelector = ({ selectedTags, onChange, isEditing = false }: TagSelectorProps) => {
   const { user } = useAuth();
   
-  // Common tags from user preferences or default ones
-  const commonTags = user?.preferences?.tags || [
+  // Common tags from user preferences or default ones, filtering out empty strings
+  const commonTags = (user?.preferences?.tags || [
     "Clothing", "Book", "Electronics", "Furniture", "Kitchen",
     "Decor", "Toy", "Tool", "Sport", "Outdoor", "Cosmetic", "Food", "Pet"
-  ];
+  ]).filter(tag => tag && tag.trim() !== "");
   
   const handleTagSelect = (tag: string) => {
     if (!selectedTags.includes(tag)) {

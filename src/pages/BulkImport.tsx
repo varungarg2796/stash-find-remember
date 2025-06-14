@@ -29,8 +29,8 @@ const BulkImport = () => {
   const { addItem, getActiveItems } = useItems();
   const activeItems = getActiveItems();
   
-  // Extract unique locations from existing items
-  const existingLocations = [...new Set(activeItems.map(item => item.location))];
+  // Extract unique locations from existing items, filtering out empty strings
+  const existingLocations = [...new Set(activeItems.map(item => item.location).filter(location => location && location.trim() !== ""))];
   const availableLocations = [...new Set([...SAMPLE_LOCATIONS, ...existingLocations])];
   
   const [rows, setRows] = useState<RowItem[]>([
