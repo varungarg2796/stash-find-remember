@@ -3,13 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useItems } from "@/context/ItemsContext";
 import { useAuth } from "@/context/AuthContext";
-import { Package, DollarSign, MapPin, Tag, Eye, EyeOff } from "lucide-react";
+import { Package, DollarSign, MapPin, Tag, Eye, EyeOff, ChevronUp, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const StashStats = () => {
   const { items } = useItems();
   const { user } = useAuth();
   const [showValue, setShowValue] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const activeItems = items.filter(item => !item.archived);
   
   // Get user's preferred currency or default to INR (Indian Rupees)
@@ -68,37 +70,54 @@ const StashStats = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      {stats.map((stat, index) => (
-        <Card key={index} className="bg-white shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
-            <CardTitle className="text-xs font-medium text-muted-foreground">
-              {stat.title}
-            </CardTitle>
-            <div className="flex items-center gap-1">
-              <stat.icon className={`h-3 w-3 ${stat.color}`} />
-              {stat.hasToggle && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => setShowValue(!showValue)}
-                >
-                  {showValue ? (
-                    <Eye className="h-3 w-3 text-muted-foreground" />
-                  ) : (
-                    <EyeOff className="h-3 w-3 text-muted-foreground" />
+    <Collapsible open={isExpanded} onOpenChange={setIsExpanded} className="mb-4">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-medium text-muted-foreground">Quick Stats</h3>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+      </div>
+      
+      <CollapsibleContent>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {stats.map((stat, index) => (
+            <Card key={index} className="bg-white shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
+                <CardTitle className="text-xs font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <div className="flex items-center gap-1">
+                  <stat.icon className={`h-3 w-3 ${stat.color}`} />
+                  {stat.hasToggle && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 p-0 hover:bg-transparent"
+                      onClick={() => setShowValue(!showValue)}
+                    >
+                      {showValue ? (
+                        <Eye className="h-3 w-3 text-muted-foreground" />
+                      ) : (
+                        <EyeOff className="h-3 w-3 text-muted-foreground" />
+                      )}
+                    </Button>
                   )}
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0 pb-3 px-3">
-            <div className="text-lg sm:text-xl font-bold">{stat.value}</div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0 pb-3 px-3">
+                <div className="text-lg sm:text-xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 

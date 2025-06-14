@@ -45,10 +45,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Initialize preferences if not present
     if (!userData.preferences) {
       userData.preferences = {
-        currency: "USD",
+        currency: "INR",
         locations: [...DEFAULT_LOCATIONS],
         tags: [...DEFAULT_TAGS]
       };
+    }
+    
+    // Ensure currency is set to INR if not specified
+    if (!userData.preferences.currency) {
+      userData.preferences.currency = "INR";
     }
     
     if (!userData.preferences.locations) {
