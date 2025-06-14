@@ -6,6 +6,7 @@ import { getTagColor } from '@/lib/utils';
 import { getIconByName } from '@/utils/iconUtils';
 import { Package, Clock } from 'lucide-react';
 import { format, isAfter, isBefore, addDays } from 'date-fns';
+import { useAuth } from '@/context/AuthContext';
 
 interface ItemListProps {
   items: Item[];
@@ -20,6 +21,31 @@ const ItemList: React.FC<ItemListProps> = ({
   onDelete,
   onRestore
 }) => {
+  const { user } = useAuth();
+  const currency = user?.preferences?.currency || 'INR';
+
+  // Format currency based on user preference with compact notation for large values
+  const formatCurrency = (amount: number) => {
+    const currencyConfig = {
+      'INR': { locale: 'en-IN', currency: 'INR' },
+      'USD': { locale: 'en-US', currency: 'USD' },
+      'EUR': { locale: 'en-DE', currency: 'EUR' }
+    };
+
+    const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
+    
+    // Use compact notation for values over 1 million to prevent overflow
+    const useCompact = amount >= 1000000;
+    
+    return new Intl.NumberFormat(config.locale, {
+      style: 'currency',
+      currency: config.currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: useCompact ? 1 : 2,
+      notation: useCompact ? 'compact' : 'standard',
+    }).format(amount);
+  };
+
   return (
     <div className="space-y-3">
       {items.map(item => {
@@ -81,8 +107,8 @@ const ItemList: React.FC<ItemListProps> = ({
                       </span>
                     )}
                     {item.price && !item.priceless && (
-                      <span className="text-sm font-medium text-green-600">
-                        ${item.price.toFixed(2)}
+                      <span className="text-sm font-medium text-green-600 truncate" title={formatCurrency(item.price)}>
+                        {formatCurrency(item.price)}
                       </span>
                     )}
                     {item.priceless && (
