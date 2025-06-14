@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Save, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { 
   Table, 
@@ -22,6 +22,7 @@ import BulkImportRow, { RowItem } from "@/components/form/BulkImportRow";
 import { validateItemName, validateQuantity, validatePrice } from "@/utils/validationUtils";
 
 const SAMPLE_LOCATIONS = ["Wardrobe", "Kitchen", "Bookshelf", "Drawer", "Garage", "Basement", "Attic"];
+const MAX_BULK_IMPORT_ITEMS = 40;
 
 const BulkImport = () => {
   const navigate = useNavigate();
@@ -40,6 +41,11 @@ const BulkImport = () => {
   const [isSaving, setIsSaving] = useState(false);
   
   const addRow = () => {
+    if (rows.length >= MAX_BULK_IMPORT_ITEMS) {
+      toast.error(`Maximum ${MAX_BULK_IMPORT_ITEMS} items allowed in bulk import`);
+      return;
+    }
+    
     const newRow: RowItem = {
       id: Date.now().toString(),
       name: "",
@@ -150,6 +156,12 @@ const BulkImport = () => {
   }, [rows]);
   
   const handleSaveAll = async () => {
+    // Check item limit
+    if (rows.length > MAX_BULK_IMPORT_ITEMS) {
+      toast.error(`Cannot save more than ${MAX_BULK_IMPORT_ITEMS} items in bulk import`);
+      return;
+    }
+    
     // Validate all rows first
     if (!validateAllRows()) {
       toast.error("Please fix validation errors before saving");
@@ -191,6 +203,10 @@ const BulkImport = () => {
     }
   };
   
+  // Check if approaching limit
+  const isApproachingLimit = rows.length >= MAX_BULK_IMPORT_ITEMS - 5;
+  const isAtLimit = rows.length >= MAX_BULK_IMPORT_ITEMS;
+  
   return (
     <div className="max-w-screen-lg mx-auto px-4 py-6">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
@@ -211,6 +227,19 @@ const BulkImport = () => {
         >
           How It Works
         </Button>
+      </div>
+
+      {/* Item count and limit warning */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          Items: {rows.length} / {MAX_BULK_IMPORT_ITEMS}
+        </div>
+        {isApproachingLimit && (
+          <div className={`flex items-center text-sm ${isAtLimit ? 'text-red-600' : 'text-yellow-600'}`}>
+            <AlertTriangle size={16} className="mr-1" />
+            {isAtLimit ? 'Maximum items reached' : 'Approaching item limit'}
+          </div>
+        )}
       </div>
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
@@ -244,7 +273,12 @@ const BulkImport = () => {
       </div>
       
       <div className="flex justify-between">
-        <Button onClick={addRow} variant="outline" className="flex items-center">
+        <Button 
+          onClick={addRow} 
+          variant="outline" 
+          className="flex items-center"
+          disabled={isAtLimit}
+        >
           <Plus size={16} className="mr-1" />
           Add Row
         </Button>
@@ -252,7 +286,7 @@ const BulkImport = () => {
         <Button 
           onClick={handleSaveAll} 
           className="flex items-center"
-          disabled={hasValidationErrors || rows.length === 0 || isSaving}
+          disabled={hasValidationErrors || rows.length === 0 || isSaving || rows.length > MAX_BULK_IMPORT_ITEMS}
         >
           {isSaving ? (
             <Loader2 size={16} className="mr-1 animate-spin" />
@@ -275,12 +309,12 @@ const BulkImport = () => {
                 <li>For Tags, click the dropdown to select from available options</li>
                 <li>For Location, choose from the dropdown of existing locations</li>
                 <li>Value/Cost is optional - enter a price if you want to track item values</li>
-                <li>Click "Add Row" to add more items to your list</li>
+                <li>Click "Add Row" to add more items to your list (maximum {MAX_BULK_IMPORT_ITEMS} items)</li>
                 <li>Click "Save All Items" when ready - the system will process all items at once</li>
               </ol>
               
               <p className="mt-4 text-sm text-muted-foreground">
-                <strong>Tip:</strong> You can add multiple items quickly by filling out several rows before saving. The system will validate all entries and add them to your inventory simultaneously.
+                <strong>Tip:</strong> You can add up to {MAX_BULK_IMPORT_ITEMS} items in a single bulk import. The system will validate all entries and add them to your inventory simultaneously.
               </p>
             </DialogDescription>
           </DialogHeader>
