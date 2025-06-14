@@ -3,7 +3,6 @@ import { Item } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { getDefaultImage } from "@/utils/imageUtils";
 import ImageUploader from "./form/ImageUploader";
 import IconSelector from "./form/IconSelector";
 import QuantityInput from "./form/QuantityInput";
@@ -17,7 +16,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { validateItemForm } from "@/utils/validationUtils";
 import { toast } from "sonner";
-import { getIconForTag } from "@/utils/iconUtils";
 
 interface ItemFormProps {
   initialData?: Partial<Item>;
@@ -44,13 +42,11 @@ const defaultInitialItemData: Omit<Item, "id"> = {
 };
 
 const getPlaceholderImage = (name: string = ""): string => {
-  // Corrected placeholder image path if needed, or ensure it exists.
-  // Assuming you meant wine-glasses.jpg based on your public folder.
-  return "/lovable-uploads/wine-glasses.jpg";
+  return "/placeholder.svg";
 };
 
 const ItemForm = ({
-  initialData: initialDataProp = defaultInitialItemData, // Use the stable default
+  initialData: initialDataProp = defaultInitialItemData,
   onSubmit,
   onCancel,
   submitLabel,
@@ -64,21 +60,19 @@ const ItemForm = ({
   // Effect to reset the form if initialDataProp changes
   useEffect(() => {
     setFormData({ ...defaultInitialItemData, ...initialDataProp });
-    setUseIcon(!!initialDataProp.iconType); // Also reset useIcon based on the new initial data
-  }, [initialDataProp]); // Dependency only on the prop itself
+    setUseIcon(!!initialDataProp.iconType);
+  }, [initialDataProp]);
 
   // Effect to handle UI changes when toggling between icon and image
   useEffect(() => {
     setFormData(prev => {
       if (useIcon) {
-        // When switching to icon mode, clear imageUrl. Icon value is handled by IconSelector.
         return { ...prev, imageUrl: "" };
       } else {
-        // When switching to image mode, clear iconType. Image value is handled by ImageUploader.
         return { ...prev, iconType: null };
       }
     });
-  }, [useIcon]); // Only depends on useIcon
+  }, [useIcon]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -160,7 +154,6 @@ const ItemForm = ({
 
   const handleImageMethodToggle = (useIconValue: boolean) => {
     setUseIcon(useIconValue);
-    // The actual formData update for imageUrl/iconType will happen in the useEffect listening to useIcon
   };
 
   const handleDateChange = (date: Date | undefined) => {
@@ -185,27 +178,17 @@ const ItemForm = ({
 
     let finalData = { ...formData };
 
-    // Smart fallback system for image/icon
+    // Simple fallback system - no smart defaults
     if (useIcon) {
-      // If using icon mode but no icon selected, try to auto-suggest based on tags
-      if (!finalData.iconType && finalData.tags && finalData.tags.length > 0) {
-        for (const tag of finalData.tags) {
-          const suggestedIcon = getIconForTag(tag);
-          if (suggestedIcon) {
-            finalData.iconType = suggestedIcon;
-            break;
-          }
-        }
-      }
-      // If still no icon, use a default one
+      // If using icon mode but no icon selected, use default box icon
       if (!finalData.iconType) {
-        finalData.iconType = "box"; // Default fallback icon
+        finalData.iconType = "box";
       }
       finalData.imageUrl = "";
     } else {
-      // If using image mode but no image selected, get default image
+      // If using image mode but no image selected, use placeholder
       if (!finalData.imageUrl) {
-        finalData.imageUrl = getDefaultImage(finalData);
+        finalData.imageUrl = "/placeholder.svg";
       }
       finalData.iconType = null;
     }
@@ -290,7 +273,7 @@ const ItemForm = ({
           <p className="text-xs text-muted-foreground mt-1">
             {useIcon 
               ? "Choose an icon to represent your item"
-              : "Upload a photo or we'll provide a smart default"
+              : "Upload a photo or we'll show a placeholder"
             }
           </p>
         </div>
@@ -304,7 +287,7 @@ const ItemForm = ({
           <ImageUploader
             imageUrl={formData.imageUrl}
             onImageChange={handleImageChange}
-            getPlaceholderImage={() => getDefaultImage(formData)}
+            getPlaceholderImage={getPlaceholderImage}
             itemName={formData.name}
           />
         )}
