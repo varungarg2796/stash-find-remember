@@ -55,11 +55,23 @@ const ItemList: React.FC<ItemListProps> = ({
               <div className="flex-grow min-w-0">
                 <div className="flex justify-between items-start">
                   <h3 className="font-semibold text-lg truncate pr-2">{item.name}</h3>
-                  {item.quantity && item.quantity > 1 && (
-                    <span className="flex-shrink-0 bg-indigo-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                      {item.quantity}x
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {item.quantity && item.quantity > 1 && (
+                      <span className="bg-indigo-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                        {item.quantity}x
+                      </span>
+                    )}
+                    {item.price && !item.priceless && (
+                      <span className="text-sm font-medium text-green-600">
+                        ${item.price.toFixed(2)}
+                      </span>
+                    )}
+                    {item.priceless && (
+                      <span className="text-sm font-medium text-purple-600">
+                        Priceless
+                      </span>
+                    )}
+                  </div>
                 </div>
                 
                 {item.location && (
