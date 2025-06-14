@@ -1,9 +1,10 @@
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useCollections } from "@/context/CollectionsContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Users, Globe, Heart, Sparkles, FolderOpen } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Users, Globe, Heart, Sparkles, FolderOpen, Share } from "lucide-react";
 import CollectionCard from "@/components/collection/CollectionCard";
 import CreateCollectionDialog from "@/components/collection/CreateCollectionDialog";
 

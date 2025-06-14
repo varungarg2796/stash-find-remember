@@ -25,6 +25,21 @@ const CollectionHeader = ({
   onShareSettingsUpdate,
   onCopyShareLink
 }: CollectionHeaderProps) => {
+  const handleSharingToggle = (checked: boolean) => {
+    if (shareSettings) {
+      setShareSettings({ ...shareSettings, isEnabled: checked });
+    }
+  };
+
+  const handleDisplaySettingChange = (key: string, checked: boolean) => {
+    if (shareSettings) {
+      setShareSettings({
+        ...shareSettings,
+        displaySettings: { ...shareSettings.displaySettings, [key]: checked }
+      });
+    }
+  };
+
   return (
     <div className="sticky top-0 bg-background border-b z-10">
       <div className="px-4 py-3">
@@ -49,9 +64,7 @@ const CollectionHeader = ({
                     <Switch
                       id="enable-sharing"
                       checked={shareSettings?.isEnabled || false}
-                      onCheckedChange={(checked) => 
-                        setShareSettings(prev => prev ? {...prev, isEnabled: checked} : undefined)
-                      }
+                      onCheckedChange={handleSharingToggle}
                     />
                     <Label htmlFor="enable-sharing">Enable Public Sharing</Label>
                   </div>
@@ -79,12 +92,7 @@ const CollectionHeader = ({
                             <div key={key} className="flex items-center space-x-2">
                               <Switch
                                 checked={value}
-                                onCheckedChange={(checked) => 
-                                  setShareSettings(prev => prev ? {
-                                    ...prev,
-                                    displaySettings: {...prev.displaySettings, [key]: checked}
-                                  } : undefined)
-                                }
+                                onCheckedChange={(checked) => handleDisplaySettingChange(key, checked)}
                               />
                               <Label className="text-sm capitalize">
                                 {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
