@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -11,11 +11,20 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { ArrowLeft, Plus, X, Tag } from "lucide-react";
+import { ArrowLeft, Plus, X, Tag, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Profile = () => {
   const { user, updateUserPreferences, addLocation, removeLocation, addTag, removeTag } = useAuth();
+  const { items } = useItems();
   const navigate = useNavigate();
   
   const [theme, setTheme] = useState<"light" | "dark">(
@@ -26,16 +35,104 @@ const Profile = () => {
   );
   const [newLocation, setNewLocation] = useState<string>("");
   const [newTag, setNewTag] = useState<string>("");
+  const [validationDialog, setValidationDialog] = useState<{
+    open: boolean;
+    type: 'locations' | 'tags';
+    unusedItems: string[];
+    usedItems: { name: string; items: string[] }[];
+  }>({
+    open: false,
+    type: 'locations',
+    unusedItems: [],
+    usedItems: []
+  });
 
   if (!user) {
     navigate("/");
     return null;
   }
 
+  const checkItemUsage = (items: string[], type: 'locations' | 'tags') => {
+    const currentItems = items;
+    const originalItems = type === 'locations' 
+      ? user?.preferences?.locations || []
+      : user?.preferences?.tags || [];
+    
+    // Find removed items
+    const removedItems = originalItems.filter(item => !currentItems.includes(item));
+    
+    if (removedItems.length === 0) {
+      return { canProceed: true, unusedItems: [], usedItems: [] };
+    }
+
+    // Check which removed items are being used
+    const usedItems: { name: string; items: string[] }[] = [];
+    const unusedItems: string[] = [];
+
+    removedItems.forEach(removedItem => {
+      const usingItems = items.filter(item => {
+        if (type === 'locations') {
+          return item.location === removedItem;
+        } else {
+          return item.tags.includes(removedItem);
+        }
+      }).map(item => item.name);
+
+      if (usingItems.length > 0) {
+        usedItems.push({ name: removedItem, items: usingItems });
+      } else {
+        unusedItems.push(removedItem);
+      }
+    });
+
+    return {
+      canProceed: usedItems.length === 0,
+      unusedItems,
+      usedItems
+    };
+  };
+
   const handleSavePreferences = () => {
+    const currentLocations = user?.preferences?.locations || [];
+    const currentTags = user?.preferences?.tags || [];
+
+    // Check locations
+    const locationCheck = checkItemUsage(currentLocations, 'locations');
+    if (!locationCheck.canProceed) {
+      setValidationDialog({
+        open: true,
+        type: 'locations',
+        unusedItems: locationCheck.unusedItems,
+        usedItems: locationCheck.usedItems
+      });
+      return;
+    }
+
+    // Check tags
+    const tagCheck = checkItemUsage(currentTags, 'tags');
+    if (!tagCheck.canProceed) {
+      setValidationDialog({
+        open: true,
+        type: 'tags',
+        unusedItems: tagCheck.unusedItems,
+        usedItems: tagCheck.usedItems
+      });
+      return;
+    }
+
+    // If we get here, all validations passed
     updateUserPreferences({
       theme,
       currency,
+    });
+  };
+
+  const handleValidationDialogClose = () => {
+    setValidationDialog({
+      open: false,
+      type: 'locations',
+      unusedItems: [],
+      usedItems: []
     });
   };
 
@@ -249,6 +346,54 @@ const Profile = () => {
           </Button>
         </div>
       </div>
+
+      <Dialog open={validationDialog.open} onOpenChange={handleValidationDialogClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-red-600">
+              <AlertTriangle className="mr-2" size={20} />
+              Cannot Remove {validationDialog.type === 'locations' ? 'Locations' : 'Tags'}
+            </DialogTitle>
+            <DialogDescription>
+              Some {validationDialog.type} you're trying to remove are currently being used by your items.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {validationDialog.usedItems.map((usedItem, index) => (
+              <div key={index} className="mb-4 p-3 bg-red-50 rounded-lg border border-red-200">
+                <div className="font-medium text-red-800 mb-2">
+                  "{usedItem.name}" is used by:
+                </div>
+                <ScrollArea className="max-h-24">
+                  <div className="space-y-1">
+                    {usedItem.items.slice(0, 10).map((itemName, itemIndex) => (
+                      <div key={itemIndex} className="text-sm text-red-700">
+                        • {itemName}
+                      </div>
+                    ))}
+                    {usedItem.items.length > 10 && (
+                      <div className="text-sm text-red-600 font-medium">
+                        ... and {usedItem.items.length - 10} more items
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            ))}
+            
+            <div className="text-sm text-gray-600 mt-4">
+              Please update these items first before removing the {validationDialog.type}.
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button onClick={handleValidationDialogClose}>
+              Got it
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
