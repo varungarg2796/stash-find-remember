@@ -52,6 +52,53 @@ const Profile = () => {
     return null;
   }
 
+  const checkSingleItemUsage = (itemToRemove: string, type: 'locations' | 'tags') => {
+    const usingItems = items.filter(item => {
+      if (type === 'locations') {
+        return item.location === itemToRemove;
+      } else {
+        return item.tags.includes(itemToRemove);
+      }
+    }).map(item => item.name);
+
+    return {
+      isUsed: usingItems.length > 0,
+      usingItems
+    };
+  };
+
+  const handleRemoveLocation = (location: string) => {
+    const usage = checkSingleItemUsage(location, 'locations');
+    
+    if (usage.isUsed) {
+      setValidationDialog({
+        open: true,
+        type: 'locations',
+        unusedItems: [],
+        usedItems: [{ name: location, items: usage.usingItems }]
+      });
+      return;
+    }
+    
+    removeLocation(location);
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    const usage = checkSingleItemUsage(tag, 'tags');
+    
+    if (usage.isUsed) {
+      setValidationDialog({
+        open: true,
+        type: 'tags',
+        unusedItems: [],
+        usedItems: [{ name: tag, items: usage.usingItems }]
+      });
+      return;
+    }
+    
+    removeTag(tag);
+  };
+
   const checkItemUsage = (currentItems: string[], type: 'locations' | 'tags') => {
     const originalItems = type === 'locations' 
       ? user?.preferences?.locations || []
@@ -261,7 +308,7 @@ const Profile = () => {
                     variant="ghost" 
                     size="icon"
                     className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground transition-colors duration-200"
-                    onClick={() => removeLocation(location)}
+                    onClick={() => handleRemoveLocation(location)}
                   >
                     <X size={12} />
                   </Button>
@@ -319,7 +366,7 @@ const Profile = () => {
                     variant="ghost" 
                     size="icon"
                     className="h-4 w-4 p-0 ml-1 text-muted-foreground hover:text-foreground transition-colors duration-200"
-                    onClick={() => removeTag(tag)}
+                    onClick={() => handleRemoveTag(tag)}
                   >
                     <X size={12} />
                   </Button>
@@ -351,10 +398,10 @@ const Profile = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center text-red-600">
               <AlertTriangle className="mr-2" size={20} />
-              Cannot Remove {validationDialog.type === 'locations' ? 'Locations' : 'Tags'}
+              Cannot Remove {validationDialog.type === 'locations' ? 'Location' : 'Tag'}
             </DialogTitle>
             <DialogDescription>
-              Some {validationDialog.type} you're trying to remove are currently being used by your items.
+              This {validationDialog.type === 'locations' ? 'location' : 'tag'} is currently being used by your items.
             </DialogDescription>
           </DialogHeader>
           
@@ -382,7 +429,7 @@ const Profile = () => {
             ))}
             
             <div className="text-sm text-gray-600 mt-4">
-              Please update these items first before removing the {validationDialog.type}.
+              Please update these items first before removing the {validationDialog.type === 'locations' ? 'location' : 'tag'}.
             </div>
           </div>
           
