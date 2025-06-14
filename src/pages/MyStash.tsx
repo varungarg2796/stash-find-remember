@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useItems } from "@/context/ItemsContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Package, Camera, MapPin, Tag, Star } from "lucide-react";
+import { PlusCircle, Package, Camera, MapPin, Tag, Star, Search, Grid, List } from "lucide-react";
 import { useNavigationHelper } from "@/hooks/useNavigationHelper";
 import { useState, useEffect, useCallback, useMemo } from "react";
 
@@ -127,23 +127,79 @@ const MyStash = () => {
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Preview: Your Stash Interface</h3>
                 <p className="text-sm text-gray-500">This is what your organized collection will look like</p>
               </div>
-              <div className="space-y-4 opacity-60">
-                <div className="flex gap-2">
-                  <div className="bg-white p-2 rounded border flex-1">
-                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-2 bg-gray-100 rounded w-2/3"></div>
+              <div className="space-y-4 opacity-70">
+                {/* Mock search and filter bar */}
+                <div className="flex gap-2 items-center">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <div className="w-full h-10 bg-white border rounded-lg pl-10 flex items-center">
+                      <span className="text-gray-400 text-sm">Search your items...</span>
+                    </div>
                   </div>
-                  <div className="bg-white p-2 rounded border flex-1">
-                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-2 bg-gray-100 rounded w-1/2"></div>
+                  <div className="flex gap-1">
+                    <div className="h-10 w-10 bg-white border rounded-lg flex items-center justify-center">
+                      <Grid className="h-4 w-4 text-gray-600" />
+                    </div>
+                    <div className="h-10 w-10 bg-white border rounded-lg flex items-center justify-center">
+                      <List className="h-4 w-4 text-gray-400" />
+                    </div>
                   </div>
                 </div>
-                <div className="bg-white p-3 rounded border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-200 rounded"></div>
-                    <div className="flex-1">
-                      <div className="h-3 bg-gray-200 rounded mb-1"></div>
-                      <div className="h-2 bg-gray-100 rounded w-3/4"></div>
+
+                {/* Mock filter tabs */}
+                <div className="flex gap-2 overflow-x-auto">
+                  <div className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium whitespace-nowrap">
+                    All Items
+                  </div>
+                  <div className="px-3 py-1 bg-white border rounded-full text-sm text-gray-600 whitespace-nowrap">
+                    Electronics
+                  </div>
+                  <div className="px-3 py-1 bg-white border rounded-full text-sm text-gray-600 whitespace-nowrap">
+                    Clothing
+                  </div>
+                  <div className="px-3 py-1 bg-white border rounded-full text-sm text-gray-600 whitespace-nowrap">
+                    Kitchen
+                  </div>
+                </div>
+
+                {/* Mock item cards */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white rounded-lg border p-3">
+                    <div className="aspect-square bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg mb-2 flex items-center justify-center">
+                      <Camera className="h-8 w-8 text-purple-600" />
+                    </div>
+                    <h4 className="font-medium text-sm mb-1">Wireless Headphones</h4>
+                    <p className="text-xs text-gray-500 mb-2">Electronics • Desk</p>
+                    <div className="flex gap-1">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">Electronics</span>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg border p-3">
+                    <div className="aspect-square bg-gradient-to-br from-green-100 to-green-200 rounded-lg mb-2 flex items-center justify-center">
+                      <Package className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h4 className="font-medium text-sm mb-1">Coffee Mug</h4>
+                    <p className="text-xs text-gray-500 mb-2">Kitchen • Cupboard</p>
+                    <div className="flex gap-1">
+                      <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">Kitchen</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mock stats */}
+                <div className="bg-white rounded-lg border p-3">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-lg font-semibold text-gray-800">24</div>
+                      <div className="text-xs text-gray-500">Total Items</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-gray-800">$1,240</div>
+                      <div className="text-xs text-gray-500">Total Value</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-gray-800">8</div>
+                      <div className="text-xs text-gray-500">Categories</div>
                     </div>
                   </div>
                 </div>
