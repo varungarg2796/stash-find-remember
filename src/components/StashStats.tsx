@@ -9,11 +9,11 @@ import { useState } from "react";
 const StashStats = () => {
   const { items } = useItems();
   const { user } = useAuth();
-  const [showValue, setShowValue] = useState(true);
+  const [showValue, setShowValue] = useState(false);
   const activeItems = items.filter(item => !item.archived);
   
-  // Get user's preferred currency or default to USD
-  const currency = user?.preferences?.currency || 'USD';
+  // Get user's preferred currency or default to INR (Indian Rupees)
+  const currency = user?.preferences?.currency || 'INR';
   
   // Calculate total value of items with prices
   const totalValue = activeItems.reduce((sum, item) => {
@@ -31,7 +31,7 @@ const StashStats = () => {
 
   // Format currency based on user preference
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
