@@ -52,8 +52,7 @@ const Profile = () => {
     return null;
   }
 
-  const checkItemUsage = (items: string[], type: 'locations' | 'tags') => {
-    const currentItems = items;
+  const checkItemUsage = (currentItems: string[], type: 'locations' | 'tags') => {
     const originalItems = type === 'locations' 
       ? user?.preferences?.locations || []
       : user?.preferences?.tags || [];
