@@ -39,7 +39,7 @@ const StashStats = () => {
   const stats = [
     {
       title: "Total Items",
-      value: activeItems.reduce((sum, item) => sum + item.quantity, 0),
+      value: activeItems.length, // Count number of items, not quantities
       icon: Package,
       color: "text-blue-600"
     },
