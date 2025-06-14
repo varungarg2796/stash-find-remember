@@ -2,14 +2,14 @@ import React, { createContext, useContext, useState } from "react";
 import { Item, ItemHistory } from "@/types";
 import { toast } from "sonner";
 
-// Mock initial data
+// Mock initial data - using only common default tags
 const initialItems: Item[] = [
   {
     id: "1",
     name: "Sweater",
     description: "Wool sweater received as a birthday gift",
     imageUrl: "/lovable-uploads/sweater.jpg",
-    tags: ["Clothing", "Gift"],
+    tags: ["Clothing"],
     quantity: 1,
     location: "Wardrobe",
     createdAt: new Date("2023-12-15"),
@@ -22,7 +22,7 @@ const initialItems: Item[] = [
     name: "Cookbook",
     description: "Italian cuisine cookbook",
     imageUrl: "/lovable-uploads/cookbook.jpg",
-    tags: ["Books", "Christmas"],
+    tags: ["Book"],
     quantity: 1,
     location: "Bookshelf",
     createdAt: new Date("2024-01-20"),
@@ -35,7 +35,7 @@ const initialItems: Item[] = [
     name: "Wine Glasses",
     description: "Crystal wine glasses, set of 2",
     imageUrl: "/lovable-uploads/wine-glasses.jpg",
-    tags: ["Glassware", "Set"],
+    tags: ["Kitchen"],
     quantity: 2,
     location: "Kitchen",
     createdAt: new Date("2024-02-05"),
@@ -48,7 +48,7 @@ const initialItems: Item[] = [
     name: "Wireless Earbuds",
     description: "Noise cancelling wireless earbuds",
     imageUrl: "/lovable-uploads/earbuds.jpg",
-    tags: ["Electronics", "Prize"],
+    tags: ["Electronics"],
     quantity: 1,
     location: "Drawer",
     createdAt: new Date("2024-03-10"),
