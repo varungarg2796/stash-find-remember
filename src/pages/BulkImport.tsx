@@ -1,9 +1,8 @@
-
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Save, Download } from "lucide-react";
+import { ArrowLeft, Plus, Save, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { 
   Table, 
@@ -38,6 +37,7 @@ const BulkImport = () => {
   ]);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [hasValidationErrors, setHasValidationErrors] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const addRow = () => {
     const newRow: RowItem = {
@@ -149,95 +149,46 @@ const BulkImport = () => {
     return !anyErrors;
   }, [rows]);
   
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     // Validate all rows first
     if (!validateAllRows()) {
       toast.error("Please fix validation errors before saving");
       return;
     }
     
-    // Process and save each row
-    rows.forEach(row => {
-      const item = {
-        name: row.name.trim(),
-        description: row.description.trim(),
-        quantity: parseInt(row.quantity.toString()) || 1,
-        location: row.location.trim(),
-        tags: row.tags.split(",").map(tag => tag.trim()).filter(Boolean),
-        price: row.price,
-        imageUrl: "/lovable-uploads/earbuds.png" // Default image
-      };
-      
-      addItem(item);
-    });
+    setIsSaving(true);
     
-    toast.success(`${rows.length} items added successfully`);
-    navigate("/");
-  };
-  
-  // Create a template for export
-  const generateTemplate = () => {
-    const headers = ["Name", "Description", "Quantity", "Location", "Tags (comma-separated)", "Price/Value"];
-    const csvContent = [
-      headers.join(","),
-      "Example Item,This is a sample description,1,Kitchen,Kitchen,Electronics,49.99"
-    ].join("\n");
-    
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "stasher_template.csv");
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-  
-  // Parse CSV
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      if (!content) return;
-      
-      const lines = content.split('\n');
-      if (lines.length < 2) {
-        toast.error("Invalid CSV format");
-        return;
-      }
-      
-      // Skip the header row
-      const newRows: RowItem[] = [];
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue; // Skip empty lines
+    try {
+      // Process and save each row
+      const promises = rows.map(row => {
+        const item = {
+          name: row.name.trim(),
+          description: row.description.trim(),
+          quantity: parseInt(row.quantity.toString()) || 1,
+          location: row.location.trim(),
+          tags: row.tags.split(",").map(tag => tag.trim()).filter(Boolean),
+          price: row.price,
+          imageUrl: "/lovable-uploads/earbuds.png" // Default image
+        };
         
-        const values = lines[i].split(',');
-        if (values.length < 3) continue; // Skip invalid lines
-        
-        newRows.push({
-          id: Date.now().toString() + i,
-          name: values[0] || "",
-          description: values[1] || "",
-          quantity: parseInt(values[2]) || 1,
-          location: values[3] || "",
-          tags: values.slice(4, -1).join(','),
-          price: values[values.length-1] ? parseFloat(values[values.length-1]) : undefined
+        return new Promise<void>((resolve) => {
+          // Simulate API delay and add item
+          setTimeout(() => {
+            addItem(item);
+            resolve();
+          }, 100);
         });
-      }
+      });
       
-      if (newRows.length > 0) {
-        setRows(newRows);
-        toast.success(`Loaded ${newRows.length} items from CSV`);
-      } else {
-        toast.error("No valid items found in CSV");
-      }
-    };
-    
-    reader.readAsText(file);
+      await Promise.all(promises);
+      
+      toast.success(`${rows.length} items added successfully`);
+      navigate("/");
+    } catch (error) {
+      toast.error("Failed to save items. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
   };
   
   return (
@@ -253,36 +204,13 @@ const BulkImport = () => {
           Bulk Import Items
         </h1>
         
-        <div className="flex flex-wrap gap-2 justify-end">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowHelpDialog(true)}
-            className="text-sm"
-          >
-            How It Works
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={generateTemplate}
-            className="text-sm flex items-center"
-          >
-            <Download size={16} className="mr-1" />
-            Template
-          </Button>
-          
-          {/* CSV Upload button */}
-          <div className="relative">
-            <Button variant="outline" className="text-sm">
-              Import CSV
-            </Button>
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-          </div>
-        </div>
+        <Button 
+          variant="outline" 
+          onClick={() => setShowHelpDialog(true)}
+          className="text-sm"
+        >
+          How It Works
+        </Button>
       </div>
       
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
@@ -324,9 +252,14 @@ const BulkImport = () => {
         <Button 
           onClick={handleSaveAll} 
           className="flex items-center"
-          disabled={hasValidationErrors || rows.length === 0}>
-          <Save size={16} className="mr-1" />
-          Save All Items
+          disabled={hasValidationErrors || rows.length === 0 || isSaving}
+        >
+          {isSaving ? (
+            <Loader2 size={16} className="mr-1 animate-spin" />
+          ) : (
+            <Save size={16} className="mr-1" />
+          )}
+          {isSaving ? "Saving..." : "Save All Items"}
         </Button>
       </div>
       
@@ -336,17 +269,18 @@ const BulkImport = () => {
             <DialogTitle>How to Use Bulk Import</DialogTitle>
             <DialogDescription className="pt-4">
               <ol className="list-decimal pl-5 space-y-2">
-                <li>Fill in the spreadsheet-like table with your item details</li>
+                <li>Fill in the table with your item details using the form fields</li>
                 <li>Each row represents one item in your inventory</li>
-                <li>Only the Name field is required</li>
-                <li>For Tags, select from the dropdown menu</li>
-                <li>Value/Cost is optional - enter the price if desired</li>
-                <li>Click "Add Row" to add more items</li>
-                <li>Click "Save All Items" when you're ready to add everything to your inventory</li>
+                <li>Only the Name field is required - all others are optional</li>
+                <li>For Tags, click the dropdown to select from available options</li>
+                <li>For Location, choose from the dropdown of existing locations</li>
+                <li>Value/Cost is optional - enter a price if you want to track item values</li>
+                <li>Click "Add Row" to add more items to your list</li>
+                <li>Click "Save All Items" when ready - the system will process all items at once</li>
               </ol>
               
-              <p className="mt-4 italic text-muted-foreground">
-                Need a template? Click the "Template" button to download a sample CSV template or import your own CSV file.
+              <p className="mt-4 text-sm text-muted-foreground">
+                <strong>Tip:</strong> You can add multiple items quickly by filling out several rows before saving. The system will validate all entries and add them to your inventory simultaneously.
               </p>
             </DialogDescription>
           </DialogHeader>
