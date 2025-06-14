@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { Item, ItemHistory } from "@/types";
 import { toast } from "sonner";
@@ -82,21 +81,29 @@ export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addItem = (newItem: Omit<Item, "id" | "createdAt" | "history">) => {
     const now = new Date();
+    const itemId = Date.now().toString();
     
     const item = {
       ...newItem,
-      id: Date.now().toString(),
+      id: itemId,
       createdAt: now,
+      // Ensure we don't set both imageUrl and iconType
+      imageUrl: newItem.iconType ? "" : (newItem.imageUrl || "/lovable-uploads/earbuds.png"),
+      iconType: newItem.iconType || null,
       history: [
         { id: Date.now().toString(), action: "created" as const, date: now }
       ]
     };
+    
+    console.log("Adding item:", item); // Debug log
     
     setItems((prevItems) => [...prevItems, item]);
     toast.success("Item added successfully");
   };
 
   const updateItem = (updatedItem: Item) => {
+    console.log("Updating item:", updatedItem); // Debug log
+    
     setItems((prevItems) =>
       prevItems.map((item) => {
         if (item.id === updatedItem.id) {
@@ -111,7 +118,15 @@ export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
             ];
           }
           
-          return updatedItem;
+          // Ensure we don't set both imageUrl and iconType
+          const finalItem = {
+            ...updatedItem,
+            imageUrl: updatedItem.iconType ? "" : updatedItem.imageUrl,
+            iconType: updatedItem.imageUrl ? null : updatedItem.iconType,
+          };
+          
+          console.log("Final updated item:", finalItem); // Debug log
+          return finalItem;
         }
         return item;
       })
