@@ -82,7 +82,7 @@ const Header = () => {
         </div>
 
         {/* Navigation - Left Side - Desktop Only */}
-        <div className="hidden md:block flex-shrink-0 mr-4">
+        <div className="hidden md:flex flex-1 justify-start">
           <NavigationMenu>
             <NavigationMenuList className="gap-0.5">
               {navigationItems.map((item) => (
@@ -106,7 +106,7 @@ const Header = () => {
         </div>
 
         {/* Logo & Tagline - Center */}
-        <div className="flex-1 flex justify-center items-center min-w-0">
+        <div className="flex-1 md:flex-none flex justify-center items-center min-w-0">
           <div className="flex flex-col items-center justify-center">
             <Link to="/" className="flex items-center gap-2">
               <img 
@@ -124,7 +124,76 @@ const Header = () => {
         </div>
 
         {/* User Menu - Right Side */}
-        <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+        <div className="hidden md:flex flex-1 justify-end">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+                    <AvatarFallback>{user.name ? user.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase() : "U"}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+                    <AvatarFallback>{user.name ? user.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase() : "U"}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer flex w-full items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>My Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ask" className="cursor-pointer flex w-full items-center">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <span>Ask Stasher</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/bulk-import" className="cursor-pointer flex w-full items-center">
+                    <FileText className="mr-2 h-4 w-4" />
+                    <span>Bulk Import</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/archive" className="cursor-pointer flex w-full items-center">
+                    <Archive className="mr-2 h-4 w-4" />
+                    <span>Archive</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              onClick={handleLogin} 
+              variant="default" 
+              size="sm"
+              disabled={isLoggingIn}
+              className="px-2 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm"
+            >
+              {isLoggingIn ? "Logging in..." : "Login"}
+              {!isLoggingIn && <User className="ml-1 h-3 w-3 sm:ml-2 sm:h-4 sm:w-4" />}
+            </Button>
+          )}
+        </div>
+
+        {/* Mobile User Menu - Right Side */}
+        <div className="md:hidden flex items-center gap-2 flex-shrink-0 ml-4">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
