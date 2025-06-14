@@ -26,6 +26,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Default locations and tags
+const DEFAULT_LOCATIONS = [
+  "Kitchen", "Bedroom", "Living Room", "Bathroom", "Garage", 
+  "Attic", "Basement", "Office", "Closet", "Storage Room"
+];
+
+const DEFAULT_TAGS = [
+  "Electronics", "Clothing", "Books", "Kitchen", "Furniture",
+  "Tools", "Decor", "Sports", "Beauty", "Toys"
+];
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
@@ -35,17 +46,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!userData.preferences) {
       userData.preferences = {
         currency: "USD",
-        locations: ["Wardrobe", "Kitchen", "Bookshelf", "Drawer"],
-        tags: ["Clothing", "Book", "Electronics", "Furniture"]
+        locations: [...DEFAULT_LOCATIONS],
+        tags: [...DEFAULT_TAGS]
       };
     }
     
     if (!userData.preferences.locations) {
-      userData.preferences.locations = ["Wardrobe", "Kitchen", "Bookshelf", "Drawer"];
+      userData.preferences.locations = [...DEFAULT_LOCATIONS];
     }
 
     if (!userData.preferences.tags) {
-      userData.preferences.tags = ["Clothing", "Book", "Electronics", "Furniture"];
+      userData.preferences.tags = [...DEFAULT_TAGS];
     }
     
     setUser(userData);

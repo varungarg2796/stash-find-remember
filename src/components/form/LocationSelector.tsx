@@ -21,14 +21,16 @@ interface LocationSelectorProps {
   isEditing?: boolean;
 }
 
+const DEFAULT_LOCATIONS = [
+  "Kitchen", "Bedroom", "Living Room", "Bathroom", "Garage", 
+  "Attic", "Basement", "Office", "Closet", "Storage Room"
+];
+
 const LocationSelector = ({ value, onChange, isEditing = false }: LocationSelectorProps) => {
   const { user } = useAuth();
   
-  // Get locations from user preferences, filtering out empty strings
-  const locations = (user?.preferences?.locations || [
-    "Kitchen", "Bedroom", "Wardrobe", "Drawer", 
-    "Garage", "Attic", "Basement", "Other"
-  ]).filter(loc => loc && loc.trim() !== "");
+  // Get locations from user preferences, with fallback to defaults
+  const locations = (user?.preferences?.locations || DEFAULT_LOCATIONS).filter(loc => loc && loc.trim() !== "");
 
   return (
     <div>
