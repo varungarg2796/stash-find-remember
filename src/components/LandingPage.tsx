@@ -31,6 +31,7 @@ const LandingPage = () => {
         id: "user-1",
         name: "John Doe",
         email: "john@example.com",
+        username: "johndoe",
         avatarUrl: "https://i.pravatar.cc/150?u=user-1"
       });
       setIsLoggingIn(false);
