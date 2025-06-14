@@ -3,6 +3,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Item } from '@/types';
 import { getTagColor } from '@/lib/utils';
+import { getIconByName } from '@/utils/iconUtils';
+import { Package } from 'lucide-react';
 
 interface ItemListProps {
   items: Item[];
@@ -20,7 +22,7 @@ const ItemList: React.FC<ItemListProps> = ({
   return (
     <div className="space-y-3">
       {items.map(item => {
-        const placeholderImage = `https://via.placeholder.com/100/6B7280/FFFFFF?text=${item.name.charAt(0)}`;
+        const IconComponent = getIconByName(item.iconType);
         
         return (
           <Link 
@@ -30,14 +32,24 @@ const ItemList: React.FC<ItemListProps> = ({
           >
             <div className="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow flex items-start gap-4">
               <div className="flex-shrink-0 w-16 h-16 bg-gray-100 rounded overflow-hidden">
-                <img 
-                  src={item.imageUrl || placeholderImage} 
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = placeholderImage;
-                  }}
-                />
+                {item.imageUrl ? (
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/placeholder.svg";
+                    }}
+                  />
+                ) : IconComponent ? (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                    <IconComponent className="h-8 w-8 text-slate-600" />
+                  </div>
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                    <Package className="h-8 w-8 text-slate-400" />
+                  </div>
+                )}
               </div>
               
               <div className="flex-grow min-w-0">
