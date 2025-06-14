@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
@@ -71,7 +72,7 @@ const ItemDetail = () => {
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       deleteItem(item.id);
-      navigate("/");
+      navigate("/my-stash");
     }
   };
 
@@ -87,11 +88,11 @@ const ItemDetail = () => {
     switch (actionType) {
       case "gift":
         giftItem(item.id, actionNote);
-        if (item.quantity <= 1) navigate("/");
+        if (item.quantity <= 1) navigate("/my-stash");
         break;
       case "archive":
         archiveItem(item.id, actionNote);
-        navigate("/");
+        navigate("/my-stash");
         break;
       case "restore":
         restoreItem(item.id, actionNote || "Restored from archive");
