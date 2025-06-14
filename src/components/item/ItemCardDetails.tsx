@@ -3,6 +3,7 @@ import { MapPin, Tag, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Item } from "@/types";
 import { format } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
 
 interface ItemCardDetailsProps {
   item: Item;
@@ -11,6 +12,27 @@ interface ItemCardDetailsProps {
 }
 
 const ItemCardDetails = ({ item, isExpired, isExpiringSoon }: ItemCardDetailsProps) => {
+  const { user } = useAuth();
+  const currency = user?.preferences?.currency || 'INR';
+
+  // Format currency based on user preference
+  const formatCurrency = (amount: number) => {
+    const currencyConfig = {
+      'INR': { locale: 'en-IN', currency: 'INR' },
+      'USD': { locale: 'en-US', currency: 'USD' },
+      'EUR': { locale: 'en-DE', currency: 'EUR' }
+    };
+
+    const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
+    
+    return new Intl.NumberFormat(config.locale, {
+      style: 'currency',
+      currency: config.currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
   return (
     <>
       {/* Location */}
@@ -61,7 +83,7 @@ const ItemCardDetails = ({ item, isExpired, isExpiringSoon }: ItemCardDetailsPro
       {/* Price */}
       {item.price && !item.priceless && (
         <div className="text-sm font-medium text-green-600">
-          ${item.price.toFixed(2)}
+          {formatCurrency(item.price)}
         </div>
       )}
       {item.priceless && (

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useItems } from "@/context/ItemsContext";
 import { useAuth } from "@/context/AuthContext";
-import { Package, DollarSign, MapPin, Tag, Eye, EyeOff, ChevronUp, ChevronDown } from "lucide-react";
+import { Package, IndianRupee, MapPin, Tag, Eye, EyeOff, ChevronUp, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -33,9 +33,17 @@ const StashStats = () => {
 
   // Format currency based on user preference
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
+    const currencyConfig = {
+      'INR': { locale: 'en-IN', currency: 'INR' },
+      'USD': { locale: 'en-US', currency: 'USD' },
+      'EUR': { locale: 'en-DE', currency: 'EUR' }
+    };
+
+    const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
+    
+    return new Intl.NumberFormat(config.locale, {
       style: 'currency',
-      currency: currency,
+      currency: config.currency,
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     }).format(amount);
@@ -51,7 +59,7 @@ const StashStats = () => {
     {
       title: "Value",
       value: showValue ? formatCurrency(totalValue) : "•••",
-      icon: DollarSign,
+      icon: IndianRupee,
       color: "text-green-600",
       hasToggle: true
     },

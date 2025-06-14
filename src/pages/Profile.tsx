@@ -44,7 +44,7 @@ const Profile = () => {
   
   const [username, setUsername] = useState<string>(user?.username || "");
   const [currency, setCurrency] = useState<string>(
-    user?.preferences?.currency || "USD"
+    user?.preferences?.currency || "INR"
   );
   const [newLocation, setNewLocation] = useState<string>("");
   const [newTag, setNewTag] = useState<string>("");
@@ -294,10 +294,9 @@ const Profile = () => {
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
                   <SelectContent className="animate-scale-in">
-                    <SelectItem value="USD">USD ($)</SelectItem>
-                    <SelectItem value="EUR">EUR (€)</SelectItem>
-                    <SelectItem value="GBP">GBP (£)</SelectItem>
-                    <SelectItem value="JPY">JPY (¥)</SelectItem>
+                    <SelectItem value="INR">₹ Indian Rupee (INR)</SelectItem>
+                    <SelectItem value="USD">$ US Dollar (USD)</SelectItem>
+                    <SelectItem value="EUR">€ Euro (EUR)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
