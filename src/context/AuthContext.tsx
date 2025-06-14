@@ -1,12 +1,13 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { UserPreferences } from "@/types";
 
 interface User {
   id: string;
   name: string;
   email: string;
+  username: string;
   avatarUrl?: string;
   preferences?: UserPreferences;
 }
@@ -16,6 +17,7 @@ interface AuthContextType {
   login: (user: User) => void;
   logout: () => void;
   updateUserPreferences: (preferences: Partial<UserPreferences>) => void;
+  updateUsername: (username: string) => void;
   addLocation: (location: string) => void;
   removeLocation: (location: string) => void;
   addTag: (tag: string) => void;
@@ -32,7 +34,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Initialize preferences if not present
     if (!userData.preferences) {
       userData.preferences = {
-        theme: "light",
         currency: "USD",
         locations: ["Wardrobe", "Kitchen", "Bookshelf", "Drawer"],
         tags: ["Clothing", "Book", "Electronics", "Furniture"]
@@ -74,6 +75,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       toast({
         title: "Preferences updated",
         description: "Your profile preferences have been updated.",
+      });
+    }
+  };
+
+  const updateUsername = (username: string) => {
+    if (user) {
+      setUser({
+        ...user,
+        username,
+      });
+      toast({
+        title: "Username updated",
+        description: "Your username has been updated successfully.",
       });
     }
   };
@@ -173,6 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login, 
         logout, 
         updateUserPreferences,
+        updateUsername,
         addLocation,
         removeLocation,
         addTag,

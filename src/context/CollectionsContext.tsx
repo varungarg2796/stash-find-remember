@@ -1,11 +1,11 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { Collection, CollectionItem, ShareSettings } from "@/types";
 import { toast } from "sonner";
+import { useAuth } from "./AuthContext";
 
 type CollectionsContextType = {
   collections: Collection[];
-  addCollection: (collection: Omit<Collection, "id" | "createdAt" | "updatedAt" | "shareSettings">) => void;
+  addCollection: (collection: Omit<Collection, "id" | "createdAt" | "updatedAt" | "shareSettings" | "by">) => void;
   updateCollection: (collection: Collection) => void;
   deleteCollection: (id: string) => void;
   getCollection: (id: string) => Collection | undefined;
@@ -20,18 +20,20 @@ const CollectionsContext = createContext<CollectionsContextType | undefined>(und
 
 export const CollectionsProvider = ({ children }: { children: React.ReactNode }) => {
   const [collections, setCollections] = useState<Collection[]>([]);
+  const { user } = useAuth();
 
   const generateShareId = () => {
     return Math.random().toString(36).substring(2) + Date.now().toString(36);
   };
 
-  const addCollection = (newCollection: Omit<Collection, "id" | "createdAt" | "updatedAt" | "shareSettings">) => {
+  const addCollection = (newCollection: Omit<Collection, "id" | "createdAt" | "updatedAt" | "shareSettings" | "by">) => {
     const now = new Date();
     const collection: Collection = {
       ...newCollection,
       id: Date.now().toString(),
       createdAt: now,
       updatedAt: now,
+      by: user?.username || 'Anonymous',
       shareSettings: {
         isEnabled: false,
         shareId: generateShareId(),

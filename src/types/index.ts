@@ -1,3 +1,4 @@
+
 export interface Item {
   id: string;
   name: string;
@@ -32,6 +33,7 @@ export interface Collection {
   shareSettings: ShareSettings;
   createdAt: Date;
   updatedAt: Date;
+  by: string; // Username of the collection owner
 }
 
 export interface CollectionItem {
@@ -62,7 +64,6 @@ export interface ShareSettings {
 export type ViewMode = 'grid' | 'list';
 
 export interface UserPreferences {
-  theme?: "light" | "dark";
   currency?: string;
   locations?: string[];
   tags?: string[];

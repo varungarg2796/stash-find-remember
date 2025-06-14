@@ -11,7 +11,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { ArrowLeft, Plus, X, Tag, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, X, Tag, AlertTriangle, Loader2, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -24,14 +24,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
-  const { user, updateUserPreferences, addLocation, removeLocation, addTag, removeTag } = useAuth();
+  const { user, updateUserPreferences, updateUsername, addLocation, removeLocation, addTag, removeTag } = useAuth();
   const { items } = useItems();
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [theme, setTheme] = useState<"light" | "dark">(
-    user?.preferences?.theme || "light"
-  );
+  const [username, setUsername] = useState<string>(user?.username || "");
   const [currency, setCurrency] = useState<string>(
     user?.preferences?.currency || "USD"
   );
@@ -178,9 +176,13 @@ const Profile = () => {
       
       // If we get here, all validations passed
       updateUserPreferences({
-        theme,
         currency,
       });
+
+      // Update username if changed
+      if (username !== user.username) {
+        updateUsername(username);
+      }
 
       toast({
         title: "Preferences saved",
@@ -250,27 +252,29 @@ const Profile = () => {
           <div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>
             <p className="text-muted-foreground">{user.email}</p>
+            <p className="text-sm text-muted-foreground">@{user.username}</p>
           </div>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-2">
-            <h3 className="text-lg font-medium">Preferences</h3>
+            <h3 className="text-lg font-medium">Profile Settings</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Theme</label>
-                <Select
-                  value={theme}
-                  onValueChange={(value: "light" | "dark") => setTheme(value)}
-                >
-                  <SelectTrigger className="transition-all duration-200 hover:scale-[1.02]">
-                    <SelectValue placeholder="Select theme" />
-                  </SelectTrigger>
-                  <SelectContent className="animate-scale-in">
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <User size={16} />
+                  Username
+                </label>
+                <Input
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username"
+                  maxLength={30}
+                  className="transition-all duration-200 focus:scale-[1.02]"
+                />
+                <p className="text-xs text-muted-foreground">
+                  This will appear on your shared collections
+                </p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Currency</label>
