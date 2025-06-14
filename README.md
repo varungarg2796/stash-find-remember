@@ -1,73 +1,272 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🗂️ Stasher - Organize Your Belongings with Ease
 
-**URL**: https://lovable.dev/projects/3d2471bc-9421-4ef9-b4fe-7e246d7ae0f5
+![Stasher Logo](public/stasher-logo.svg)
 
-## How can I edit this code?
+A modern, intuitive web application for managing and organizing your personal belongings. Track items, organize them into collections, and never lose track of your possessions again.
 
-There are several ways of editing your application.
+## ✨ Features
 
-**Use Lovable**
+### 📋 Item Management
+- **Add Items**: Create detailed records of your belongings with photos, descriptions, locations, and tags
+- **Search & Filter**: Quickly find items using powerful search and filtering capabilities
+- **Quantity Tracking**: Monitor quantities and get notified when items are running low
+- **Item Actions**: Use, gift, or archive items with automatic history tracking
+- **Bulk Import**: Import multiple items at once using CSV or manual entry
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3d2471bc-9421-4ef9-b4fe-7e246d7ae0f5) and start prompting.
+### 📁 Collections
+- **Create Collections**: Organize related items into themed collections
+- **Drag & Drop**: Easily reorganize items within collections
+- **Share Collections**: Generate shareable links for collections with privacy controls
+- **Collection Types**: Support for different collection types (boxes, rooms, categories, etc.)
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🔍 Smart Features
+- **AI Assistant**: Ask Stasher questions about your items using natural language
+- **Visual Search**: Upload images to find similar items in your stash
+- **Location Tracking**: Keep track of where items are stored
+- **Tag System**: Categorize items with customizable tags
+- **History Tracking**: Complete audit trail of all item actions
 
-**Use your preferred IDE**
+### 📊 Analytics & Insights
+- **Dashboard Stats**: View comprehensive statistics about your belongings
+- **Usage Patterns**: Track how often you use different items
+- **Value Tracking**: Monitor the total value of your possessions
+- **Archive Management**: Review and restore archived items
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 👤 User Experience
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Dark/Light Theme**: Choose your preferred visual theme
+- **Customizable Preferences**: Personalize locations, tags, and settings
+- **User Profiles**: Manage your account and preferences
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Quick Start
 
-Follow these steps:
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn package manager
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Installation
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. **Clone the repository**
+   ```bash
+   git clone <YOUR_GIT_URL>
+   cd stasher
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:5173` to see the application.
+
+## 🏗️ Technology Stack
+
+### Frontend
+- **React 18** - Modern React with hooks and functional components
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Beautiful, accessible UI components
+
+### State Management
+- **TanStack Query** - Server state management and caching
+- **React Context** - Client state management
+- **React Router** - Client-side routing
+
+### UI/UX
+- **Lucide React** - Beautiful icons
+- **Recharts** - Data visualization
+- **Sonner** - Toast notifications
+- **React Hook Form** - Form handling with validation
+
+### Development Tools
+- **ESLint** - Code linting
+- **TypeScript** - Static type checking
+- **PostCSS** - CSS processing
+
+## 📁 Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   ├── form/           # Form-specific components
+│   ├── item/           # Item-related components
+│   └── collection/     # Collection-related components
+├── context/            # React Context providers
+├── hooks/              # Custom React hooks
+├── pages/              # Page components
+├── services/           # API and external services
+├── types/              # TypeScript type definitions
+├── utils/              # Utility functions
+└── lib/                # Library configurations
 ```
 
-**Edit a file directly in GitHub**
+## 🎯 Usage Guide
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Getting Started
+1. **Login**: Use the login button to create your account
+2. **Add Your First Item**: Click "Add Item" to create your first inventory entry
+3. **Organize**: Create collections to group related items
+4. **Track**: Use the search and filter features to find items quickly
 
-**Use GitHub Codespaces**
+### Adding Items
+- Fill in item details (name, description, quantity, location)
+- Upload photos for visual identification
+- Add tags for better categorization
+- Set purchase information for value tracking
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Managing Collections
+- Create themed collections (e.g., "Kitchen Appliances", "Winter Clothes")
+- Drag and drop items between collections
+- Share collections with family or friends
+- Set privacy levels for each collection
 
-## What technologies are used for this project?
+### Using the Search
+- Use the search bar to find items by name or description
+- Filter by location, tags, or quantity
+- Use the AI assistant for natural language queries
 
-This project is built with:
+## 🔧 Configuration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Environment Variables
+Create a `.env.local` file in the root directory:
 
-## How can I deploy this project?
+```env
+# Add any environment variables here
+VITE_API_URL=your_api_url_here
+```
 
-Simply open [Lovable](https://lovable.dev/projects/3d2471bc-9421-4ef9-b4fe-7e246d7ae0f5) and click on Share -> Publish.
+### Customization
+- **Locations**: Add your custom storage locations in user preferences
+- **Tags**: Create custom tags for better organization
+- **Currency**: Set your preferred currency for price tracking
 
-## Can I connect a custom domain to my Lovable project?
+## 🤝 Contributing
 
-Yes it is!
+We welcome contributions! Please follow these steps:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Development Guidelines
+- Follow TypeScript best practices
+- Use meaningful component and variable names
+- Write responsive, mobile-first CSS
+- Test your changes across different screen sizes
+- Follow the existing code style and conventions
+
+## 📱 Mobile Support
+
+Stasher is fully responsive and optimized for mobile devices:
+- Touch-friendly interface
+- Swipe gestures for navigation
+- Mobile-optimized forms and dialogs
+- Responsive image handling
+- Fast loading on mobile networks
+
+## 🔒 Privacy & Security
+
+- **Local Storage**: Data is stored locally in your browser
+- **No External Tracking**: Your personal information stays private
+- **Secure Sharing**: Collection sharing uses secure, time-limited links
+- **Data Export**: Export your data anytime in standard formats
+
+## 🚀 Deployment
+
+### Build for Production
+```bash
+npm run build
+```
+
+### Deploy to Lovable
+1. Click the "Publish" button in the Lovable editor
+2. Your app will be available at `yourapp.lovable.app`
+
+### Custom Domain
+Connect your own domain through Project Settings > Domains in Lovable.
+
+### Self-Hosting
+After connecting to GitHub, you can deploy the built application to any static hosting service:
+- Vercel
+- Netlify
+- GitHub Pages
+- Cloudflare Pages
+
+## 📊 Analytics & Monitoring
+
+The app includes built-in analytics for:
+- Item usage patterns
+- Collection organization trends
+- Search behavior
+- Performance metrics
+
+## 🔄 Data Management
+
+### Backup & Restore
+- Export your data as JSON or CSV
+- Import data from other inventory systems
+- Automatic browser storage backup
+
+### Data Migration
+- Bulk import from spreadsheets
+- API endpoints for data synchronization
+- Cross-platform data compatibility
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**App not loading**
+- Clear browser cache and cookies
+- Check if JavaScript is enabled
+- Try in an incognito/private browser window
+
+**Images not uploading**
+- Check file size (max 10MB)
+- Ensure file format is supported (JPG, PNG, WebP)
+- Check browser permissions for file access
+
+**Search not working**
+- Try clearing and retyping your search query
+- Check if items exist with the search terms
+- Use tags or filters as alternative search methods
+
+### Performance Optimization
+- Use image compression for faster loading
+- Regularly archive unused items
+- Limit collections to manageable sizes
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🤔 Support
+
+- **Documentation**: Check this README and inline help text
+- **Issues**: Report bugs via GitHub Issues
+- **Discussions**: Join community discussions on GitHub
+- **Updates**: Follow the project for new features and improvements
+
+## 🎉 Acknowledgments
+
+- Built with [Lovable](https://lovable.dev) - AI-powered web development
+- UI components from [shadcn/ui](https://ui.shadcn.com)
+- Icons from [Lucide](https://lucide.dev)
+- Inspired by modern inventory management needs
+
+---
+
+**Made with ❤️ using Lovable AI Editor**
+
+*Stasher - Because knowing where your stuff is should be simple.*
