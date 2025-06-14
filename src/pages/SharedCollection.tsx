@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useCollections } from "@/context/CollectionsContext";
@@ -6,7 +5,7 @@ import { useItems } from "@/context/ItemsContext";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Tag, MapPin, DollarSign, Clock } from "lucide-react";
+import { Calendar, Tag, MapPin, DollarSign, Clock, User } from "lucide-react";
 import { format } from "date-fns";
 import ViewToggle from "@/components/ViewToggle";
 import { ViewMode } from "@/types";
@@ -52,10 +51,14 @@ const SharedCollection = () => {
         {collection.description && (
           <p className="text-muted-foreground">{collection.description}</p>
         )}
-        <div className="mt-2">
+        <div className="mt-3 flex items-center justify-center gap-4">
           <Badge variant="secondary">
             {collectionItems.length} item{collectionItems.length !== 1 ? 's' : ''}
           </Badge>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <User className="h-4 w-4 mr-1" />
+            <span>by {collection.by}</span>
+          </div>
         </div>
       </div>
 
