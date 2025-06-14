@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Share, Copy, Eye, Settings, Grid, List, Package } from "lucide-react";
+import { ArrowLeft, Plus, Share, Copy, Eye, Settings, Grid, List, Package, Save } from "lucide-react";
 import { toast } from "sonner";
 import ViewToggle from "@/components/ViewToggle";
 import CoverImageUploader from "@/components/form/CoverImageUploader";
@@ -19,22 +19,26 @@ import DraggableItemCard from "@/components/items/DraggableItemCard";
 import ItemCardSkeleton from "@/components/ItemCardSkeleton";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { ViewMode } from "@/types";
+import { ViewMode, Collection, CollectionItem } from "@/types";
 
 const CollectionDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const { getCollection, updateCollection, addItemToCollection, removeItemFromCollection, updateShareSettings, reorderCollectionItems } = useCollections();
+  const { getCollection, updateCollection, updateShareSettings } = useCollections();
   const { items } = useItems();
   const navigate = useNavigate();
   
-  const [collection, setCollection] = useState(getCollection(id!));
+  const originalCollection = getCollection(id!);
+  
+  // Local state for pending changes
+  const [localCollection, setLocalCollection] = useState<Collection | null>(originalCollection);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [editName, setEditName] = useState(collection?.name || "");
-  const [editDescription, setEditDescription] = useState(collection?.description || "");
-  const [editCoverImage, setEditCoverImage] = useState(collection?.coverImage || "");
+  const [editName, setEditName] = useState(originalCollection?.name || "");
+  const [editDescription, setEditDescription] = useState(originalCollection?.description || "");
+  const [editCoverImage, setEditCoverImage] = useState(originalCollection?.coverImage || "");
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [shareSettings, setShareSettings] = useState(collection?.shareSettings);
+  const [shareSettings, setShareSettings] = useState(originalCollection?.shareSettings);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -56,15 +60,16 @@ const CollectionDetail = () => {
     const updateCollectionData = () => {
       if (isMounted) {
         const updatedCollection = getCollection(id!);
-        setCollection(updatedCollection);
-        setShareSettings(updatedCollection?.shareSettings);
-        setEditCoverImage(updatedCollection?.coverImage || "");
+        if (!hasUnsavedChanges) {
+          setLocalCollection(updatedCollection);
+          setShareSettings(updatedCollection?.shareSettings);
+          setEditCoverImage(updatedCollection?.coverImage || "");
+        }
       }
     };
     
     updateCollectionData();
     
-    // Simulate loading for collection items
     timeoutId = setTimeout(() => {
       if (isMounted) {
         setIsLoading(false);
@@ -77,41 +82,42 @@ const CollectionDetail = () => {
         clearTimeout(timeoutId);
       }
     };
-  }, [id, getCollection]);
+  }, [id, getCollection, hasUnsavedChanges]);
 
   const collectionItems = useMemo(() => {
-    if (!collection) return [];
+    if (!localCollection) return [];
     
-    return collection.items
+    return localCollection.items
       .sort((a, b) => a.order - b.order)
       .map(collectionItem => {
         const item = items.find(i => i.id === collectionItem.itemId);
         return item ? { ...item, collectionNote: collectionItem.collectionNote } : null;
       }).filter(Boolean);
-  }, [collection, items]);
+  }, [localCollection, items]);
 
   const availableItems = useMemo(() => {
     return items.filter(item => 
-      !collection?.items.some(ci => ci.itemId === item.id)
+      !localCollection?.items.some(ci => ci.itemId === item.id)
     );
-  }, [items, collection]);
+  }, [items, localCollection]);
 
   const handleSaveName = useCallback(() => {
-    if (editName.trim() && collection) {
-      updateCollection({
-        ...collection,
+    if (editName.trim() && localCollection) {
+      setLocalCollection({
+        ...localCollection,
         name: editName.trim(),
         description: editDescription.trim() || undefined,
         coverImage: editCoverImage || undefined
       });
+      setHasUnsavedChanges(true);
       setIsEditingName(false);
     }
-  }, [editName, editDescription, editCoverImage, collection, updateCollection]);
+  }, [editName, editDescription, editCoverImage, localCollection]);
 
   const handleDragEnd = useCallback((event: any) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id && collection) {
+    if (active.id !== over?.id && localCollection) {
       const oldIndex = collectionItems.findIndex((item: any) => item.id === active.id);
       const newIndex = collectionItems.findIndex((item: any) => item.id === over.id);
       
@@ -122,43 +128,86 @@ const CollectionDetail = () => {
         order: index
       }));
       
-      reorderCollectionItems(collection.id, updatedCollectionItems);
+      setLocalCollection({
+        ...localCollection,
+        items: updatedCollectionItems
+      });
+      setHasUnsavedChanges(true);
     }
-  }, [collection, collectionItems, reorderCollectionItems]);
+  }, [localCollection, collectionItems]);
 
   const handleShareSettingsUpdate = useCallback(() => {
-    if (shareSettings && collection) {
-      updateShareSettings(collection.id, shareSettings);
+    if (shareSettings && localCollection) {
+      updateShareSettings(localCollection.id, shareSettings);
       setIsShareDialogOpen(false);
     }
-  }, [shareSettings, collection, updateShareSettings]);
+  }, [shareSettings, localCollection, updateShareSettings]);
 
   const copyShareLink = useCallback(() => {
-    if (collection?.shareSettings.isEnabled) {
-      const shareUrl = `${window.location.origin}/share/collection/${collection.shareSettings.shareId}`;
+    if (localCollection?.shareSettings.isEnabled) {
+      const shareUrl = `${window.location.origin}/share/collection/${localCollection.shareSettings.shareId}`;
       navigator.clipboard.writeText(shareUrl);
       toast.success("Share link copied to clipboard!");
     }
-  }, [collection]);
+  }, [localCollection]);
 
   const handleAddItemToCollection = useCallback((itemId: string) => {
-    if (collection) {
-      addItemToCollection(collection.id, itemId);
+    if (localCollection) {
+      const existingItem = localCollection.items.find(item => item.itemId === itemId);
+      if (existingItem) {
+        toast.error("Item already in collection");
+        return;
+      }
+      
+      const newItem: CollectionItem = {
+        itemId,
+        order: localCollection.items.length
+      };
+      
+      setLocalCollection({
+        ...localCollection,
+        items: [...localCollection.items, newItem]
+      });
+      setHasUnsavedChanges(true);
     }
-  }, [collection, addItemToCollection]);
+  }, [localCollection]);
 
   const handleRemoveItem = useCallback((itemId: string) => {
-    if (collection) {
-      removeItemFromCollection(collection.id, itemId);
+    if (localCollection) {
+      setLocalCollection({
+        ...localCollection,
+        items: localCollection.items.filter(item => item.itemId !== itemId)
+      });
+      setHasUnsavedChanges(true);
     }
-  }, [collection, removeItemFromCollection]);
+  }, [localCollection]);
+
+  const handleSaveChanges = useCallback(() => {
+    if (localCollection && hasUnsavedChanges) {
+      updateCollection(localCollection);
+      setHasUnsavedChanges(false);
+      toast.success("Collection saved successfully");
+    }
+  }, [localCollection, hasUnsavedChanges, updateCollection]);
+
+  const handleDiscardChanges = useCallback(() => {
+    const originalCollection = getCollection(id!);
+    setLocalCollection(originalCollection);
+    setEditName(originalCollection?.name || "");
+    setEditDescription(originalCollection?.description || "");
+    setEditCoverImage(originalCollection?.coverImage || "");
+    setShareSettings(originalCollection?.shareSettings);
+    setHasUnsavedChanges(false);
+    setIsEditingName(false);
+    toast.success("Changes discarded");
+  }, [id, getCollection]);
 
   if (!user) {
     navigate("/");
     return null;
   }
 
-  if (!collection && !isLoading) {
+  if (!localCollection && !isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-screen-md mx-auto px-4 py-6">
@@ -201,7 +250,7 @@ const CollectionDetail = () => {
               <ArrowLeft size={18} />
             </Button>
             
-            {collection && (
+            {localCollection && (
               <div className="flex gap-2">
                 <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
                   <DialogTrigger asChild>
@@ -272,7 +321,7 @@ const CollectionDetail = () => {
                   </DialogContent>
                 </Dialog>
                 
-                {collection.shareSettings.isEnabled && (
+                {localCollection.shareSettings.isEnabled && (
                   <Button onClick={copyShareLink} size="sm">
                     <Share className="h-4 w-4" />
                   </Button>
@@ -282,7 +331,7 @@ const CollectionDetail = () => {
           </div>
 
           {/* Collection title and edit */}
-          {collection && (isEditingName ? (
+          {localCollection && (isEditingName ? (
             <div className="space-y-3">
               <Input
                 value={editName}
@@ -311,21 +360,41 @@ const CollectionDetail = () => {
               className="cursor-pointer"
               onClick={() => setIsEditingName(true)}
             >
-              {collection.coverImage && (
+              {localCollection.coverImage && (
                 <div className="w-full h-24 mb-3 rounded-lg overflow-hidden">
                   <img 
-                    src={collection.coverImage} 
-                    alt={collection.name}
+                    src={localCollection.coverImage} 
+                    alt={localCollection.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
               )}
-              <h1 className="text-xl font-bold">{collection.name}</h1>
-              {collection.description && (
-                <p className="text-sm text-muted-foreground mt-1">{collection.description}</p>
+              <h1 className="text-xl font-bold">{localCollection.name}</h1>
+              {localCollection.description && (
+                <p className="text-sm text-muted-foreground mt-1">{localCollection.description}</p>
               )}
             </div>
           ))}
+
+          {/* Save/Discard Changes Bar */}
+          {hasUnsavedChanges && (
+            <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-sm text-orange-800">
+                  <Save className="h-4 w-4 mr-2" />
+                  You have unsaved changes
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleDiscardChanges} variant="outline" size="sm">
+                    Discard
+                  </Button>
+                  <Button onClick={handleSaveChanges} size="sm">
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -389,7 +458,7 @@ const CollectionDetail = () => {
         </div>
 
         {/* Add items section */}
-        {!isLoading && collection && availableItems.length > 0 && (
+        {!isLoading && localCollection && availableItems.length > 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">Add Items</h2>
             <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -423,11 +492,11 @@ const CollectionDetail = () => {
         )}
 
         {/* Preview shared view button */}
-        {!isLoading && collection?.shareSettings.isEnabled && (
+        {!isLoading && localCollection?.shareSettings.isEnabled && (
           <div className="text-center">
             <Button 
               variant="outline" 
-              onClick={() => navigate(`/share/collection/${collection.shareSettings.shareId}`)}
+              onClick={() => navigate(`/share/collection/${localCollection.shareSettings.shareId}`)}
             >
               <Eye className="mr-2 h-4 w-4" />
               Preview Shared View
