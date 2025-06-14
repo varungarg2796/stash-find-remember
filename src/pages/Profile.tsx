@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useItems } from "@/context/ItemsContext";
@@ -29,6 +29,19 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Check authentication
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+      return;
+    }
+  }, [user, navigate]);
+
+  // Don't render if user is not authenticated
+  if (!user) {
+    return null;
+  }
+  
   const [username, setUsername] = useState<string>(user?.username || "");
   const [currency, setCurrency] = useState<string>(
     user?.preferences?.currency || "USD"
@@ -47,11 +60,6 @@ const Profile = () => {
     unusedItems: [],
     usedItems: []
   });
-
-  if (!user) {
-    navigate("/");
-    return null;
-  }
 
   const checkSingleItemUsage = (itemToRemove: string, type: 'locations' | 'tags') => {
     const usingItems = items.filter(item => {

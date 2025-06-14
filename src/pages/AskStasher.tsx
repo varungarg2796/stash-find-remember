@@ -1,10 +1,10 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, MessageSquareMore } from "lucide-react";
 import { useItems } from "@/context/ItemsContext";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 const AskStasher = () => {
@@ -12,7 +12,21 @@ const AskStasher = () => {
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { items } = useItems();
+
+  // Check authentication
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+      return;
+    }
+  }, [user, navigate]);
+
+  // Don't render if user is not authenticated
+  if (!user) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

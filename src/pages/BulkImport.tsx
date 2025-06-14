@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus, Save, Loader2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
@@ -26,7 +27,22 @@ const MAX_BULK_IMPORT_ITEMS = 40;
 
 const BulkImport = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { addItem, getActiveItems } = useItems();
+  
+  // Check authentication
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+      return;
+    }
+  }, [user, navigate]);
+
+  // Don't render if user is not authenticated
+  if (!user) {
+    return null;
+  }
+
   const activeItems = getActiveItems();
   
   // Extract unique locations from existing items, filtering out empty strings

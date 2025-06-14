@@ -1,7 +1,7 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useItems } from "@/context/ItemsContext";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import ItemList from "@/components/ItemList";
 import { ArrowLeft, Box, Trash2 } from "lucide-react";
@@ -9,10 +9,25 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { toast } from "sonner";
 
 const Archive = () => {
+  const { user } = useAuth();
   const { getArchivedItems, deleteItem, restoreItem } = useItems();
   const navigate = useNavigate();
-  const archivedItems = getArchivedItems();
   const [sortBy, setSortBy] = useState<string>("newest");
+  
+  // Check authentication
+  useEffect(() => {
+    if (!user) {
+      navigate("/");
+      return;
+    }
+  }, [user, navigate]);
+
+  // Don't render if user is not authenticated
+  if (!user) {
+    return null;
+  }
+  
+  const archivedItems = getArchivedItems();
   
   const sortedItems = [...archivedItems].sort((a, b) => {
     const archiveActions = (item: any) => {
