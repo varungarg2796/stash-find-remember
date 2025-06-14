@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useCollections } from "@/context/CollectionsContext";
 import { useItems } from "@/context/ItemsContext";
@@ -18,8 +19,38 @@ const SharedCollection = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   useEffect(() => {
-    setCollection(getSharedCollection(shareId!));
+    let isMounted = true;
+    
+    const updateCollection = () => {
+      if (isMounted) {
+        setCollection(getSharedCollection(shareId!));
+      }
+    };
+    
+    updateCollection();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [shareId, getSharedCollection]);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
+
+  const collectionItems = useMemo(() => {
+    if (!collection) return [];
+    
+    return collection.items.map(collectionItem => {
+      const item = items.find(i => i.id === collectionItem.itemId);
+      return item ? { ...item, collectionNote: collectionItem.collectionNote } : null;
+    }).filter(Boolean);
+  }, [collection, items]);
+
+  const shareSettings = useMemo(() => {
+    if (!collection) return null;
+    return collection.shareSettings.displaySettings;
+  }, [collection]);
 
   if (!collection) {
     return (
@@ -37,12 +68,7 @@ const SharedCollection = () => {
   const {
     showDescription, showQuantity, showLocation,
     showTags, showPrice, showAcquisitionDate
-  } = collection.shareSettings.displaySettings;
-
-  const collectionItems = collection.items.map(collectionItem => {
-    const item = items.find(i => i.id === collectionItem.itemId);
-    return item ? { ...item, collectionNote: collectionItem.collectionNote } : null;
-  }).filter(Boolean);
+  } = shareSettings!;
 
   return (
     <div className="max-w-screen-lg mx-auto px-4 py-6">
@@ -73,7 +99,7 @@ const SharedCollection = () => {
           <div className="flex justify-end">
             <ViewToggle 
               activeView={viewMode}
-              onViewChange={setViewMode}
+              onViewChange={handleViewModeChange}
             />
           </div>
           

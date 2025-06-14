@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useCollections } from "@/context/CollectionsContext";
@@ -49,17 +50,108 @@ const CollectionDetail = () => {
   );
 
   useEffect(() => {
-    const updatedCollection = getCollection(id!);
-    setCollection(updatedCollection);
-    setShareSettings(updatedCollection?.shareSettings);
-    setEditCoverImage(updatedCollection?.coverImage || "");
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+    
+    const updateCollectionData = () => {
+      if (isMounted) {
+        const updatedCollection = getCollection(id!);
+        setCollection(updatedCollection);
+        setShareSettings(updatedCollection?.shareSettings);
+        setEditCoverImage(updatedCollection?.coverImage || "");
+      }
+    };
+    
+    updateCollectionData();
     
     // Simulate loading for collection items
-    const timer = setTimeout(() => {
-      setIsLoading(false);
+    timeoutId = setTimeout(() => {
+      if (isMounted) {
+        setIsLoading(false);
+      }
     }, 800);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      isMounted = false;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [id, getCollection]);
+
+  const collectionItems = useMemo(() => {
+    if (!collection) return [];
+    
+    return collection.items
+      .sort((a, b) => a.order - b.order)
+      .map(collectionItem => {
+        const item = items.find(i => i.id === collectionItem.itemId);
+        return item ? { ...item, collectionNote: collectionItem.collectionNote } : null;
+      }).filter(Boolean);
+  }, [collection, items]);
+
+  const availableItems = useMemo(() => {
+    return items.filter(item => 
+      !collection?.items.some(ci => ci.itemId === item.id)
+    );
+  }, [items, collection]);
+
+  const handleSaveName = useCallback(() => {
+    if (editName.trim() && collection) {
+      updateCollection({
+        ...collection,
+        name: editName.trim(),
+        description: editDescription.trim() || undefined,
+        coverImage: editCoverImage || undefined
+      });
+      setIsEditingName(false);
+    }
+  }, [editName, editDescription, editCoverImage, collection, updateCollection]);
+
+  const handleDragEnd = useCallback((event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id && collection) {
+      const oldIndex = collectionItems.findIndex((item: any) => item.id === active.id);
+      const newIndex = collectionItems.findIndex((item: any) => item.id === over.id);
+      
+      const reorderedItems = arrayMove(collectionItems, oldIndex, newIndex);
+      const updatedCollectionItems = reorderedItems.map((item: any, index) => ({
+        itemId: item.id,
+        collectionNote: item.collectionNote,
+        order: index
+      }));
+      
+      reorderCollectionItems(collection.id, updatedCollectionItems);
+    }
+  }, [collection, collectionItems, reorderCollectionItems]);
+
+  const handleShareSettingsUpdate = useCallback(() => {
+    if (shareSettings && collection) {
+      updateShareSettings(collection.id, shareSettings);
+      setIsShareDialogOpen(false);
+    }
+  }, [shareSettings, collection, updateShareSettings]);
+
+  const copyShareLink = useCallback(() => {
+    if (collection?.shareSettings.isEnabled) {
+      const shareUrl = `${window.location.origin}/share/collection/${collection.shareSettings.shareId}`;
+      navigator.clipboard.writeText(shareUrl);
+      toast.success("Share link copied to clipboard!");
+    }
+  }, [collection]);
+
+  const handleAddItemToCollection = useCallback((itemId: string) => {
+    if (collection) {
+      addItemToCollection(collection.id, itemId);
+    }
+  }, [collection, addItemToCollection]);
+
+  const handleRemoveItem = useCallback((itemId: string) => {
+    if (collection) {
+      removeItemFromCollection(collection.id, itemId);
+    }
+  }, [collection, removeItemFromCollection]);
 
   if (!user) {
     navigate("/");
@@ -94,62 +186,6 @@ const CollectionDetail = () => {
       </div>
     );
   }
-
-  const collectionItems = collection?.items
-    .sort((a, b) => a.order - b.order)
-    .map(collectionItem => {
-      const item = items.find(i => i.id === collectionItem.itemId);
-      return item ? { ...item, collectionNote: collectionItem.collectionNote } : null;
-    }).filter(Boolean) || [];
-
-  const availableItems = items.filter(item => 
-    !collection?.items.some(ci => ci.itemId === item.id)
-  );
-
-  const handleSaveName = () => {
-    if (editName.trim() && collection) {
-      updateCollection({
-        ...collection,
-        name: editName.trim(),
-        description: editDescription.trim() || undefined,
-        coverImage: editCoverImage || undefined
-      });
-      setIsEditingName(false);
-    }
-  };
-
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-
-    if (active.id !== over?.id) {
-      const oldIndex = collectionItems.findIndex((item: any) => item.id === active.id);
-      const newIndex = collectionItems.findIndex((item: any) => item.id === over.id);
-      
-      const reorderedItems = arrayMove(collectionItems, oldIndex, newIndex);
-      const updatedCollectionItems = reorderedItems.map((item: any, index) => ({
-        itemId: item.id,
-        collectionNote: item.collectionNote,
-        order: index
-      }));
-      
-      reorderCollectionItems(collection!.id, updatedCollectionItems);
-    }
-  };
-
-  const handleShareSettingsUpdate = () => {
-    if (shareSettings && collection) {
-      updateShareSettings(collection.id, shareSettings);
-      setIsShareDialogOpen(false);
-    }
-  };
-
-  const copyShareLink = () => {
-    if (collection?.shareSettings.isEnabled) {
-      const shareUrl = `${window.location.origin}/share/collection/${collection.shareSettings.shareId}`;
-      navigator.clipboard.writeText(shareUrl);
-      toast.success("Share link copied to clipboard!");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -343,7 +379,7 @@ const CollectionDetail = () => {
                       key={item.id}
                       item={item}
                       viewMode={viewMode}
-                      onRemove={() => removeItemFromCollection(collection!.id, item.id)}
+                      onRemove={() => handleRemoveItem(item.id)}
                     />
                   ))}
                 </div>
@@ -373,7 +409,7 @@ const CollectionDetail = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => addItemToCollection(collection.id, item.id)}
+                        onClick={() => handleAddItemToCollection(item.id)}
                         className="flex-shrink-0"
                       >
                         <Plus className="h-4 w-4" />

@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Package, Camera, MapPin, Tag, Star } from "lucide-react";
 import { useNavigationHelper } from "@/hooks/useNavigationHelper";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 
 const MyStash = () => {
   const { navigateWithState } = useNavigationHelper();
@@ -35,18 +35,25 @@ const MyStash = () => {
     clearSubFilter
   } = useItemFiltering();
 
-  const hasItems = items.length > 0;
+  const hasItems = useMemo(() => items.length > 0, [items.length]);
   const itemsPerPage = 12;
 
   // Simulate loading state for demonstration
   useEffect(() => {
-    const timer = setTimeout(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    timeoutId = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
-  const handleQuickLogin = () => {
+  const handleQuickLogin = useCallback(() => {
     login({
       id: "user-1",
       name: "John Doe",
@@ -54,16 +61,16 @@ const MyStash = () => {
       username: "johndoe",
       avatarUrl: "https://i.pravatar.cc/150?u=user-1"
     });
-  };
+  }, [login]);
 
-  const handleAddItem = () => {
+  const handleAddItem = useCallback(() => {
     navigateWithState("/add-item", "/my-stash");
-  };
+  }, [navigateWithState]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     handleSearch("");
     handleFilterChange("all");
-  };
+  }, [handleSearch, handleFilterChange]);
 
   // Show placeholder content for non-logged-in users
   if (!user) {
