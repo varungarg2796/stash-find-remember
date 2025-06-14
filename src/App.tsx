@@ -24,6 +24,10 @@ import BulkImport from "./pages/BulkImport";
 import Collections from "./pages/Collections";
 import CollectionDetail from "./pages/CollectionDetail";
 import SharedCollection from "./pages/SharedCollection";
+import CollectionNotFound from "./pages/CollectionNotFound";
+import ItemNotFound from "./pages/ItemNotFound";
+import AccessDenied from "./pages/AccessDenied";
+import ServerError from "./pages/ServerError";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +59,13 @@ const App = () => {
                       <Route path="/collections" element={<Collections />} />
                       <Route path="/collections/:id" element={<CollectionDetail />} />
                       <Route path="/share/collection/:shareId" element={<SharedCollection />} />
+                      
+                      {/* Error pages */}
+                      <Route path="/error/collection-not-found" element={<CollectionNotFound />} />
+                      <Route path="/error/item-not-found" element={<ItemNotFound />} />
+                      <Route path="/error/access-denied" element={<AccessDenied />} />
+                      <Route path="/error/server-error" element={<ServerError />} />
+                      
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

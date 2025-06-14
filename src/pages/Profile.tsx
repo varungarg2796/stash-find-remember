@@ -11,7 +11,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { ArrowLeft, Plus, X, Tag, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, X, Tag, AlertTriangle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -21,11 +21,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { user, updateUserPreferences, addLocation, removeLocation, addTag, removeTag } = useAuth();
   const { items } = useItems();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const [theme, setTheme] = useState<"light" | "dark">(
     user?.preferences?.theme || "light"
@@ -35,6 +37,7 @@ const Profile = () => {
   );
   const [newLocation, setNewLocation] = useState<string>("");
   const [newTag, setNewTag] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
   const [validationDialog, setValidationDialog] = useState<{
     open: boolean;
     type: 'locations' | 'tags';
@@ -138,7 +141,7 @@ const Profile = () => {
     };
   };
 
-  const handleSavePreferences = () => {
+  const handleSavePreferences = async () => {
     const currentLocations = user?.preferences?.locations || [];
     const currentTags = user?.preferences?.tags || [];
 
@@ -166,11 +169,32 @@ const Profile = () => {
       return;
     }
 
-    // If we get here, all validations passed
-    updateUserPreferences({
-      theme,
-      currency,
-    });
+    // Show loading state and simulate API call
+    setIsSaving(true);
+    
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // If we get here, all validations passed
+      updateUserPreferences({
+        theme,
+        currency,
+      });
+
+      toast({
+        title: "Preferences saved",
+        description: "Your preferences have been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving preferences",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleValidationDialogClose = () => {
@@ -386,9 +410,17 @@ const Profile = () => {
 
           <Button 
             onClick={handleSavePreferences}
+            disabled={isSaving}
             className="transition-all duration-200 hover:scale-105"
           >
-            Save Preferences
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Preferences"
+            )}
           </Button>
         </div>
       </div>
