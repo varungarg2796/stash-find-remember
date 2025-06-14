@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import AddItemButton from "@/components/AddItemButton";
 import FilterSection from "@/components/filter/FilterSection";
@@ -223,5 +224,3 @@ const MyStash = () => {
 };
 
 export default MyStash;
-
-}

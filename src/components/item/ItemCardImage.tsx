@@ -1,6 +1,7 @@
 
 import { Package } from "lucide-react";
 import { Item } from "@/types";
+import { getIconByName } from "@/utils/iconUtils";
 
 interface ItemCardImageProps {
   item: Item;
@@ -10,6 +11,9 @@ interface ItemCardImageProps {
 }
 
 const ItemCardImage = ({ item, onClick, isExpired, isExpiringSoon }: ItemCardImageProps) => {
+  // Get the icon component from the icon name
+  const IconComponent = getIconByName(item.iconType);
+
   return (
     <div onClick={onClick} className="relative">
       <div className="aspect-square relative">
@@ -22,11 +26,9 @@ const ItemCardImage = ({ item, onClick, isExpired, isExpiringSoon }: ItemCardIma
               e.currentTarget.src = "/placeholder.svg";
             }}
           />
-        ) : item.iconType ? (
+        ) : IconComponent ? (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 rounded-t-lg">
-            <div className="text-6xl">
-              {item.iconType}
-            </div>
+            <IconComponent className="h-16 w-16 text-slate-600" />
           </div>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-t-lg flex items-center justify-center">
