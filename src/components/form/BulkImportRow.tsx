@@ -1,121 +1,71 @@
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, AlertCircle, Tag } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
+// The RowItem type is now much simpler, as it doesn't need to track errors.
 export interface RowItem {
   id: string;
   name: string;
   description: string;
   quantity: number;
   location: string;
-  tags: string;
+  tags: string; // Keep as a comma-separated string for the input field
   price?: number;
-  hasErrors?: boolean;
-  errors?: {
-    name?: string;
-    quantity?: string;
-    tags?: string;
-    price?: string;
-  };
 }
 
 interface BulkImportRowProps {
   row: RowItem;
-  locations: string[];
-  onUpdate: (id: string, field: keyof RowItem, value: any) => void;
+  locations: string[]; // Pass down the available location names
+  onUpdate: (id: string, field: keyof RowItem, value: RowItem[keyof RowItem]) => void;
   onDelete: (id: string) => void;
-  validateRow?: (row: RowItem) => RowItem;
 }
 
-const BulkImportRow = ({ row, locations, onUpdate, onDelete, validateRow }: BulkImportRowProps) => {
+const BulkImportRow = ({ row, locations, onUpdate, onDelete }: BulkImportRowProps) => {
   const { user } = useAuth();
-  
-  // Common tags from user preferences or default ones
-  const commonTags = user?.preferences?.tags || [
-    "Clothing", "Book", "Electronics", "Furniture", "Kitchen", 
-    "Decor", "Toy", "Tool", "Sport", "Outdoor", "Cosmetic", "Food", "Pet"
-  ];
 
-  // Handle selecting a tag
-  const handleTagSelect = (tag: string) => {
-    const currentTags = row.tags ? row.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-    if (!currentTags.includes(tag)) {
-      const newTags = [...currentTags, tag];
-      onUpdate(row.id, "tags", newTags.join(', '));
-    }
-  };
-
-  // Validate on blur
-  const handleBlur = (field: keyof RowItem) => {
-    if (validateRow) {
-      validateRow({...row});
-    }
-  };
+  // The list of all available tags now comes directly from the user object.
+  const allUserTags = user?.tags.map(t => t.name) || [];
 
   return (
-    <tr className={row.hasErrors ? "bg-red-50" : ""}>
+    // No more dynamic error classes, as validation is on the backend.
+    <tr>
       <td>
-        <div>
-          <Input
-            value={row.name}
-            onChange={(e) => onUpdate(row.id, "name", e.target.value)}
-            onBlur={() => handleBlur("name")}
-            placeholder="Item name"
-            className={`h-9 ${row.errors?.name ? "border-destructive" : ""}`}
-          />
-          {row.errors?.name && (
-            <div className="text-destructive text-xs flex items-center mt-1">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              {row.errors.name}
-            </div>
-          )}
-        </div>
+        <Input
+          value={row.name}
+          onChange={(e) => onUpdate(row.id, 'name', e.target.value)}
+          placeholder="Item name (required)"
+          className="h-9"
+        />
       </td>
       <td>
         <Input
           value={row.description}
-          onChange={(e) => onUpdate(row.id, "description", e.target.value)}
+          onChange={(e) => onUpdate(row.id, 'description', e.target.value)}
           placeholder="Description"
           className="h-9"
         />
       </td>
       <td>
-        <div>
-          <Input
-            type="number"
-            min="1"
-            value={row.quantity}
-            onChange={(e) => onUpdate(row.id, "quantity", parseInt(e.target.value) || 1)}
-            onBlur={() => handleBlur("quantity")}
-            className={`h-9 ${row.errors?.quantity ? "border-destructive" : ""}`}
-          />
-          {row.errors?.quantity && (
-            <div className="text-destructive text-xs flex items-center mt-1">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              {row.errors.quantity}
-            </div>
-          )}
-        </div>
+        <Input
+          type="number"
+          min="1"
+          value={row.quantity}
+          onChange={(e) => onUpdate(row.id, 'quantity', parseInt(e.target.value, 10) || 1)}
+          className="h-9"
+        />
       </td>
       <td>
-        <Select 
+        <Select
           value={row.location}
-          onValueChange={(value) => onUpdate(row.id, "location", value)}
+          onValueChange={(value) => onUpdate(row.id, 'location', value)}
         >
           <SelectTrigger className="h-9">
             <SelectValue placeholder="Select location" />
           </SelectTrigger>
           <SelectContent>
+            {/* The locations prop is now just an array of strings */}
             {locations.map((location) => (
               <SelectItem key={location} value={location}>
                 {location}
@@ -125,53 +75,26 @@ const BulkImportRow = ({ row, locations, onUpdate, onDelete, validateRow }: Bulk
         </Select>
       </td>
       <td>
-        <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-9 w-full flex justify-between items-center text-left font-normal">
-                <span className="truncate">{row.tags || "Select tags"}</span>
-                <Tag size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48 max-h-60 overflow-auto">
-              {commonTags.map((tag) => (
-                <DropdownMenuItem 
-                  key={tag}
-                  onClick={() => handleTagSelect(tag)}
-                >
-                  {tag}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          {row.errors?.tags && (
-            <div className="text-destructive text-xs flex items-center mt-1">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              {row.errors.tags}
-            </div>
-          )}
-        </div>
+        {/* The UI for tags can now be a simple text input, as per your design */}
+        <Input
+          value={row.tags}
+          onChange={(e) => onUpdate(row.id, 'tags', e.target.value)}
+          placeholder="e.g., Electronics, Work"
+          className="h-9"
+        />
+        {/* The Dropdown for picking tags can be added back as a UX improvement,
+            but a simple text input is sufficient for the backend logic. */}
       </td>
       <td>
-        <div>
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            value={row.price !== undefined ? row.price : ""}
-            onChange={(e) => onUpdate(row.id, "price", e.target.value ? parseFloat(e.target.value) : undefined)}
-            onBlur={() => handleBlur("price")}
-            placeholder="Value/Cost"
-            className={`h-9 ${row.errors?.price ? "border-destructive" : ""}`}
-          />
-          {row.errors?.price && (
-            <div className="text-destructive text-xs flex items-center mt-1">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              {row.errors.price}
-            </div>
-          )}
-        </div>
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          value={row.price !== undefined ? row.price : ''}
+          onChange={(e) => onUpdate(row.id, 'price', e.target.value ? parseFloat(e.target.value) : undefined)}
+          placeholder="Value/Cost"
+          className="h-9"
+        />
       </td>
       <td>
         <Button

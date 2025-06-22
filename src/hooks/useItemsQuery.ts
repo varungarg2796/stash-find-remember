@@ -1,192 +1,109 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { mockApi } from '@/services/mockApi';
-import { Item } from '@/types';
+import { itemsApi, FindAllItemsParams } from '@/services/api/itemsApi';
 import { toast } from 'sonner';
+import { ApiError, Item } from '@/types';
 
+// Define query keys for TanStack Query to manage caching
 export const QUERY_KEYS = {
-  items: ['items'] as const,
-  item: (id: string) => ['items', id] as const,
-  activeItems: ['items', 'active'] as const,
-  archivedItems: ['items', 'archived'] as const,
+  items: (params: FindAllItemsParams) => ['items', params],
+  item: (id: string) => ['items', id],
 };
 
-// Get all items
-export const useItemsQuery = () => {
+/**
+ * Hook to fetch a paginated and filtered list of items from the backend.
+ * @param params - The filter, sort, and pagination parameters.
+ */
+export const useItemsQuery = (params: FindAllItemsParams) => {
   return useQuery({
-    queryKey: QUERY_KEYS.items,
-    queryFn: mockApi.getItems,
+    queryKey: QUERY_KEYS.items(params),
+    queryFn: () => itemsApi.getAll(params),
+    placeholderData: (prev) => prev, // Provides a smoother UX during pagination
   });
 };
 
-// Get active items
-export const useActiveItemsQuery = () => {
-  return useQuery({
-    queryKey: QUERY_KEYS.activeItems,
-    queryFn: mockApi.getActiveItems,
-  });
-};
-
-// Get archived items
-export const useArchivedItemsQuery = () => {
-  return useQuery({
-    queryKey: QUERY_KEYS.archivedItems,
-    queryFn: mockApi.getArchivedItems,
-  });
-};
-
-// Get single item
+/**
+ * Hook to fetch a single item by its ID.
+ * @param id - The ID of the item to fetch.
+ */
 export const useItemQuery = (id: string) => {
   return useQuery({
     queryKey: QUERY_KEYS.item(id),
-    queryFn: () => mockApi.getItem(id),
-    enabled: !!id,
+    queryFn: () => itemsApi.getById(id),
+    enabled: !!id, // The query will not run until an ID is provided
   });
 };
 
-// Create item mutation
+// --- MUTATIONS ---
+
 export const useCreateItemMutation = () => {
   const queryClient = useQueryClient();
-  
   return useMutation({
-    mutationFn: mockApi.createItem,
+    mutationFn: itemsApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.items });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.activeItems });
-      toast.success("Item added successfully");
+      // Invalidate all 'items' queries to refetch the list
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      toast.success('Item added successfully!');
     },
-    onError: (error) => {
-      toast.error("Failed to add item");
-      console.error("Error creating item:", error);
+    onError: (err: ApiError) => {
+      toast.error('Failed to add item', {
+        description: Array.isArray(err.response?.data?.message)
+          ? err.response.data.message.join(', ')
+          : err.response?.data?.message || err.message,
+      });
     },
   });
 };
 
-// Update item mutation
 export const useUpdateItemMutation = () => {
   const queryClient = useQueryClient();
-  
   return useMutation({
-    mutationFn: mockApi.updateItem,
+    mutationFn: ({ id, data }: { id: string; data: Partial<Item> }) => itemsApi.update(id, data),
     onSuccess: (updatedItem) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.items });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.activeItems });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.archivedItems });
+      // Invalidate list queries to reflect the update
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      // Immediately update the cache for the single item view
       queryClient.setQueryData(QUERY_KEYS.item(updatedItem.id), updatedItem);
-      toast.success("Item updated successfully");
+      toast.success('Item updated successfully!');
     },
-    onError: (error) => {
-      toast.error("Failed to update item");
-      console.error("Error updating item:", error);
+    onError: (err: ApiError) => {
+      toast.error('Failed to update item', {
+        description: Array.isArray(err.response?.data?.message)
+          ? err.response.data.message.join(', ')
+          : err.response?.data?.message || err.message,
+      });
     },
   });
 };
 
-// Delete item mutation
 export const useDeleteItemMutation = () => {
   const queryClient = useQueryClient();
-  
   return useMutation({
-    mutationFn: mockApi.deleteItem,
+    mutationFn: itemsApi.remove,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.items });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.activeItems });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.archivedItems });
-      toast.success("Item deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      toast.success('Item deleted successfully!');
     },
-    onError: (error) => {
-      toast.error("Failed to delete item");
-      console.error("Error deleting item:", error);
+    onError: (err: ApiError) => {
+      toast.error('Failed to delete item', { description: err.response?.data?.message || err.message });
     },
   });
 };
 
-// Archive item mutation
-export const useArchiveItemMutation = () => {
+export const useBulkCreateItemsMutation = () => {
   const queryClient = useQueryClient();
-  
   return useMutation({
-    mutationFn: ({ id, note }: { id: string; note?: string }) => 
-      mockApi.archiveItem(id, note),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.items });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.activeItems });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.archivedItems });
-      toast.success("Item moved to archive");
+    mutationFn: itemsApi.bulkCreate,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] }); // Also invalidate stats
+      toast.success(data.message);
     },
-    onError: (error) => {
-      toast.error("Failed to archive item");
-      console.error("Error archiving item:", error);
-    },
-  });
-};
-
-// Restore item mutation
-export const useRestoreItemMutation = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, note }: { id: string; note?: string }) => 
-      mockApi.restoreItem(id, note),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.items });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.activeItems });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.archivedItems });
-      toast.success("Item restored from archive");
-    },
-    onError: (error) => {
-      toast.error("Failed to restore item");
-      console.error("Error restoring item:", error);
-    },
-  });
-};
-
-// Use item mutation
-export const useUseItemMutation = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, note }: { id: string; note?: string }) => 
-      mockApi.useItem(id, note),
-    onSuccess: (updatedItem) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.items });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.activeItems });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.archivedItems });
-      
-      if (updatedItem.quantity > 0) {
-        toast.success(`Used one ${updatedItem.name}`);
-      } else {
-        toast.success(`${updatedItem.name} moved to archive`);
-      }
-    },
-    onError: (error) => {
-      toast.error("Failed to use item");
-      console.error("Error using item:", error);
-    },
-  });
-};
-
-// Gift item mutation
-export const useGiftItemMutation = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: ({ id, note }: { id: string; note?: string }) => 
-      mockApi.giftItem(id, note),
-    onSuccess: (updatedItem) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.items });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.activeItems });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.archivedItems });
-      
-      if (updatedItem.quantity > 0) {
-        toast.success(`Gifted one ${updatedItem.name}`);
-      } else {
-        toast.success(`${updatedItem.name} moved to archive`);
-      }
-    },
-    onError: (error) => {
-      toast.error("Failed to gift item");
-      console.error("Error gifting item:", error);
+    onError: (err: ApiError) => {
+      toast.error('Bulk import failed', {
+        description: Array.isArray(err.response?.data?.message)
+          ? err.response.data.message.join(', ')
+          : err.response?.data?.message || err.message,
+      });
     },
   });
 };

@@ -1,6 +1,9 @@
 
 import { API_BASE_URL, getDefaultHeaders, REQUEST_TIMEOUT } from './config';
 
+interface RequestConfig {
+  headers?: Record<string, string>;
+}
 // Generic API client for making HTTP requests
 class ApiClient {
   // GET request
@@ -14,36 +17,41 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 
-  // POST request
-  async post<T>(endpoint: string, data?: any): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown, config?: RequestConfig): Promise<T> {
     const url = this.buildUrl(endpoint);
+    const headers = { ...getDefaultHeaders(), ...config?.headers };
+
+    // When sending FormData, the browser sets the Content-Type with the boundary.
+    // If we send FormData, we must remove our manual 'Content-Type' header.
+    if (data instanceof FormData) {
+      delete headers['Content-Type'];
+    }
+
     const response = await this.fetchWithTimeout(url, {
       method: 'POST',
-      headers: getDefaultHeaders(),
-      body: JSON.stringify(data),
+      headers: headers,
+      body: data instanceof FormData ? data : JSON.stringify(data),
     });
     
     return this.handleResponse<T>(response);
   }
 
-  // PUT request
-  async put<T>(endpoint: string, data?: any): Promise<T> {
+  async put<T>(endpoint: string, data?: unknown, config?: RequestConfig): Promise<T> {
     const url = this.buildUrl(endpoint);
     const response = await this.fetchWithTimeout(url, {
       method: 'PUT',
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...config?.headers },
       body: JSON.stringify(data),
     });
     
     return this.handleResponse<T>(response);
   }
 
-  // PATCH request
-  async patch<T>(endpoint: string, data?: any): Promise<T> {
+  async patch<T>(endpoint: string, data?: unknown, config?: RequestConfig): Promise<T> {
     const url = this.buildUrl(endpoint);
     const response = await this.fetchWithTimeout(url, {
       method: 'PATCH',
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...config?.headers },
       body: JSON.stringify(data),
     });
     

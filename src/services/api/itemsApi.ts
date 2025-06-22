@@ -1,55 +1,65 @@
-
 import { apiClient } from './apiClient';
 import { Item } from '@/types';
 
+// Type for the paginated response from GET /api/items
+export interface PaginatedItemsResponse {
+  data: Item[];
+  totalPages: number;
+  currentPage: number;
+}
+
+// Type for the query parameters for GET /api/items
+export interface FindAllItemsParams {
+  search?: string;
+  location?: string;
+  tag?: string;
+  archived?: boolean;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}
+
 export const itemsApi = {
-  // Get all items
-  getItems: () => {
-    return apiClient.get<Item[]>('/items');
+  // Use a query string builder for complex queries
+  getAll: (params: FindAllItemsParams): Promise<PaginatedItemsResponse> => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== '') {
+        query.append(key, String(value));
+      }
+    });
+    return apiClient.get(`/items?${query.toString()}`);
   },
-  
-  // Get a single item by ID
-  getItem: (id: string) => {
-    return apiClient.get<Item>(`/items/${id}`);
+
+  getById: (id: string): Promise<Item> => {
+    return apiClient.get(`/items/${id}`);
   },
-  
-  // Create a new item
-  createItem: (item: Omit<Item, 'id' | 'createdAt' | 'history'>) => {
-    return apiClient.post<Item>('/items', item);
+
+  // The DTO for creating an item is defined in the frontend types
+  create: (itemData: Partial<Omit<Item, 'id' | 'createdAt'>>): Promise<Item> => {
+    return apiClient.post('/items', itemData);
   },
-  
-  // Update an existing item
-  updateItem: (item: Item) => {
-    return apiClient.put<Item>(`/items/${item.id}`, item);
+
+  update: (id: string, itemData: Partial<Item>): Promise<Item> => {
+    return apiClient.patch(`/items/${id}`, itemData);
   },
-  
-  // Archive an item
-  archiveItem: (id: string, note?: string) => {
-    return apiClient.patch<Item>(`/items/${id}/archive`, { note });
+
+  remove: (id: string): Promise<void> => {
+    return apiClient.delete(`/items/${id}`);
   },
-  
-  // Use an item (reduce quantity)
-  useItem: (id: string, note?: string) => {
-    return apiClient.patch<Item>(`/items/${id}/use`, { note });
+
+  // Note: Your backend doesn't have these specific endpoints yet.
+  // We can add them later or handle this logic via PATCH /items/:id.
+  // For now, let's assume we use the main update endpoint.
+  archive: (id: string, note?: string): Promise<Item> => {
+    return apiClient.patch(`/items/${id}`, { archived: true, historyNote: note });
   },
-  
-  // Gift an item (reduce quantity)
-  giftItem: (id: string, note?: string) => {
-    return apiClient.patch<Item>(`/items/${id}/gift`, { note });
+
+  restore: (id: string, note?: string): Promise<Item> => {
+    return apiClient.patch(`/items/${id}`, { archived: false, historyNote: note });
   },
-  
-  // Delete an item permanently
-  deleteItem: (id: string) => {
-    return apiClient.delete<void>(`/items/${id}`);
+
+  bulkCreate: (items: Partial<Omit<Item, 'id' | 'createdAt'>>[]): Promise<{ message: string }> => {
+    return apiClient.post('/items/bulk', { items });
   },
-  
-  // Get archived items
-  getArchivedItems: () => {
-    return apiClient.get<Item[]>('/items/archived');
-  },
-  
-  // Get active (non-archived) items
-  getActiveItems: () => {
-    return apiClient.get<Item[]>('/items/active');
-  }
 };

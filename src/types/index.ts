@@ -15,6 +15,8 @@ export interface Item {
   history?: ItemHistory[];
   acquisitionDate?: Date;
   expiryDate?: Date;
+  historyNote?: string;
+
 }
 
 export interface ItemHistory {
@@ -67,4 +69,35 @@ export interface UserPreferences {
   currency?: string;
   locations?: string[];
   tags?: string[];
+}
+
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  name: string;
+  avatarUrl?: string;
+  plan: 'FREE' | 'PREMIUM';
+  currency?: string;
+  // The 'locations' and 'tags' will now be objects with an 'id' and 'name'
+  locations: { id: string; name: string }[];
+  tags: { id: string; name: string }[];
+  usage: {
+    itemCount: number;
+    itemLimit: number;
+    locationCount: number;
+    locationLimit: number;
+    tagCount: number;
+    tagLimit: number;
+  };
+}
+export interface ApiError {
+  response?: {
+    data?: {
+      message?: string | string[]; // NestJS validation errors can be an array of strings
+      error?: string;
+      statusCode?: number;
+    };
+  };
+  message: string;
 }
