@@ -48,18 +48,20 @@ export const itemsApi = {
     return apiClient.delete(`/items/${id}`);
   },
 
-  // Note: Your backend doesn't have these specific endpoints yet.
-  // We can add them later or handle this logic via PATCH /items/:id.
-  // For now, let's assume we use the main update endpoint.
-  archive: (id: string, note?: string): Promise<Item> => {
-    return apiClient.patch(`/items/${id}`, { archived: true, historyNote: note });
-  },
-
-  restore: (id: string, note?: string): Promise<Item> => {
-    return apiClient.patch(`/items/${id}`, { archived: false, historyNote: note });
-  },
-
   bulkCreate: (items: Partial<Omit<Item, 'id' | 'createdAt'>>[]): Promise<{ message: string }> => {
     return apiClient.post('/items/bulk', { items });
+  },
+
+  archive: (id: string, note?: string): Promise<Item> => {
+    return apiClient.post(`/items/${id}/archive`, { note });
+  },
+  restore: (id: string, note?: string): Promise<Item> => {
+    return apiClient.post(`/items/${id}/restore`, { note });
+  },
+  gift: (id: string, note?: string): Promise<Item> => {
+    return apiClient.post(`/items/${id}/gift`, { note });
+  },
+  use: (id: string, note?: string): Promise<Item> => {
+    return apiClient.post(`/items/${id}/use`, { note });
   },
 };

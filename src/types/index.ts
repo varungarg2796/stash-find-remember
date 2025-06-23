@@ -31,7 +31,11 @@ export interface Collection {
   name: string;
   description?: string;
   coverImage?: string;
-  items: CollectionItem[];
+  items: {
+    collectionNote?: string;
+    order: number;
+    item: Item;
+  }[];
   shareSettings: ShareSettings;
   createdAt: Date;
   updatedAt: Date;

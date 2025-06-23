@@ -3,18 +3,38 @@ import {
   useCreateItemMutation,
   useUpdateItemMutation,
   useDeleteItemMutation,
+  useArchiveItemMutation,
+  useRestoreItemMutation,
+  // Assuming you create these two hooks following the same pattern
+  // For now, we will reuse the archive hook for simplicity as the backend logic is similar
 } from '@/hooks/useItemsQuery';
 import { Item } from '@/types';
+import { itemsApi } from '@/services/api/itemsApi';
+import { useMutation } from '@tanstack/react-query';
+
+// It's cleaner to define the mutation hooks for gift/use right here
+// if they are simple wrappers, or in useItemsQuery.ts for consistency.
+// Let's define them here for clarity.
+
+const useGiftItemMutation = () => {
+  // This would be a real hook if you had a dedicated gift endpoint
+  return useArchiveItemMutation(); // Placeholder: for now, gifting archives the item
+};
+
+const useUseItemMutation = () => {
+  // This would be a real hook if you had a dedicated use endpoint
+  return useArchiveItemMutation(); // Placeholder: for now, using archives the item
+};
+
 
 type ItemsContextType = {
-  addItem: (item: Partial<Omit<Item, 'id'>>) => void;
+  addItem: (item: Partial<Omit<Item, 'id' | 'createdAt'>>) => void;
   updateItem: (params: { id: string; data: Partial<Item> }) => void;
   deleteItem: (id: string) => void;
-  // --- ADD THESE BACK ---
-  archiveItem: (id: string, note?: string) => void;
-  restoreItem: (id: string, note?: string) => void;
-  giftItem: (id: string, note?: string) => void;
-  useItem: (id: string, note?: string) => void;
+  archiveItem: (params: { id: string; note?: string }) => void;
+  restoreItem: (params: { id:string; note?: string }) => void;
+  giftItem: (params: { id: string; note?: string }) => void;
+  useItem: (params: { id: string; note?: string }) => void;
 };
 
 const ItemsContext = createContext<ItemsContextType | undefined>(undefined);
@@ -23,36 +43,41 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
   const createMutation = useCreateItemMutation();
   const updateMutation = useUpdateItemMutation();
   const deleteMutation = useDeleteItemMutation();
+  const archiveMutation = useArchiveItemMutation();
+  const restoreMutation = useRestoreItemMutation();
+  const giftMutation = useGiftItemMutation();
+  const useMutation = useUseItemMutation();
+
+
+  const addItem = (item: Partial<Omit<Item, 'id' | 'createdAt'>>) => {
+    createMutation.mutate(item);
+  };
+
+  const updateItem = (params: { id: string; data: Partial<Item> }) => {
+    updateMutation.mutate(params);
+  };
+
+  const deleteItem = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
+  const archiveItem = (params: { id: string; note?: string }) => {
+    archiveMutation.mutate(params);
+  };
+
+  const restoreItem = (params: { id: string; note?: string }) => {
+    restoreMutation.mutate(params);
+  };
   
-  // You would need to create these mutation hooks in useItemsQuery.ts
-  // For now, let's use the update mutation as a placeholder
-  const archiveMutation = useUpdateItemMutation(); 
-  const restoreMutation = useUpdateItemMutation();
-  const giftMutation = useUpdateItemMutation();
-  const useMutation = useUpdateItemMutation();
-
-
-  const addItem = (item: Partial<Omit<Item, 'id'>>) => createMutation.mutate(item);
-  const updateItem = (params: { id: string; data: Partial<Item> }) => updateMutation.mutate(params);
-  const deleteItem = (id: string) => deleteMutation.mutate(id);
-
-  // --- IMPLEMENT THE FUNCTIONS ---
-  const archiveItem = (id: string, note?: string) => {
-    archiveMutation.mutate({ id, data: { archived: true, historyNote: note || 'Archived' } });
+  const giftItem = (params: { id: string; note?: string }) => {
+    // For now, we treat gifting as archiving with a specific note
+    giftMutation.mutate({ ...params, note: params.note || 'Gifted' });
   };
-  const restoreItem = (id: string, note?: string) => {
-    restoreMutation.mutate({ id, data: { archived: false, historyNote: note || 'Restored' } });
+  
+  const useItem = (params: { id: string; note?: string }) => {
+    // For now, we treat using as archiving with a specific note
+    useMutation.mutate({ ...params, note: params.note || 'Used' });
   };
-  const giftItem = (id: string, note?: string) => {
-    // This logic is more complex (decrement quantity, archive if last one)
-    // and should ideally be a dedicated backend endpoint.
-    // For now, we simulate by archiving.
-    giftMutation.mutate({ id, data: { archived: true, historyNote: note || 'Gifted' } });
-  };
-  const useItem = (id: string, note?: string) => {
-    useMutation.mutate({ id, data: { archived: true, historyNote: note || 'Used' } });
-  };
-
 
   return (
     <ItemsContext.Provider

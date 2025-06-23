@@ -107,3 +107,27 @@ export const useBulkCreateItemsMutation = () => {
     },
   });
 };
+
+export const useArchiveItemMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note?: string }) => itemsApi.archive(id, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      toast.success('Item archived.');
+    },
+    onError: (err: ApiError) => toast.error('Failed to archive item', { description: err.response?.data?.message || err.message }),
+  });
+};
+
+export const useRestoreItemMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note?: string }) => itemsApi.restore(id, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      toast.success('Item restored.');
+    },
+    onError: (err: ApiError) => toast.error('Failed to restore item', { description: err.response?.data?.message || err.message }),
+  });
+};

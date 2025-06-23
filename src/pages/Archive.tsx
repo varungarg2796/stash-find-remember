@@ -1,70 +1,60 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useItems } from "@/context/ItemsContext";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
-import ItemList from "@/components/ItemList";
-import { ArrowLeft, Box, Trash2 } from "lucide-react";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import ItemList from '@/components/ItemList';
+import { ArrowLeft, Box, Loader2 } from 'lucide-react';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { useItemsQuery } from '@/hooks/useItemsQuery';
+import { useItems } from '@/context/ItemsContext';
+import ErrorDisplay from '@/components/ErrorDisplay';
 
 const Archive = () => {
   const { user } = useAuth();
-  const { getArchivedItems, deleteItem, restoreItem } = useItems();
   const navigate = useNavigate();
-  const [sortBy, setSortBy] = useState<string>("newest");
+  // We still use the context for actions, but not for fetching
+  const { deleteItem, restoreItem } = useItems();
   
-  // Check authentication
+  const [sortBy, setSortBy] = useState<string>('newest');
+
+  // --- DATA FETCHING with TanStack Query ---
+  // We call useItemsQuery with the specific filter for archived items
+  const { data: queryData, isLoading, error } = useItemsQuery({
+    archived: true,
+    sort: sortBy,
+    // Add pagination if you want, but for an archive, a long list is often fine
+    limit: 100, // Fetch up to 100 archived items
+  });
+  
+  const archivedItems = queryData?.data || [];
+
+  // Redirect if not logged in
   useEffect(() => {
     if (!user) {
-      navigate("/");
-      return;
+      navigate('/');
     }
   }, [user, navigate]);
 
-  // Don't render if user is not authenticated
-  if (!user) {
-    return null;
-  }
-  
-  const archivedItems = getArchivedItems();
-  
-  const sortedItems = [...archivedItems].sort((a, b) => {
-    const archiveActions = (item: any) => {
-      return item.history?.find((h: any) => h.action === "archived")?.date || new Date();
-    };
-    
-    const dateA = archiveActions(a);
-    const dateB = archiveActions(b);
-    
-    if (sortBy === "newest") {
-      return new Date(dateB).getTime() - new Date(dateA).getTime();
-    } else {
-      return new Date(dateA).getTime() - new Date(dateB).getTime();
-    }
-  });
 
   const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to permanently delete this item?")) {
+    if (window.confirm('Are you sure you want to permanently delete this archived item?')) {
       deleteItem(id);
-      toast.success("Item permanently deleted");
     }
   };
   
   const handleRestore = (id: string) => {
-    restoreItem(id, "Restored from archive");
-    toast.success("Item restored from archive");
+    // The restoreItem function in the context now handles the toast
+    restoreItem({ id, note: 'Restored from archive' });
   };
+  
+  if (!user) {
+    return null; // Render nothing while redirecting
+  }
 
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">
       <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate(-1)}
-          className="mr-2"
-        >
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-2">
           <ArrowLeft size={18} />
         </Button>
         <div className="flex-1">
@@ -72,11 +62,15 @@ const Archive = () => {
             <Box className="mr-2" />
             Archive
           </h1>
-          <p className="text-muted-foreground text-sm">Items that have been used, gifted, or archived</p>
+          <p className="text-muted-foreground text-sm">Items that have been used, gifted, or otherwise archived.</p>
         </div>
       </div>
 
-      {archivedItems.length > 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin" /></div>
+      ) : error ? (
+        <ErrorDisplay title="Could Not Load Archive" message={error.message} />
+      ) : archivedItems.length > 0 ? (
         <>
           <div className="flex justify-between items-center mb-4">
             <p className="text-sm text-muted-foreground">
@@ -92,10 +86,9 @@ const Archive = () => {
               </SelectContent>
             </Select>
           </div>
-
           <div className="mb-6">
             <ItemList 
-              items={sortedItems} 
+              items={archivedItems}
               isArchive={true}
               onDelete={handleDelete}
               onRestore={handleRestore}
@@ -107,10 +100,10 @@ const Archive = () => {
           <Box size={40} className="mx-auto mb-4 text-gray-400" />
           <h3 className="text-xl font-medium mb-2">Your archive is empty</h3>
           <p className="text-muted-foreground mb-4">
-            Items that you use, gift, or archive will appear here
+            Used, gifted, or archived items will appear here.
           </p>
-          <Button variant="outline" onClick={() => navigate('/')}>
-            Return to items
+          <Button variant="outline" onClick={() => navigate('/my-stash')}>
+            Back to My Stash
           </Button>
         </div>
       )}

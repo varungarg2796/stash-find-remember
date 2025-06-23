@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useItems } from '@/context/ItemsContext'; // For actions like archive, gift
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   ArrowLeft, Edit, Trash2, Tag, MapPin,
@@ -20,6 +21,7 @@ import { getIconByName } from '@/utils/iconUtils';
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // --- DATA FETCHING ---
   const { data: item, isLoading, error } = useItemQuery(id!);
@@ -27,6 +29,25 @@ const ItemDetail = () => {
   // --- ACTIONS & MUTATIONS ---
   const { archiveItem, giftItem, restoreItem } = useItems();
   const deleteMutation = useDeleteItemMutation();
+
+  // Format currency based on user preference
+  const formatCurrency = (amount: number) => {
+    const currency = user?.currency || 'INR';
+    const currencyConfig = {
+      'INR': { locale: 'en-IN', currency: 'INR' },
+      'USD': { locale: 'en-US', currency: 'USD' },
+      'EUR': { locale: 'en-DE', currency: 'EUR' }
+    };
+
+    const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
+    
+    return new Intl.NumberFormat(config.locale, {
+      style: 'currency',
+      currency: config.currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
 
   const [activeTab, setActiveTab] = useState('details');
   const [actionNote, setActionNote] = useState('');
@@ -52,16 +73,17 @@ const ItemDetail = () => {
 
   const executeAction = () => {
     if (!actionType || !id) return;
+    const params = { id, note: actionNote };
 
     switch (actionType) {
       case 'gift':
-        giftItem(id, actionNote);
+        giftItem(params); // <-- Change to pass object
         break;
       case 'archive':
-        archiveItem(id, actionNote);
+        archiveItem(params); // <-- Change to pass object
         break;
       case 'restore':
-        restoreItem(id, actionNote || 'Restored from archive');
+        restoreItem(params); // <-- Change to pass object
         break;
     }
     setIsDialogOpen(false);
@@ -166,8 +188,8 @@ const ItemDetail = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                 <div className="bg-gray-50 p-4 rounded-lg"><h2 className="text-lg font-semibold mb-1">Quantity</h2><p className="text-2xl font-bold text-gray-800">{item.quantity}</p></div>
                 <div className="bg-gray-50 p-4 rounded-lg"><h2 className="text-lg font-semibold mb-1">Location</h2><p className="text-gray-700 flex items-center"><MapPin size={16} className="mr-1 text-gray-500" />{item.location || "Not specified"}</p></div>
-                {(item.price || item.priceless) && (
-                  <div className="bg-gray-50 p-4 rounded-lg col-span-1 sm:col-span-2"><h2 className="text-lg font-semibold mb-1">Value</h2>{item.priceless ? <p className="flex items-center text-pink-700"><Heart size={16} className="mr-1" fill="currentColor" />Priceless</p> : <p className="text-2xl font-bold text-gray-800">${item.price?.toFixed(2)}</p>}</div>
+                {((item.price && item.price > 0) || item.priceless) && (
+                  <div className="bg-gray-50 p-4 rounded-lg col-span-1 sm:col-span-2"><h2 className="text-lg font-semibold mb-1">Value</h2>{item.priceless ? <p className="flex items-center text-pink-700"><Heart size={16} className="mr-1" fill="currentColor" />Priceless</p> : <p className="text-2xl font-bold text-gray-800">{formatCurrency(item.price!)}</p>}</div>
                 )}
               </div>
               
