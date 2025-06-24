@@ -30,10 +30,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const userProfile = await userApi.getCurrentUser();
           setUser(userProfile);
         } catch (error) {
-          // Token might be expired or invalid
+          // Token might be expired or invalid, but apiClient will handle refresh
           console.error('Failed to initialize auth with stored token:', error);
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+          // Don't remove tokens here - let the apiClient handle token refresh
+          // Only remove if it's a permanent failure (handled by apiClient)
         }
       }
       // Finished checking, set initializing to false
