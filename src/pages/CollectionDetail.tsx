@@ -30,7 +30,7 @@ const CollectionDetail = () => {
 
   // We need the full item list to determine which items are available to be added
   // This can be optimized later if the list is huge
-  const { data: allItemsData } = useItemsQuery({ archived: false, limit: 1000 }); // Fetch all items
+  const { data: allItemsData } = useItemsQuery({ archived: false, limit: 1000 }, !!user); // Fetch all items
   const allUserItems = allItemsData?.data || [];
 
   // --- DATA FETCHING ---

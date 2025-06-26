@@ -55,7 +55,7 @@ const CollectionItemsSection = ({
       </div>
       
       {isLoading ? (
-        <div className={viewMode === "grid" ? "grid grid-cols-2 gap-3" : "space-y-3"}>
+        <div className={viewMode === "grid" ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-3"}>
           {Array.from({ length: 6 }).map((_, index) => (
             <ItemCardSkeleton key={index} viewMode={viewMode} />
           ))}
@@ -83,7 +83,7 @@ const CollectionItemsSection = ({
             items={collectionItems.map((item: any) => item.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className={viewMode === "grid" ? "grid grid-cols-2 gap-3" : "space-y-3"}>
+            <div className={viewMode === "grid" ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" : "space-y-3"}>
               {collectionItems.map((item: any) => (
                 <DraggableItemCard
                   key={item.id}

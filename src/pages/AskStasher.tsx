@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Send, MessageSquareMore, User, Bot, MapPin, Package, Sparkles, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Send, MessageSquareMore, User, Bot, MapPin, Package, Sparkles, Clock, ArrowRight, CheckCircle, Search, Zap, Brain, Star } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useAskStasherMutation, useQueryStatusQuery, AiResponse, FoundItem } from '@/hooks/useAiQuery';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -22,7 +24,7 @@ const AskStasher = () => {
   const { user } = useAuth();
   
   const askMutation = useAskStasherMutation();
-  const { data: queryStatus, refetch: refetchStatus } = useQueryStatusQuery();
+  const { data: queryStatus, refetch: refetchStatus } = useQueryStatusQuery(!!user);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages are added
@@ -32,10 +34,7 @@ const AskStasher = () => {
     }
   }, [chatHistory]);
   
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!user) navigate('/');
-  }, [user, navigate]);
+  // Don't redirect if not logged in, show demo content instead
 
   // Refetch status when user changes
   useEffect(() => {
@@ -99,7 +98,231 @@ const AskStasher = () => {
     navigate(`/items/${itemId}`);
   };
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <MessageSquareMore className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Ask Stasher
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+              Your AI-powered search assistant that understands natural language. Find anything in your stash by simply asking.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => navigate('/')} 
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-8 py-3"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/')}
+                className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 px-8 py-3 font-semibold"
+              >
+                Learn More
+              </Button>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {[
+              {
+                icon: <Brain className="h-8 w-8 text-purple-600" />,
+                title: "Natural Language",
+                description: "Ask questions in plain English just like talking to a friend",
+                features: ["Conversational queries", "Context understanding", "Smart interpretation"]
+              },
+              {
+                icon: <Zap className="h-8 w-8 text-yellow-600" />,
+                title: "Instant Results",
+                description: "Get lightning-fast answers with precise item matches",
+                features: ["Sub-second response", "Accurate matching", "Detailed results"]
+              },
+              {
+                icon: <Search className="h-8 w-8 text-blue-600" />,
+                title: "Smart Search",
+                description: "Find items by description, location, tags, or even fuzzy memories",
+                features: ["Multi-criteria search", "Fuzzy matching", "Visual results"]
+              }
+            ].map((feature, index) => (
+              <Card key={feature.title} className="border-2 border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300">
+                <CardHeader>
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center mb-4">
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">{feature.description}</p>
+                  <div className="space-y-2">
+                    {feature.features.map(item => (
+                      <div key={item} className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Interactive Demo */}
+          <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 mb-16">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">See Ask Stasher in Action</h3>
+                <p className="text-gray-600">Watch how natural language queries get instant, accurate results</p>
+              </div>
+              
+              <div className="max-w-2xl mx-auto space-y-6">
+                {/* Demo Chat Interface */}
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                  <div className="space-y-4">
+                    {/* User Question */}
+                    <div className="flex justify-end">
+                      <div className="max-w-[80%] bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-4">
+                        <p className="text-sm">"Where did I put my winter boots?"</p>
+                      </div>
+                    </div>
+                    
+                    {/* AI Response */}
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-white flex items-center justify-center">
+                        <Bot size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="bg-white border border-gray-200 rounded-xl p-4">
+                          <p className="text-sm text-gray-900 mb-3">Found your winter boots in the hallway closet!</p>
+                          
+                          <div className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-brown-400 to-brown-600 rounded-lg flex items-center justify-center">
+                                <Package size={16} className="text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900">Winter Boots - Black</h4>
+                                <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                                  <MapPin size={12} />
+                                  Hallway Closet → Bottom Shelf
+                                </div>
+                                <div className="flex gap-1 mt-2">
+                                  <Badge variant="secondary" className="text-xs">Footwear</Badge>
+                                  <Badge variant="secondary" className="text-xs">Winter</Badge>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-green-600 mt-2">
+                          <Sparkles size={12} />
+                          Found instantly • 0.3s
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Example Queries */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">Try asking:</h4>
+                    <div className="space-y-2">
+                      {[
+                        "Where are my car keys?",
+                        "Show me expired food items",
+                        "What's in my bedroom closet?",
+                        "Find my passport"
+                      ].map((query, index) => (
+                        <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 text-sm text-gray-700">
+                          "{query}"
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">AI understands:</h4>
+                    <div className="space-y-2">
+                      {[
+                        "Fuzzy descriptions",
+                        "Location references", 
+                        "Time-based queries",
+                        "Category searches"
+                      ].map((capability) => (
+                        <div key={capability} className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span className="text-sm text-gray-700">{capability}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Benefits Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Star className="h-6 w-6 text-green-600" />
+                  <h4 className="text-xl font-bold text-gray-900">Save Time</h4>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  Stop spending minutes searching through boxes and rooms. Find anything in seconds with natural language.
+                </p>
+                <div className="text-sm text-green-700 font-medium">
+                  Average search time: Under 2 seconds ⚡
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Brain className="h-6 w-6 text-blue-600" />
+                  <h4 className="text-xl font-bold text-gray-900">Think Less</h4>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  No need to remember exact names or locations. Describe what you're looking for however you remember it.
+                </p>
+                <div className="text-sm text-blue-700 font-medium">
+                  Works with partial memories and descriptions 🧠
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to never lose anything again?</h3>
+            <p className="text-gray-600 mb-8">Join thousands who've transformed how they find their belongings.</p>
+            <Button 
+              onClick={() => navigate('/')} 
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-8 py-3"
+            >
+              Start Using Ask Stasher
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isQuotaExhausted = (queryStatus?.remaining || 0) <= 0;
 

@@ -17,6 +17,7 @@ export interface FindAllItemsParams {
   sort?: string;
   page?: number;
   limit?: number;
+  priceFilter?: 'priceless' | 'with-price' | 'no-price';
 }
 
 export const itemsApi = {

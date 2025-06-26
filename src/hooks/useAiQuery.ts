@@ -7,7 +7,7 @@ import { ApiError } from '@/types';
 
 export * from '@/services/api/aiApi'; // Re-export types
 
-export const useQueryStatusQuery = () => {
+export const useQueryStatusQuery = (enabled: boolean = true) => {
   return useQuery<QueryStatus>({
     queryKey: ['ai-query-status'],
     queryFn: async () => {
@@ -19,6 +19,7 @@ export const useQueryStatusQuery = () => {
     },
     staleTime: 1000 * 30, // Consider fresh for 30 seconds
     refetchOnWindowFocus: true,
+    enabled,
   });
 };
 

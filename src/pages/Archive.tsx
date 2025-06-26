@@ -24,7 +24,7 @@ const Archive = () => {
     sort: sortBy,
     // Add pagination if you want, but for an archive, a long list is often fine
     limit: 100, // Fetch up to 100 archived items
-  });
+  }, !!user);
   
   const archivedItems = queryData?.data || [];
 

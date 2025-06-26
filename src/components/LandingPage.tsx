@@ -45,6 +45,10 @@ const Index = () => {
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [showSearchResult, setShowSearchResult] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  
+  // Typewriter animation states
+  const [typewriterText, setTypewriterText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
 
   // Demo data
   const demoItems = [
@@ -131,6 +135,33 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [currentSearchIndex]);
 
+  // Typewriter animation for main headline
+  useEffect(() => {
+    const text = "anything again";
+    let index = 0;
+    setTypewriterText("");
+    
+    const typeInterval = setInterval(() => {
+      if (index < text.length) {
+        setTypewriterText(text.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(typeInterval);
+      }
+    }, 100);
+
+    return () => clearInterval(typeInterval);
+  }, []);
+
+  // Cursor blinking animation
+  useEffect(() => {
+    const cursorInterval = setInterval(() => {
+      setShowCursor(prev => !prev);
+    }, 500);
+
+    return () => clearInterval(cursorInterval);
+  }, []);
+
   const handleLogin = () => {
     setIsLoggingIn(true);
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
@@ -157,10 +188,13 @@ const Index = () => {
             
             {/* Main Headline */}
             <div className="space-y-6 animate-fade-in-up">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-tight">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-relaxed">
                 Never lose
-                <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent animate-gradient bg-300% font-extrabold">
-                  anything again
+                <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent animate-gradient bg-300% font-extrabold min-h-[1.2em]">
+                  {typewriterText}
+                  {showCursor && typewriterText.length < 13 && (
+                    <span className="animate-pulse ml-1 text-purple-600">|</span>
+                  )}
                 </span>
               </h1>
               <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">

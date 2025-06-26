@@ -10,10 +10,11 @@ export const QUERY_KEYS = {
 
 // --- QUERIES ---
 
-export const useCollectionsQuery = () => {
+export const useCollectionsQuery = (enabled: boolean = true) => {
   return useQuery({
     queryKey: QUERY_KEYS.collections,
     queryFn: collectionsApi.getAll,
+    enabled,
   });
 };
 

@@ -77,6 +77,7 @@ const Header = () => {
     { path: '/', label: 'Home', icon: <Home className="h-4 w-4 mr-2" /> },
     { path: '/my-stash', label: 'My Stash', icon: <Box className="h-4 w-4 mr-2" /> },
     { path: '/collections', label: 'Collections', icon: <FolderOpen className="h-4 w-4 mr-2" /> },
+    { path: '/ask', label: 'Ask Stasher', icon: <MessageSquare className="h-4 w-4 mr-2" /> },
     { path: '/about', label: 'About', icon: <Info className="h-4 w-4 mr-2" /> },
   ];
 
@@ -119,7 +120,7 @@ const Header = () => {
           </div>
           
           {/* Logo - Centered on mobile, left-aligned on desktop */}
-          <div className="flex-1 md:flex-none flex justify-center md:justify-start items-center min-w-0 mx-4 md:mx-0">
+          <div className="flex-1 md:flex-none flex justify-center md:justify-start items-center min-w-0 mx-4 md:mr-8">
               <Link to="/" className="flex items-center gap-2 min-w-0">
                 <img src="/stasher-logo.svg" alt="Stasher Logo" className="h-8 w-8 flex-shrink-0" />
                 <span className="font-bold text-xl truncate">Stasher</span>

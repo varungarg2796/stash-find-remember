@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { itemsApi, FindAllItemsParams } from '@/services/api/itemsApi';
 import { toast } from 'sonner';
 import { ApiError, Item } from '@/types';
+import { useMemo } from 'react';
 
 // Define query keys for TanStack Query to manage caching
 export const QUERY_KEYS = {
@@ -10,15 +11,56 @@ export const QUERY_KEYS = {
 };
 
 /**
+ * Helper function to filter items by price on the client side
+ */
+const filterItemsByPrice = (items: Item[], priceFilter: string) => {
+  switch (priceFilter) {
+    case 'priceless':
+      return items.filter(item => item.priceless === true);
+    case 'with-price':
+      return items.filter(item => item.price !== undefined && item.price !== null && !item.priceless);
+    case 'no-price':
+      return items.filter(item => (item.price === undefined || item.price === null) && !item.priceless);
+    default:
+      return items;
+  }
+};
+
+/**
  * Hook to fetch a paginated and filtered list of items from the backend.
  * @param params - The filter, sort, and pagination parameters.
+ * @param enabled - Whether to enable the query (default: true)
  */
-export const useItemsQuery = (params: FindAllItemsParams) => {
-  return useQuery({
+export const useItemsQuery = (params: FindAllItemsParams, enabled: boolean = true) => {
+  // Separate the price filter from other params since backend might not support it yet
+  const { priceFilter, ...backendParams } = params;
+  
+  const query = useQuery({
     queryKey: QUERY_KEYS.items(params),
-    queryFn: () => itemsApi.getAll(params),
+    queryFn: () => itemsApi.getAll(backendParams),
     placeholderData: (prev) => prev, // Provides a smoother UX during pagination
+    enabled,
   });
+
+  // Apply client-side price filtering if needed
+  const filteredData = useMemo(() => {
+    if (!query.data || !priceFilter) {
+      return query.data;
+    }
+
+    const filteredItems = filterItemsByPrice(query.data.data, priceFilter);
+    
+    return {
+      ...query.data,
+      data: filteredItems,
+      totalPages: Math.ceil(filteredItems.length / (params.limit || 12)),
+    };
+  }, [query.data, priceFilter, params.limit]);
+
+  return {
+    ...query,
+    data: filteredData,
+  };
 };
 
 /**
