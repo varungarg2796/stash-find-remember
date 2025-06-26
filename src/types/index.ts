@@ -96,12 +96,24 @@ export interface User {
   };
 }
 export interface ApiError {
+  message?: string | string[];
+  error?: string;
+  statusCode?: number;
+  queryStatus?: {
+    remaining: number;
+    total: number;
+    resetTime?: string;
+  };
   response?: {
     data?: {
-      message?: string | string[]; // NestJS validation errors can be an array of strings
+      message?: string | string[];
       error?: string;
       statusCode?: number;
+      queryStatus?: {
+        remaining: number;
+        total: number;
+        resetTime?: string;
+      };
     };
   };
-  message: string;
 }
