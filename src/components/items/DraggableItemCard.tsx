@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GripVertical, X } from "lucide-react";
+import ItemImage from "@/components/item/ItemImage";
 
 interface DraggableItemCardProps {
   item: any;
@@ -28,6 +29,7 @@ const DraggableItemCard = ({ item, onRemove, viewMode, isReadOnly = false }: Dra
     opacity: isDragging ? 0.5 : 1,
   };
 
+
   if (viewMode === 'list') {
     return (
       <Card ref={setNodeRef} style={style} className="touch-manipulation">
@@ -42,10 +44,11 @@ const DraggableItemCard = ({ item, onRemove, viewMode, isReadOnly = false }: Dra
                 <GripVertical className="h-4 w-4 text-gray-400" />
               </div>
             )}
-            <img 
-              src={item.imageUrl} 
-              alt={item.name}
+            <ItemImage 
+              item={item}
               className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+              iconSize="h-8 w-8"
+              fallbackIconSize="h-8 w-8"
             />
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-lg truncate">{item.name}</h3>
@@ -73,10 +76,11 @@ const DraggableItemCard = ({ item, onRemove, viewMode, isReadOnly = false }: Dra
     <Card ref={setNodeRef} style={style} className="touch-manipulation">
       <div className="relative">
         <div className="aspect-square">
-          <img 
-            src={item.imageUrl} 
-            alt={item.name}
+          <ItemImage 
+            item={item}
             className="w-full h-full object-cover rounded-t-lg"
+            iconSize="h-16 w-16"
+            fallbackIconSize="h-16 w-16"
           />
         </div>
         {!isReadOnly && (

@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Loader2, Package } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { arrayMove, SortableContext } from '@dnd-kit/sortable';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { DragEndEvent } from '@dnd-kit/core';
 import {
   useCollectionQuery,
   useUpdateCollectionMutation,
@@ -30,7 +30,6 @@ const CollectionDetail = () => {
   // We need the full item list to determine which items are available to be added
   // This can be optimized later if the list is huge
   const { data: allItemsData } = useItemsQuery({ archived: false, limit: 1000 }, !!user); // Fetch all items
-  const allUserItems = allItemsData?.data || [];
 
   // --- DATA FETCHING ---
   const { data: collection, isLoading, error } = useCollectionQuery(id!);
@@ -65,10 +64,11 @@ const CollectionDetail = () => {
   }, [collection]);
 
   const availableItems = useMemo(() => {
+    const items = allItemsData?.data || [];
     if (!collection) return [];
     const itemIdsInCollection = new Set(collection.items.map(ci => ci.item.id));
-    return allUserItems.filter(item => !itemIdsInCollection.has(item.id));
-  }, [collection, allUserItems]);
+    return items.filter(item => !itemIdsInCollection.has(item.id));
+  }, [collection, allItemsData?.data]);
   
   // --- HANDLERS ---
   const handleSaveChanges = () => {
