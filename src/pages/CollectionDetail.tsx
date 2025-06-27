@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Eye, Loader2, Package } from 'lucide-react';
+import { Loader2, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -75,7 +74,14 @@ const CollectionDetail = () => {
   const handleSaveChanges = () => {
     if (!collection) return;
     updateCollectionMutation.mutate(
-      { ...collection, name: editName, description: editDescription, coverImage: editCoverImage },
+      { 
+        id: collection.id, 
+        data: { 
+          name: editName, 
+          description: editDescription, 
+          coverImage: editCoverImage 
+        } 
+      },
       { onSuccess: () => setIsEditingName(false) }
     );
   };
@@ -103,6 +109,12 @@ const CollectionDetail = () => {
     }
   };
 
+  const previewSharedView = () => {
+    if (collection?.shareSettings.isEnabled) {
+      navigate(`/share/collection/${collection.shareSettings.shareId}`);
+    }
+  };
+
   // --- RENDER LOGIC ---
   if (!user) { navigate('/'); return null; }
 
@@ -121,6 +133,7 @@ const CollectionDetail = () => {
         collection={collection}
         onShareSettingsUpdate={handleShareSettingsUpdate}
         onCopyShareLink={copyShareLink}
+        onPreviewSharedView={previewSharedView}
       />
 
       <div className="px-4 py-6">
@@ -152,13 +165,6 @@ const CollectionDetail = () => {
           availableItems={availableItems}
           onAddItem={(itemId) => addItemMutation.mutate(itemId)}
         />
-        {collection.shareSettings.isEnabled && (
-          <div className="text-center pt-4">
-            <Button variant="outline" onClick={() => navigate(`/share/collection/${collection.shareSettings.shareId}`)}>
-              <Eye className="mr-2 h-4 w-4" /> Preview Shared View
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

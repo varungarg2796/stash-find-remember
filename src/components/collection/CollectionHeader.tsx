@@ -12,7 +12,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Settings, Share, Copy } from 'lucide-react';
+import { ArrowLeft, Settings, Share, Copy, Eye } from 'lucide-react';
 import { Collection, ShareSettings } from '@/types';
 
 interface CollectionHeaderProps {
@@ -20,6 +20,7 @@ interface CollectionHeaderProps {
   collection: Collection;
   onShareSettingsUpdate: (settings: Partial<ShareSettings>) => void; // It's a partial update
   onCopyShareLink: () => void;
+  onPreviewSharedView: () => void;
 }
 
 const CollectionHeader = ({
@@ -27,6 +28,7 @@ const CollectionHeader = ({
   collection,
   onShareSettingsUpdate,
   onCopyShareLink,
+  onPreviewSharedView,
 }: CollectionHeaderProps) => {
   const [localSettings, setLocalSettings] = useState<ShareSettings>(collection.shareSettings);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -151,9 +153,14 @@ const CollectionHeader = ({
             </Dialog>
             
             {collection.shareSettings.isEnabled && (
-              <Button onClick={onCopyShareLink} size="sm" variant="secondary">
-                <Share className="h-4 w-4" />
-              </Button>
+              <>
+                <Button onClick={onCopyShareLink} size="sm" variant="secondary">
+                  <Share className="h-4 w-4" />
+                </Button>
+                <Button onClick={onPreviewSharedView} size="sm" variant="outline">
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </>
             )}
           </div>
         </div>

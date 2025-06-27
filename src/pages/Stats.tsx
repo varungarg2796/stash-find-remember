@@ -22,9 +22,11 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { statsApi } from '@/services/api/statsApi'; // We created this earlier
 import ErrorDisplay from '@/components/ErrorDisplay';
+import { useAuth } from '@/context/AuthContext';
 
 const Stats = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // Fetch stats data directly from the backend
   const { data: stats, isLoading, error } = useQuery({
@@ -59,8 +61,24 @@ const Stats = () => {
   const locationChartData = stats.locationDistribution;
   const tagChartData = stats.tagDistribution;
   
-  // The currency formatting can be simplified if needed, or use the user context
-  const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  // Dynamic currency formatting based on user preference
+  const formatCurrency = (amount: number) => {
+    const currency = user?.currency || 'INR';
+    const currencyConfig = {
+      'INR': { locale: 'en-IN', currency: 'INR' },
+      'USD': { locale: 'en-US', currency: 'USD' },
+      'EUR': { locale: 'en-DE', currency: 'EUR' }
+    };
+
+    const config = currencyConfig[currency as keyof typeof currencyConfig] || currencyConfig.INR;
+    
+    return new Intl.NumberFormat(config.locale, {
+      style: 'currency',
+      currency: config.currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
 
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">

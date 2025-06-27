@@ -44,7 +44,8 @@ export const useCreateCollectionMutation = () => {
 export const useUpdateCollectionMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (collection: Collection) => collectionsApi.update(collection.id, collection),
+    mutationFn: (params: { id: string; data: { name?: string; description?: string; coverImage?: string } }) => 
+      collectionsApi.update(params.id, params.data),
     onSuccess: (updatedCollection) => {
       // Invalidate both the list and the specific detail query
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.collections });

@@ -1,6 +1,6 @@
 
 import { apiClient } from './apiClient';
-import { UserPreferences, User } from '@/types';
+import { User } from '@/types';
 
 interface UpdatePreferencesPayload {
   username?: string;
@@ -13,6 +13,11 @@ export const userApi = {
   // Get current user profile
   getCurrentUser: (): Promise<User> => {
     return apiClient.get('/users/me');
+  },
+
+  // Check username availability
+  checkUsernameAvailability: (username: string): Promise<{ available: boolean }> => {
+    return apiClient.get(`/users/check-username/${encodeURIComponent(username)}`);
   },
   
   // Update user profile

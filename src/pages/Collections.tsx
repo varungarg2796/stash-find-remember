@@ -40,9 +40,9 @@ const Collections = () => {
     }
   };
 
-  const handleUpdateCollection = (collection: Collection) => {
+  const handleUpdateCollection = (params: { id: string; data: { name?: string; description?: string; coverImage?: string } }) => {
     // The inline edit on the card will call this
-    updateCollectionMutation.mutate(collection);
+    updateCollectionMutation.mutate(params);
   };
   
   if (!user) {

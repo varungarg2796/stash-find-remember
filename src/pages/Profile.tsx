@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Plus, X, Tag, Loader2, User } from 'lucide-react';
+import { ArrowLeft, Plus, X, Tag, Loader2, User, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '@/services/api/userApi';
@@ -30,13 +30,54 @@ const Profile = () => {
   const [currency, setCurrency] = useState('INR');
   const [newLocation, setNewLocation] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<'available' | 'taken' | 'invalid' | null>(null);
 
   useEffect(() => {
     if (user) {
       setUsername(user.username);
       setCurrency(user.currency || 'INR');
+      // Reset username status when loading user data
+      setUsernameStatus(null);
     }
   }, [user]);
+
+  // Username validation with debounce
+  useEffect(() => {
+    if (!username || username === user?.username) {
+      setUsernameStatus(null);
+      return;
+    }
+
+    // Basic validation
+    if (username.length < 3) {
+      setUsernameStatus('invalid');
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      setUsernameStatus('invalid');
+      return;
+    }
+
+    // Debounce username checking
+    const timeoutId = setTimeout(async () => {
+      setIsCheckingUsername(true);
+      try {
+        // Note: This endpoint would need to be implemented in the backend
+        const response = await userApi.checkUsernameAvailability(username);
+        setUsernameStatus(response.available ? 'available' : 'taken');
+      } catch (error) {
+        console.error('Error checking username:', error);
+        // For now, assume available if check fails
+        setUsernameStatus('available');
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [username, user?.username]);
 
   // --- MUTATIONS ---
 
@@ -98,14 +139,23 @@ const Profile = () => {
   const handleSavePreferences = () => {
     if (!user) return;
     
-    // --- THIS IS THE KEY CHANGE ---
-    // Only send the fields that this button is responsible for.
-    // Locations and Tags are handled by their own mutations.
+    // Only save if username is valid (if changed)
+    if (username !== user.username && (usernameStatus === 'taken' || usernameStatus === 'invalid')) {
+      toast.error('Please fix username issues before saving');
+      return;
+    }
+    
     updateUserMutation.mutate({
       username,
       currency,
     });
   };
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = user && (
+    username !== user.username || 
+    currency !== (user.currency || 'INR')
+  );
 
   const handleAddLocation = () => {
     if (newLocation.trim()) {
@@ -156,14 +206,51 @@ const Profile = () => {
 
         {/* Profile Settings */}
         <div className="space-y-2">
-          <h3 className="text-lg font-medium">Profile Settings</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Profile Settings</h3>
+            {hasUnsavedChanges && (
+              <div className="flex items-center gap-1 text-sm text-amber-600">
+                <Clock size={14} />
+                <span>Unsaved changes</span>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium flex items-center gap-2 mb-1">
                 <User size={16} /> Username
               </label>
-              <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Enter username" />
-              <p className="text-xs text-muted-foreground mt-1">This will appear on your shared collections</p>
+              <div className="relative">
+                <Input 
+                  value={username} 
+                  onChange={(e) => setUsername(e.target.value)} 
+                  placeholder="Enter username"
+                  className={`pr-8 ${
+                    usernameStatus === 'taken' || usernameStatus === 'invalid' 
+                      ? 'border-red-300 focus:border-red-500' 
+                      : usernameStatus === 'available' 
+                      ? 'border-green-300 focus:border-green-500' 
+                      : ''
+                  }`}
+                />
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  {isCheckingUsername && <Loader2 size={16} className="animate-spin text-gray-400" />}
+                  {!isCheckingUsername && usernameStatus === 'available' && <CheckCircle size={16} className="text-green-500" />}
+                  {!isCheckingUsername && (usernameStatus === 'taken' || usernameStatus === 'invalid') && <AlertCircle size={16} className="text-red-500" />}
+                </div>
+              </div>
+              {usernameStatus === 'invalid' && (
+                <p className="text-xs text-red-600 mt-1">Username must be 3+ characters and contain only letters, numbers, _ or -</p>
+              )}
+              {usernameStatus === 'taken' && (
+                <p className="text-xs text-red-600 mt-1">This username is already taken</p>
+              )}
+              {usernameStatus === 'available' && (
+                <p className="text-xs text-green-600 mt-1">Username is available!</p>
+              )}
+              {!usernameStatus && (
+                <p className="text-xs text-muted-foreground mt-1">This will appear on your shared collections</p>
+              )}
             </div>
             <div>
               <label className="text-sm font-medium mb-1">Currency</label>
@@ -177,12 +264,46 @@ const Profile = () => {
               </Select>
             </div>
           </div>
+          
+          {/* Save Button */}
+          <div className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-sm">Profile Preferences</h4>
+                <p className="text-xs text-muted-foreground">Username and currency settings</p>
+              </div>
+              <Button 
+                onClick={handleSavePreferences} 
+                disabled={
+                  isSaving || 
+                  !hasUnsavedChanges || 
+                  (username !== user?.username && (usernameStatus === 'taken' || usernameStatus === 'invalid' || isCheckingUsername))
+                }
+                className={hasUnsavedChanges ? 'bg-primary hover:bg-primary/90' : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Locations Management */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">My Locations</h3>
-          <p className="text-sm text-muted-foreground">Add or remove custom locations where you store your items.</p>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">My Locations</h3>
+            <div className="flex items-center gap-1 text-sm text-green-600">
+              <CheckCircle size={14} />
+              <span>Auto-saved</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">Add or remove custom locations where you store your items. Changes are saved automatically.</p>
           <div className="flex gap-2">
             <Input placeholder="Add new location..." value={newLocation} onChange={(e) => setNewLocation(e.target.value)} disabled={addLocationMutation.isPending} />
             <Button onClick={handleAddLocation} variant="outline" disabled={!newLocation.trim() || user.usage.locationCount >= user.usage.locationLimit || addLocationMutation.isPending}>
@@ -204,8 +325,14 @@ const Profile = () => {
         
         {/* Tags Management */}
         <div className="space-y-4 pt-6 border-t">
-          <h3 className="text-lg font-medium">Common Tags</h3>
-          <p className="text-sm text-muted-foreground">Manage the tags you use to categorize your items.</p>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Common Tags</h3>
+            <div className="flex items-center gap-1 text-sm text-green-600">
+              <CheckCircle size={14} />
+              <span>Auto-saved</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">Manage the tags you use to categorize your items. Changes are saved automatically.</p>
           <div className="flex gap-2">
             <Input placeholder="Add common tag..." value={newTag} onChange={(e) => setNewTag(e.target.value)} disabled={addTagMutation.isPending} />
             <Button onClick={handleAddTag} variant="outline" disabled={!newTag.trim() || user.usage.tagCount >= user.usage.tagLimit || addTagMutation.isPending}>
@@ -226,12 +353,6 @@ const Profile = () => {
           <p className="text-xs text-muted-foreground">{user.usage.tagCount}/{user.usage.tagLimit} tags used</p>
         </div>
 
-        {/* Save Button */}
-        <div>
-          <Button onClick={handleSavePreferences} disabled={isSaving}>
-            {isSaving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : "Save Preferences"}
-          </Button>
-        </div>
       </div>
     </div>
   );

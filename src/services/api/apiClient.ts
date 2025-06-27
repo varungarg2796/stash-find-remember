@@ -209,22 +209,41 @@ class ApiClient {
     });
   }
 
-  private getErrorMessage(errorData: any, fallback: string): string {
+  private getErrorMessage(errorData: unknown, fallback: string): string {
     if (typeof errorData === 'string') {
       return errorData;
     }
 
-    if (errorData.message) {
-      if (typeof errorData.message === 'string') {
-        return errorData.message;
+    if (
+      typeof errorData === 'object' &&
+      errorData !== null &&
+      'message' in errorData
+    ) {
+      const message = (errorData as { message: unknown }).message;
+      if (typeof message === 'string') {
+        return message;
       }
-      if (typeof errorData.message === 'object' && errorData.message.message) {
-        return errorData.message.message;
+      if (
+        typeof message === 'object' &&
+        message !== null &&
+        'message' in message
+      ) {
+        const innerMessage = (message as { message: unknown }).message;
+        if (typeof innerMessage === 'string') {
+          return innerMessage;
+        }
       }
     }
 
-    if (errorData.error) {
-      return errorData.error;
+    if (
+      typeof errorData === 'object' &&
+      errorData !== null &&
+      'error' in errorData
+    ) {
+      const error = (errorData as { error: unknown }).error;
+      if (typeof error === 'string') {
+        return error;
+      }
     }
 
     return fallback;

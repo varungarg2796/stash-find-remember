@@ -15,7 +15,7 @@ type CollectionWithCount = Collection & {
 
 interface CollectionCardProps {
   collection: CollectionWithCount;
-  onEdit: (collection: Collection) => void;
+  onEdit: (params: { id: string; data: { name?: string; description?: string; coverImage?: string } }) => void;
   onDelete: (id: string) => void;
   onNavigate: (id: string) => void;
 }
@@ -28,9 +28,11 @@ const CollectionCard = ({ collection, onEdit, onDelete, onNavigate }: Collection
   const handleSaveEdit = () => {
     if (editName.trim()) {
       onEdit({
-        ...collection,
-        name: editName.trim(),
-        description: editDescription.trim() || undefined
+        id: collection.id,
+        data: {
+          name: editName.trim(),
+          description: editDescription.trim() || undefined
+        }
       });
       setIsEditing(false);
     }

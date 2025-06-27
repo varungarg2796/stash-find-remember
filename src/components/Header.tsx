@@ -79,13 +79,13 @@ const Header = () => {
     { path: '/', label: 'Home', icon: <Home className="h-4 w-4 mr-2" /> },
     { path: '/my-stash', label: 'My Stash', icon: <Box className="h-4 w-4 mr-2" /> },
     { path: '/collections', label: 'Collections', icon: <FolderOpen className="h-4 w-4 mr-2" /> },
-    { path: '/archive', label: 'Archive', icon: <Archive className="h-4 w-4 mr-2" /> },
     { path: '/ask', label: 'Ask Stasher', icon: <MessageSquare className="h-4 w-4 mr-2" /> },
   ];
 
   const secondaryNavigationItems = [
     { path: '/profile', label: 'Profile & Settings', icon: <Settings className="h-4 w-4 mr-2" /> },
     { path: '/add-item', label: 'Add Item', icon: <Plus className="h-4 w-4 mr-2" /> },
+    { path: '/archive', label: 'Archive', icon: <Archive className="h-4 w-4 mr-2" /> },
     { path: '/stats', label: 'Stats', icon: <BarChart3 className="h-4 w-4 mr-2" /> },
     { path: '/about', label: 'About', icon: <Info className="h-4 w-4 mr-2" /> },
   ];
@@ -196,6 +196,13 @@ const Header = () => {
                         <Settings className="mr-2 h-4 w-4" /> 
                         Profile & Settings
                         <span className="ml-auto text-xs text-muted-foreground">Tags, Locations</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/archive">
+                        <Archive className="mr-2 h-4 w-4" /> 
+                        Archive
+                        <span className="ml-auto text-xs text-muted-foreground">Archived Items</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
