@@ -12,6 +12,7 @@ import { locationsApi } from '@/services/api/locationsApi';
 import { tagsApi } from '@/services/api/tagsApi';
 import { toast } from 'sonner';
 import { ApiError } from '@/types';
+import { getErrorMessage } from '@/lib/utils';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const Profile = () => {
     onError: (err: ApiError) => {
       const description = Array.isArray(err.response?.data?.message)
         ? err.response.data.message.join(', ')
-        : err.response?.data?.message || err.message;
+        : getErrorMessage(err, 'Failed to save preferences');
       toast.error('Failed to save preferences', { description });
     },
   });
@@ -61,7 +62,7 @@ const Profile = () => {
       setNewLocation('');
       toast.success('Location added!');
     },
-    onError: (err: ApiError) => toast.error('Failed to add location', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to add location', { description: getErrorMessage(err, 'Failed to add location') }),
   });
 
   const removeLocationMutation = useMutation({
@@ -70,7 +71,7 @@ const Profile = () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       toast.success('Location removed!');
     },
-    onError: (err: ApiError) => toast.error('Failed to remove location', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to remove location', { description: getErrorMessage(err, 'Failed to remove location') }),
   });
 
   const addTagMutation = useMutation({
@@ -80,7 +81,7 @@ const Profile = () => {
       setNewTag('');
       toast.success('Tag added!');
     },
-    onError: (err: ApiError) => toast.error('Failed to add tag', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to add tag', { description: getErrorMessage(err, 'Failed to add tag') }),
   });
 
   const removeTagMutation = useMutation({
@@ -89,7 +90,7 @@ const Profile = () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       toast.success('Tag removed!');
     },
-    onError: (err: ApiError) => toast.error('Failed to remove tag', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to remove tag', { description: getErrorMessage(err, 'Failed to remove tag') }),
   });
   
   // --- HANDLERS ---

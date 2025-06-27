@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useItems } from '@/context/ItemsContext'; // For actions like archive, gift
 import { useAuth } from '@/context/AuthContext';
@@ -18,7 +18,7 @@ import ErrorDisplay from '@/components/ErrorDisplay';
 import { useItemQuery, useDeleteItemMutation } from '@/hooks/useItemsQuery';
 import { getIconByName } from '@/utils/iconUtils';
 
-const ItemDetail = () => {
+const ItemDetailInner = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -238,6 +238,20 @@ const ItemDetail = () => {
       </Dialog>
     </div>
   );
+};
+
+const ItemDetail = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
+
+  return <ItemDetailInner />;
 };
 
 export default ItemDetail;

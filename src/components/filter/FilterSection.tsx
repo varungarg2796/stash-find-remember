@@ -71,21 +71,35 @@ const FilterSection = ({
           <h2 className="text-lg sm:text-xl font-bold">Your Items</h2>
           
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Sort Dropdown - Smaller on mobile */}
-            <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
-              <SelectTrigger className={`${isMobile ? 'w-[100px] h-8 text-xs px-2' : 'w-[140px]'}`}>
-                <SortAsc className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
-                <SelectValue placeholder={isMobile ? "Sort" : "Sort by"} />
-              </SelectTrigger>
-              <SelectContent align="end" className="z-50 w-[180px]">
-                <SelectItem value="newest">Newest first</SelectItem>
-                <SelectItem value="oldest">Oldest first</SelectItem>
-                <SelectItem value="name-asc">Name A-Z</SelectItem>
-                <SelectItem value="name-desc">Name Z-A</SelectItem>
-                <SelectItem value="quantity-high">Highest quantity</SelectItem>
-                <SelectItem value="quantity-low">Lowest quantity</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Desktop Sort Dropdown */}
+            <div className="hidden md:block">
+              <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
+                <SelectTrigger className="w-[140px]">
+                  <SortAsc className="h-4 w-4 mr-1" />
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent align="end" className="z-50 w-[180px]">
+                  <SelectItem value="newest">Newest first</SelectItem>
+                  <SelectItem value="oldest">Oldest first</SelectItem>
+                  <SelectItem value="name-asc">Name A-Z</SelectItem>
+                  <SelectItem value="name-desc">Name Z-A</SelectItem>
+                  <SelectItem value="quantity-high">Highest quantity</SelectItem>
+                  <SelectItem value="quantity-low">Lowest quantity</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Mobile Ask AI Button */}
+            <div className="block md:hidden">
+              <Button 
+                onClick={() => navigate("/ask")}
+                size="sm"
+                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-medium h-8 px-3"
+              >
+                <MessageSquareMore size={14} className="mr-1" />
+                Ask AI
+              </Button>
+            </div>
             
             {/* Mobile Action Menu */}
             <div className="block md:hidden">
@@ -96,13 +110,28 @@ const FilterSection = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 z-50">
+                  <DropdownMenuItem onClick={(e) => e.preventDefault()}>
+                    <SortAsc size={16} className="mr-2" />
+                    <div className="flex flex-col w-full">
+                      <span className="font-medium">Sort by</span>
+                      <Select value={sortBy} onValueChange={(value) => onSortChange(value as SortOption)}>
+                        <SelectTrigger className="w-full mt-1 h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="z-50">
+                          <SelectItem value="newest">Newest first</SelectItem>
+                          <SelectItem value="oldest">Oldest first</SelectItem>
+                          <SelectItem value="name-asc">Name A-Z</SelectItem>
+                          <SelectItem value="name-desc">Name Z-A</SelectItem>
+                          <SelectItem value="quantity-high">Highest quantity</SelectItem>
+                          <SelectItem value="quantity-low">Lowest quantity</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/bulk-import")}>
                     <Upload size={16} className="mr-2" />
                     Bulk Import
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/ask")}>
-                    <MessageSquareMore size={16} className="mr-2" />
-                    Ask Stasher
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/stats")}>
                     <BarChart size={16} className="mr-2" />
@@ -124,13 +153,13 @@ const FilterSection = ({
                 <Upload size={18} />
               </Button>
               <Button 
-                variant="outline" 
-                size="icon" 
                 onClick={() => navigate("/ask")}
-                className="flex-shrink-0"
-                title="Ask Stasher"
+                size="sm"
+                className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-medium flex-shrink-0"
+                title="Ask Stasher - AI Search"
               >
-                <MessageSquareMore size={18} />
+                <MessageSquareMore size={16} className="mr-2" />
+                Ask AI
               </Button>
               <Button 
                 variant="outline" 

@@ -68,28 +68,34 @@ const StashStats = () => {
       </div>
       
       <CollapsibleContent>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {stats.map((stat, index) => (
-            <Card key={index} className="bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
-                <CardTitle className="text-xs font-medium text-muted-foreground">{stat.title}</CardTitle>
-                <div className="flex items-center gap-1">
-                  <stat.icon className={`h-3 w-3 ${stat.color}`} />
-                  {stat.hasToggle && (
-                    <Button variant="ghost" size="icon" className="h-4 w-4 p-0 hover:bg-transparent" onClick={() => setShowValue(!showValue)}>
-                      {showValue ? <Eye className="h-3 w-3 text-muted-foreground" /> : <EyeOff className="h-3 w-3 text-muted-foreground" />}
-                    </Button>
+        <Card className="bg-gradient-to-r from-slate-50 to-blue-50/30 border-slate-200">
+          <CardContent className="p-3">
+            {/* Mobile: 2x2 Grid, Desktop: Horizontal Row */}
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-4">
+              {stats.map((stat, index) => (
+                <div key={index} className="flex items-center gap-2 min-w-0 sm:flex-1">
+                  <div className={`p-1.5 rounded-lg bg-white shadow-sm border border-slate-200/80`}>
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs text-muted-foreground truncate">{stat.title}</div>
+                    <div className="font-bold text-sm truncate flex items-center gap-1" title={String(stat.value)}>
+                      {stat.value}
+                      {stat.hasToggle && (
+                        <Button variant="ghost" size="icon" className="h-3 w-3 p-0 hover:bg-transparent" onClick={() => setShowValue(!showValue)}>
+                          {showValue ? <Eye className="h-2.5 w-2.5 text-muted-foreground" /> : <EyeOff className="h-2.5 w-2.5 text-muted-foreground" />}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  {index < stats.length - 1 && (
+                    <div className="hidden sm:block h-8 w-px bg-slate-200" />
                   )}
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0 pb-3 px-3">
-                <div className="text-lg sm:text-xl font-bold truncate" title={String(stat.value)}>
-                  {stat.value}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </CollapsibleContent>
     </Collapsible>
   );

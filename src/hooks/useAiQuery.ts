@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { aiApi, AiResponse, QueryStatus } from '@/services/api/aiApi';
 import { toast } from 'sonner';
 import { ApiError } from '@/types';
+import { getErrorMessage } from '@/lib/utils';
 
 export * from '@/services/api/aiApi'; // Re-export types
 
@@ -39,8 +40,9 @@ export const useAskStasherMutation = () => {
       if (err.response?.data?.queryStatus) {
         queryClient.setQueryData(['ai-query-status'], err.response.data.queryStatus);
       }
+      
       toast.error('AI Assistant Error', {
-        description: err.response?.data?.message || err.message,
+        description: getErrorMessage(err, 'Failed to process your request'),
       });
     },
   });

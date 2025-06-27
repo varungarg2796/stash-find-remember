@@ -3,6 +3,7 @@ import { itemsApi, FindAllItemsParams } from '@/services/api/itemsApi';
 import { toast } from 'sonner';
 import { ApiError, Item } from '@/types';
 import { useMemo } from 'react';
+import { getErrorMessage } from '@/lib/utils';
 
 // Define query keys for TanStack Query to manage caching
 export const QUERY_KEYS = {
@@ -87,10 +88,11 @@ export const useCreateItemMutation = () => {
       toast.success('Item added successfully!');
     },
     onError: (err: ApiError) => {
+      const errorMessage = getErrorMessage(err, 'Failed to add item');
       toast.error('Failed to add item', {
         description: Array.isArray(err.response?.data?.message)
           ? err.response.data.message.join(', ')
-          : err.response?.data?.message || err.message,
+          : errorMessage,
       });
     },
   });
@@ -108,10 +110,11 @@ export const useUpdateItemMutation = () => {
       toast.success('Item updated successfully!');
     },
     onError: (err: ApiError) => {
+      const errorMessage = getErrorMessage(err, 'Failed to update item');
       toast.error('Failed to update item', {
         description: Array.isArray(err.response?.data?.message)
           ? err.response.data.message.join(', ')
-          : err.response?.data?.message || err.message,
+          : errorMessage,
       });
     },
   });
@@ -126,7 +129,7 @@ export const useDeleteItemMutation = () => {
       toast.success('Item deleted successfully!');
     },
     onError: (err: ApiError) => {
-      toast.error('Failed to delete item', { description: err.response?.data?.message || err.message });
+      toast.error('Failed to delete item', { description: getErrorMessage(err, 'Failed to delete item') });
     },
   });
 };
@@ -141,10 +144,11 @@ export const useBulkCreateItemsMutation = () => {
       toast.success(data.message);
     },
     onError: (err: ApiError) => {
+      const errorMessage = getErrorMessage(err, 'Bulk import failed');
       toast.error('Bulk import failed', {
         description: Array.isArray(err.response?.data?.message)
           ? err.response.data.message.join(', ')
-          : err.response?.data?.message || err.message,
+          : errorMessage,
       });
     },
   });
@@ -158,7 +162,7 @@ export const useArchiveItemMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Item archived.');
     },
-    onError: (err: ApiError) => toast.error('Failed to archive item', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to archive item', { description: getErrorMessage(err, 'Failed to archive item') }),
   });
 };
 
@@ -170,7 +174,7 @@ export const useRestoreItemMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Item restored.');
     },
-    onError: (err: ApiError) => toast.error('Failed to restore item', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to restore item', { description: getErrorMessage(err, 'Failed to restore item') }),
   });
 };
 
@@ -183,7 +187,7 @@ export const useGiftItemMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       toast.success('Item marked as gifted.');
     },
-    onError: (err: ApiError) => toast.error('Failed to mark item as gifted', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to mark item as gifted', { description: getErrorMessage(err, 'Failed to mark item as gifted') }),
   });
 };
 
@@ -196,6 +200,6 @@ export const useUseItemMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       toast.success('Item marked as used.');
     },
-    onError: (err: ApiError) => toast.error('Failed to mark item as used', { description: err.response?.data?.message || err.message }),
+    onError: (err: ApiError) => toast.error('Failed to mark item as used', { description: getErrorMessage(err, 'Failed to mark item as used') }),
   });
 };

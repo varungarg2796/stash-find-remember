@@ -173,7 +173,7 @@ class ApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Request failed with status ${response.status}`);
+      throw new Error(this.getErrorMessage(errorData, `Request failed with status ${response.status}`));
     }
     
     // Check if response is empty
@@ -207,6 +207,27 @@ class ApiClient {
         .catch(reject)
         .finally(() => clearTimeout(timeout));
     });
+  }
+
+  private getErrorMessage(errorData: any, fallback: string): string {
+    if (typeof errorData === 'string') {
+      return errorData;
+    }
+
+    if (errorData.message) {
+      if (typeof errorData.message === 'string') {
+        return errorData.message;
+      }
+      if (typeof errorData.message === 'object' && errorData.message.message) {
+        return errorData.message.message;
+      }
+    }
+
+    if (errorData.error) {
+      return errorData.error;
+    }
+
+    return fallback;
   }
 }
 

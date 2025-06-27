@@ -84,6 +84,8 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
 export const useItems = () => {
   const context = useContext(ItemsContext);
   if (context === undefined) {
+    // Add more debugging info for mobile issues
+    console.error('useItems called outside ItemsProvider. Current component stack:', Error().stack);
     throw new Error('useItems must be used within an ItemsProvider');
   }
   return context;

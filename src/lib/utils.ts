@@ -5,6 +5,57 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Utility function to extract error messages from nested API error structures
+export function getErrorMessage(error: any, fallback: string = 'An error occurred'): string {
+  // If error is a string, return it directly
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  // Check error.message first (for Error objects)
+  if (error.message) {
+    if (typeof error.message === 'string') {
+      return error.message;
+    }
+    // Handle nested message structure like { message: { message: "actual message" } }
+    if (typeof error.message === 'object' && error.message.message) {
+      return error.message.message;
+    }
+  }
+
+  // Check error.response.data structure (for API errors)
+  if (error.response?.data) {
+    const data = error.response.data;
+    if (typeof data.message === 'string') {
+      return data.message;
+    }
+    if (typeof data.message === 'object' && data.message?.message) {
+      return data.message.message;
+    }
+    if (data.error) {
+      return data.error;
+    }
+  }
+
+  // Check error.response?.data?.message directly
+  if (error.response?.data?.message) {
+    const message = error.response.data.message;
+    if (typeof message === 'string') {
+      return message;
+    }
+    if (typeof message === 'object' && message.message) {
+      return message.message;
+    }
+  }
+
+  // Check for error property
+  if (error.error) {
+    return error.error;
+  }
+
+  return fallback;
+}
+
 // Function to generate consistent colors for tags
 export function getTagColor(tag: string): string {
   // Generate color based on the tag string to ensure consistency

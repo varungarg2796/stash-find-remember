@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, PlusCircle, Package, Camera, Search, MapPin, Tag, Star, ArrowRight, CheckCircle } from 'lucide-react';
+import { Loader2, PlusCircle, Package, Camera, Search, MapPin, Tag, ArrowRight, CheckCircle, MessageSquareMore } from 'lucide-react';
 
 import AddItemButton from '@/components/AddItemButton';
 import FilterSection from '@/components/filter/FilterSection';
@@ -301,6 +301,7 @@ const MyStash = () => {
         
         {hasAnyItems && <StashStats />}
         
+        
         <div className="space-y-6">
           <FilterSection 
             searchQuery={filters.search || ''}
@@ -328,6 +329,31 @@ const MyStash = () => {
               message={error.message}
               onRetry={() => window.location.reload()} // Or refetch from query
             />
+          ) : data?.data && data.data.length === 0 && filters.search ? (
+            // No results found with search - suggest Ask Stasher
+            <Card className="text-center py-12 bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+              <CardContent>
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">No items found for "{filters.search}"</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Try using our AI-powered Ask Stasher for natural language search like "Where are my winter clothes?" 
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    onClick={() => navigate('/ask')}
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
+                  >
+                    <MessageSquareMore className="mr-2 h-4 w-4" />
+                    Try Ask Stasher
+                  </Button>
+                  <Button variant="outline" onClick={handleClearFilters}>
+                    Clear Search
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <ItemsDisplay 
               items={data?.data || []}

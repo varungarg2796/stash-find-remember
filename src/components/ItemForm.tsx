@@ -9,6 +9,7 @@ import QuantityInput from './form/QuantityInput';
 import LocationSelector from './form/LocationSelector';
 import PriceInput from './form/PriceInput';
 import TagSelector from './form/TagSelector';
+import ImageAnalysis from './ImageAnalysis';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon, Loader2, X } from 'lucide-react';
@@ -48,6 +49,7 @@ const ItemForm = ({
   const [useIcon, setUseIcon] = useState<boolean>(!!initialData?.iconType);
   const [imageFile, setImageFile] = useState<File | undefined>();
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>(initialData.imageUrl || '');
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   
   // Clean up the temporary object URL when the component unmounts
   useEffect(() => {
@@ -73,6 +75,32 @@ const ItemForm = ({
     }
   };
 
+  const handleAnalysisStart = () => {
+    setIsAnalyzing(true);
+  };
+
+  const handleAnalysisResult = (result: { name: string; tags: string[] }) => {
+    // Just store the analysis result, don't auto-apply
+    console.log('Analysis result received:', result);
+    setIsAnalyzing(false);
+  };
+
+  const handleApplyName = (name: string) => {
+    setFormData(prev => ({
+      ...prev,
+      name: name
+    }));
+    toast.success(`Applied suggested name: "${name}"`);
+  };
+
+  const handleApplyTags = (tags: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: [...new Set([...(prev.tags || []), ...tags])] // Merge tags, removing duplicates
+    }));
+    toast.success(`Applied ${tags.length} suggested tag${tags.length !== 1 ? 's' : ''}`);
+  };
+
   const handleImageMethodToggle = (useIconValue: boolean) => {
     setUseIcon(useIconValue);
     // Clear the other method's data
@@ -90,6 +118,13 @@ const ItemForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent submission during analysis
+    if (isAnalyzing) {
+      console.log('Preventing form submission during analysis');
+      return;
+    }
+    
     if (!formData.name) {
       toast.error("Item name is required.");
       return;
@@ -130,7 +165,18 @@ const ItemForm = ({
         {useIcon ? (
           <IconSelector selectedIcon={formData.iconType || null} onSelectIcon={handleIconChange} />
         ) : (
-          <ImageUploader onImageChange={handleImageChange} previewUrl={imagePreviewUrl} />
+          <div className="space-y-3 sm:space-y-4">
+            <ImageUploader onImageChange={handleImageChange} previewUrl={imagePreviewUrl} />
+            
+            {/* AI Image Analysis Component */}
+            <ImageAnalysis 
+              imageFile={imageFile || null}
+              onAnalysisStart={handleAnalysisStart}
+              onAnalysisResult={handleAnalysisResult}
+              onApplyName={handleApplyName}
+              onApplyTags={handleApplyTags}
+            />
+          </div>
         )}
       </div>
 
