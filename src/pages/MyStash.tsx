@@ -19,6 +19,8 @@ import { FindAllItemsParams } from '@/services/api/itemsApi';
 import { useNavigationHelper } from '@/hooks/useNavigationHelper';
 import { SortOption } from '@/hooks/useItemFiltering'; // This type can be reused
 import { ViewMode } from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import { statsApi } from '@/services/api/statsApi';
 
 const MyStash = () => {
   const { user } = useAuth();
@@ -37,7 +39,17 @@ const MyStash = () => {
   // The main data fetching hook - only fetch if user is logged in
   const { data, isLoading, error } = useItemsQuery(filters, !!user);
 
-  const hasItems = useMemo(() => (data?.data?.length ?? 0) > 0 || filters.search !== '', [data, filters]);
+  // Fetch total items count to determine if stash is truly empty
+  const { data: statsData } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: statsApi.getDashboardStats,
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Check if there are any items at all in the inventory (not just filtered results)
+  const hasAnyItems = useMemo(() => (statsData?.totalItems ?? 0) > 0, [statsData]);
+  const hasFilteredResults = useMemo(() => (data?.data?.length ?? 0) > 0, [data]);
 
   // --- Filter and Pagination Handlers ---
 
@@ -272,8 +284,8 @@ const MyStash = () => {
 
   return (
     <TooltipProvider>
-      <div className="max-w-screen-md mx-auto px-4 py-6">
-        {!hasItems && !isLoading && (
+      <div className="max-w-screen-md lg:max-w-5xl mx-auto px-4 py-6">
+        {!hasAnyItems && !isLoading && (
           <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-none">
             <CardContent className="p-6 text-center">
               <Package className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
@@ -287,20 +299,21 @@ const MyStash = () => {
           </Card>
         )}
         
-        {hasItems && <StashStats />}
+        {hasAnyItems && <StashStats />}
         
         <div className="space-y-6">
           <FilterSection 
             searchQuery={filters.search || ''}
             activeFilter={filters.tag ? 'tags' : filters.location ? 'location' : filters.priceFilter ? 'price' : 'all'}
             activeSubFilter={filters.tag || filters.location || filters.priceFilter}
-            viewMode={viewMode} // This would need its own state if you want to toggle it
+            viewMode={viewMode}
             sortBy={filters.sort as SortOption}
             onSearchChange={handleSearch}
             onFilterChange={handleFilterChange}
             onViewChange={handleViewChange}
             onSortChange={handleSortChange}
             clearSubFilter={handleClearFilters}
+            isLoading={isLoading}
           />
           
           {isLoading ? (

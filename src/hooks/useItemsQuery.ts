@@ -173,3 +173,29 @@ export const useRestoreItemMutation = () => {
     onError: (err: ApiError) => toast.error('Failed to restore item', { description: err.response?.data?.message || err.message }),
   });
 };
+
+export const useGiftItemMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note?: string }) => itemsApi.gift(id, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      toast.success('Item marked as gifted.');
+    },
+    onError: (err: ApiError) => toast.error('Failed to mark item as gifted', { description: err.response?.data?.message || err.message }),
+  });
+};
+
+export const useUseItemMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note?: string }) => itemsApi.use(id, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      toast.success('Item marked as used.');
+    },
+    onError: (err: ApiError) => toast.error('Failed to mark item as used', { description: err.response?.data?.message || err.message }),
+  });
+};

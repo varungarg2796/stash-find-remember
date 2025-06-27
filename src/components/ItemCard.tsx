@@ -1,5 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,12 +25,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useItems } from "@/context/ItemsContext";
 import { toast } from "sonner";
 import { useNavigationHelper } from "@/hooks/useNavigationHelper";
 import ItemCardImage from "./item/ItemCardImage";
 import ItemCardDetails from "./item/ItemCardDetails";
-import ItemCardActions from "./item/ItemCardActions";
 
 interface ItemCardProps {
   item: Item;
@@ -39,28 +58,49 @@ const ItemCard = ({ item }: ItemCardProps) => {
   const navigate = useNavigate();
   const { navigateWithState } = useNavigationHelper();
   const { useItem, giftItem, archiveItem, deleteItem } = useItems();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [actionNote, setActionNote] = useState('');
+  const [actionType, setActionType] = useState<'gift' | 'archive' | null>(null);
+  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
 
   const handleUse = (note?: string) => {
-    useItem(item.id, note);
+    useItem({ id: item.id, note });
     // Don't navigate away for use action as item might still exist
   };
 
-  const handleGift = (note?: string) => {
-    giftItem(item.id, note);
-    if (item.quantity <= 1) {
-      navigate("/my-stash");
-    }
+  const openActionDialog = (type: 'gift' | 'archive') => {
+    setActionType(type);
+    setActionNote('');
+    setIsActionDialogOpen(true);
   };
 
-  const handleArchive = (note?: string) => {
-    archiveItem(item.id, note);
-    navigate("/my-stash");
+  const executeAction = () => {
+    if (!actionType) return;
+    const params = { id: item.id, note: actionNote };
+
+    switch (actionType) {
+      case 'gift':
+        giftItem(params);
+        if (item.quantity <= 1) {
+          navigate("/my-stash");
+        }
+        break;
+      case 'archive':
+        archiveItem(params);
+        navigate("/my-stash");
+        break;
+    }
+    setIsActionDialogOpen(false);
   };
 
   const handleDelete = () => {
     deleteItem(item.id);
     navigate("/my-stash");
-    toast.success("Item deleted successfully");
+    setShowDeleteDialog(false);
+  };
+
+  const confirmDelete = () => {
+    setShowDeleteDialog(true);
   };
 
   const handleEdit = () => {
@@ -105,21 +145,17 @@ const ItemCard = ({ item }: ItemCardProps) => {
                   <Edit className="mr-2 h-4 w-4" />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleUse()}>
-                  <Package className="mr-2 h-4 w-4" />
-                  Mark as Used
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleGift()}>
+                <DropdownMenuItem onClick={() => openActionDialog('gift')}>
                   <Gift className="mr-2 h-4 w-4" />
-                  Gift Item
+                  Mark as Gifted
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleArchive()}>
+                <DropdownMenuItem onClick={() => openActionDialog('archive')}>
                   <Archive className="mr-2 h-4 w-4" />
                   Archive
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                  onClick={handleDelete}
+                  onClick={confirmDelete}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -137,13 +173,49 @@ const ItemCard = ({ item }: ItemCardProps) => {
         </div>
       </CardContent>
 
-      <ItemCardActions
-        item={item}
-        onUse={handleUse}
-        onGift={handleGift}
-        onArchive={handleArchive}
-        onDelete={handleDelete}
-      />
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{item.name}"? This action cannot be undone and the item will be permanently removed from your stash.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={isActionDialogOpen} onOpenChange={setIsActionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === 'gift' && 'Mark as Gifted'}
+              {actionType === 'archive' && 'Archive Item'}
+            </DialogTitle>
+            <DialogDescription>Add an optional note for your item's history.</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <Textarea 
+              placeholder={actionType === 'gift' ? "e.g., Gifted to Jane for her birthday" : "e.g., No longer needed"} 
+              value={actionNote} 
+              onChange={(e) => setActionNote(e.target.value)} 
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsActionDialogOpen(false)}>Cancel</Button>
+            <Button onClick={executeAction}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

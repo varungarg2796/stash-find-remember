@@ -5,26 +5,13 @@ import {
   useDeleteItemMutation,
   useArchiveItemMutation,
   useRestoreItemMutation,
-  // Assuming you create these two hooks following the same pattern
-  // For now, we will reuse the archive hook for simplicity as the backend logic is similar
+  useGiftItemMutation,
+  useUseItemMutation,
 } from '@/hooks/useItemsQuery';
 import { Item } from '@/types';
 import { itemsApi } from '@/services/api/itemsApi';
 import { useMutation } from '@tanstack/react-query';
 
-// It's cleaner to define the mutation hooks for gift/use right here
-// if they are simple wrappers, or in useItemsQuery.ts for consistency.
-// Let's define them here for clarity.
-
-const useGiftItemMutation = () => {
-  // This would be a real hook if you had a dedicated gift endpoint
-  return useArchiveItemMutation(); // Placeholder: for now, gifting archives the item
-};
-
-const useUseItemMutation = () => {
-  // This would be a real hook if you had a dedicated use endpoint
-  return useArchiveItemMutation(); // Placeholder: for now, using archives the item
-};
 
 
 type ItemsContextType = {
@@ -46,7 +33,7 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
   const archiveMutation = useArchiveItemMutation();
   const restoreMutation = useRestoreItemMutation();
   const giftMutation = useGiftItemMutation();
-  const useMutation = useUseItemMutation();
+  const useItemMutation = useUseItemMutation();
 
 
   const addItem = (item: Partial<Omit<Item, 'id' | 'createdAt'>>) => {
@@ -70,13 +57,11 @@ export const ItemsProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const giftItem = (params: { id: string; note?: string }) => {
-    // For now, we treat gifting as archiving with a specific note
-    giftMutation.mutate({ ...params, note: params.note || 'Gifted' });
+    giftMutation.mutate(params);
   };
   
   const useItem = (params: { id: string; note?: string }) => {
-    // For now, we treat using as archiving with a specific note
-    useMutation.mutate({ ...params, note: params.note || 'Used' });
+    useItemMutation.mutate(params);
   };
 
   return (

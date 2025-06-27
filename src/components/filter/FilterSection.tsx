@@ -34,6 +34,7 @@ interface FilterSectionProps {
   onViewChange: (view: ViewMode) => void;
   onSortChange: (sort: SortOption) => void;
   clearSubFilter: () => void;
+  isLoading?: boolean;
 }
 
 const FilterSection = ({
@@ -47,6 +48,7 @@ const FilterSection = ({
   onViewChange,
   onSortChange,
   clearSubFilter,
+  isLoading = false,
 }: FilterSectionProps) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -54,7 +56,13 @@ const FilterSection = ({
   return (
     <>
       <div className="mb-4 sm:mb-6">
-        <SearchBar onSearch={onSearchChange} />
+        <SearchBar 
+          onSearch={onSearchChange} 
+          isLoading={isLoading}
+          initialValue={searchQuery}
+          debounceDelay={500}
+          minSearchLength={2}
+        />
       </div>
       
       <div className="mb-6 sm:mb-8">

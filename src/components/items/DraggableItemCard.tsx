@@ -7,11 +7,12 @@ import { GripVertical, X } from "lucide-react";
 
 interface DraggableItemCardProps {
   item: any;
-  onRemove: () => void;
+  onRemove?: () => void;
   viewMode: 'grid' | 'list';
+  isReadOnly?: boolean;
 }
 
-const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps) => {
+const DraggableItemCard = ({ item, onRemove, viewMode, isReadOnly = false }: DraggableItemCardProps) => {
   const {
     attributes,
     listeners,
@@ -32,13 +33,15 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
       <Card ref={setNodeRef} style={style} className="touch-manipulation">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <div
-              {...attributes}
-              {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
-            >
-              <GripVertical className="h-4 w-4 text-gray-400" />
-            </div>
+            {!isReadOnly && (
+              <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+              >
+                <GripVertical className="h-4 w-4 text-gray-400" />
+              </div>
+            )}
             <img 
               src={item.imageUrl} 
               alt={item.name}
@@ -50,14 +53,16 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
                 <p className="text-sm text-muted-foreground truncate mt-1">{item.collectionNote}</p>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onRemove}
-              className="flex-shrink-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {!isReadOnly && onRemove && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onRemove}
+                className="flex-shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -74,21 +79,25 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
             className="w-full h-full object-cover rounded-t-lg"
           />
         </div>
-        <div
-          {...attributes}
-          {...listeners}
-          className="absolute top-2 left-2 p-1 bg-white/80 rounded cursor-grab active:cursor-grabbing hover:bg-white"
-        >
-          <GripVertical className="h-4 w-4 text-gray-600" />
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRemove}
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        {!isReadOnly && (
+          <div
+            {...attributes}
+            {...listeners}
+            className="absolute top-2 left-2 p-1 bg-white/80 rounded cursor-grab active:cursor-grabbing hover:bg-white"
+          >
+            <GripVertical className="h-4 w-4 text-gray-600" />
+          </div>
+        )}
+        {!isReadOnly && onRemove && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRemove}
+            className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       <CardContent className="p-4">
         <h3 className="font-medium text-lg truncate">{item.name}</h3>
