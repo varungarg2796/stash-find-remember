@@ -46,9 +46,7 @@ const Index = () => {
   const [showSearchResult, setShowSearchResult] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   
-  // Typewriter animation states
-  const [typewriterText, setTypewriterText] = useState("");
-  const [showCursor, setShowCursor] = useState(true);
+  // Removed typewriter animation states since we have static text now
 
   // Demo data
   const demoItems = [
@@ -135,32 +133,7 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [currentSearchIndex]);
 
-  // Typewriter animation for main headline
-  useEffect(() => {
-    const text = "anything again";
-    let index = 0;
-    setTypewriterText("");
-    
-    const typeInterval = setInterval(() => {
-      if (index < text.length) {
-        setTypewriterText(text.slice(0, index + 1));
-        index++;
-      } else {
-        clearInterval(typeInterval);
-      }
-    }, 100);
-
-    return () => clearInterval(typeInterval);
-  }, []);
-
-  // Cursor blinking animation
-  useEffect(() => {
-    const cursorInterval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 500);
-
-    return () => clearInterval(cursorInterval);
-  }, []);
+  // Removed typewriter animation effects since we have static headline now
 
   const handleLogin = () => {
     setIsLoggingIn(true);
@@ -189,18 +162,15 @@ const Index = () => {
             {/* Main Headline */}
             <div className="space-y-6 animate-fade-in-up">
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight leading-relaxed">
-                Never lose
-                <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent animate-gradient bg-300% font-extrabold min-h-[1.2em]">
-                  {typewriterText}
-                  {showCursor && typewriterText.length < 13 && (
-                    <span className="animate-pulse ml-1 text-purple-600">|</span>
-                  )}
+                Organise your belongings
+                <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent animate-gradient bg-300% font-extrabold">
+                  with AI
                 </span>
               </h1>
-              <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
-                Snap, organize, and find your belongings instantly with AI-powered smart search.
+              <p className="text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto font-light leading-relaxed">
+                <span className="text-purple-600 font-semibold">Snap to catalog.</span> <span className="text-pink-600 font-semibold">Ask to find.</span> <span className="text-indigo-600 font-semibold">Share with control.</span>
                 <br className="hidden sm:block" />
-                <span className="text-purple-600 font-medium">Turn chaos into control.</span>
+                <span className="text-gray-700 font-medium">Your personal inventory, made intelligent.</span>
               </p>
             </div>
 
@@ -213,7 +183,7 @@ const Index = () => {
                   <Input
                     value={searchQuery}
                     readOnly
-                    placeholder="Ask StashTracker anything..."
+                    placeholder="Ask to find anything..."
                     className="pl-12 h-16 text-lg bg-white shadow-2xl border-2 border-transparent focus:border-purple-400 rounded-xl text-center font-medium"
                   />
                   {isTyping && (
@@ -272,21 +242,21 @@ const Index = () => {
               {user ? (
                 <>
                   <Button 
-                    onClick={() => navigate('/add-item')} 
+                    onClick={() => navigate('/my-stash')} 
                     size="lg"
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-10 py-6 text-lg rounded-xl shadow-2xl hover:shadow-purple-500/25 hover:scale-105 transition-all duration-300 w-full sm:w-auto group"
                   >
-                    <Camera className="mr-3 h-5 w-5 group-hover:rotate-12 transition-transform" /> 
-                    Add First Item
+                    <Box className="mr-3 h-5 w-5 group-hover:rotate-12 transition-transform" /> 
+                    View Stash
                   </Button>
                   <Button 
-                    onClick={() => navigate('/my-stash')} 
+                    onClick={() => navigate('/ask')} 
                     variant="outline" 
                     size="lg"
                     className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 px-10 py-6 text-lg rounded-xl font-semibold hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                   >
-                    <Box className="mr-3 h-5 w-5" /> 
-                    View Stash
+                    <MessageSquare className="mr-3 h-5 w-5" /> 
+                    Ask AI
                   </Button>
                 </>
               ) : (
@@ -348,7 +318,7 @@ const Index = () => {
                   1
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-purple-600 transition-colors">Snap & Store</h3>
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-purple-600 transition-colors">Snap to Catalog</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Take photos, add locations, and let our AI automatically tag and categorize everything for you.
               </p>
@@ -408,7 +378,7 @@ const Index = () => {
                   3
                 </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-orange-600 transition-colors">Find Instantly</h3>
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-orange-600 transition-colors">Ask to Find</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Ask in natural language and get instant results with photos, locations, and smart suggestions.
               </p>
@@ -495,7 +465,7 @@ const Index = () => {
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
                 <MessageSquare className="h-6 w-6 text-purple-600" />
-                <h3 className="text-2xl font-bold">Ask StashTracker</h3>
+                <h3 className="text-2xl font-bold">Ask to Find</h3>
               </div>
               <Card className="h-96 flex flex-col shadow-2xl border-2 border-purple-100">
                 <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
@@ -583,10 +553,10 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Why StashTracker works
+              Your intelligent inventory solution
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Built for real people with real organizational challenges
+              AI-powered features designed to make organization effortless
             </p>
           </div>
 
@@ -656,7 +626,7 @@ const Index = () => {
               </div>
             </div>
             <blockquote className="text-2xl sm:text-3xl font-light text-white leading-relaxed">
-              "StashTracker saved my sanity. I used to spend hours looking for things. Now I find everything in seconds."
+              "Just snap to catalog, ask to find. StashTracker made my chaotic home organized and intelligent."
             </blockquote>
             <div className="text-purple-200">
               <p className="font-semibold">Sarah Chen</p>
@@ -674,7 +644,7 @@ const Index = () => {
               Ready to get organized?
             </h2>
             <p className="text-xl text-purple-200 mb-8 max-w-2xl mx-auto">
-              Join thousands who've transformed their chaotic spaces into organized sanctuaries
+              Join thousands who've made their personal inventory intelligent with AI
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center max-w-lg mx-auto">
@@ -748,18 +718,18 @@ const Index = () => {
                       </h2>
                       <p className="text-lg text-gray-600 mb-6">
                         {itemCount > 0 
-                          ? `You have ${itemCount} item(s) organized. Ready to add more?`
-                          : "Your organized life starts now. Let's add your first item!"
+                          ? `You have ${itemCount} item(s) organized. View your stash or ask AI anything!`
+                          : "Your organized life starts now. View your stash or try our AI assistant!"
                         }
                       </p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
                       <Button 
-                        onClick={() => navigate('/add-item')} 
+                        onClick={() => navigate('/my-stash')} 
                         className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-8 py-4 text-lg w-full sm:w-auto"
                       >
-                        <Camera className="mr-2 h-5 w-5" />
-                        Add First Item
+                        <Box className="mr-2 h-5 w-5" />
+                        View Stash
                       </Button>
                       <Button 
                         onClick={() => navigate('/ask')} 
@@ -767,7 +737,7 @@ const Index = () => {
                         className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 px-8 py-4 text-lg font-semibold w-full sm:w-auto"
                       >
                         <MessageSquare className="mr-2 h-5 w-5" />
-                        Try AI Search
+                        Ask AI
                       </Button>
                     </div>
                   </CardContent>
