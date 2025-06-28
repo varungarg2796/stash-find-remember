@@ -114,14 +114,15 @@ const Header = () => {
               <NavigationMenuList>
                 {primaryNavigationItems.map((item) => (
                   <NavigationMenuItem key={item.path}>
-                    <Link to={item.path}>
-                      <NavigationMenuLink
-                        active={location.pathname === item.path}
-                        className={navigationMenuTriggerStyle()}
-                      >
+                    <NavigationMenuLink
+                      asChild
+                      active={location.pathname === item.path}
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      <Link to={item.path}>
                         {item.icon} {item.label}
-                      </NavigationMenuLink>
-                    </Link>
+                      </Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
@@ -134,14 +135,15 @@ const Header = () => {
               <NavigationMenuList>
                 {primaryNavigationItems.slice(0, 3).map((item) => (
                   <NavigationMenuItem key={item.path}>
-                    <Link to={item.path}>
-                      <NavigationMenuLink
-                        active={location.pathname === item.path}
-                        className={navigationMenuTriggerStyle()}
-                      >
+                    <NavigationMenuLink
+                      asChild
+                      active={location.pathname === item.path}
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      <Link to={item.path}>
                         {item.icon} {item.label}
-                      </NavigationMenuLink>
-                    </Link>
+                      </Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>

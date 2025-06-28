@@ -4,8 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, FolderOpen, Loader2, Share2, Lock, Eye, Star, CheckCircle, ArrowRight, Grid3X3 } from 'lucide-react';
+import { useState } from 'react';
 import CollectionCard from '@/components/collection/CollectionCard';
 import CreateCollectionDialog from '@/components/collection/CreateCollectionDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   useCollectionsQuery,
   useCreateCollectionMutation,
@@ -18,6 +29,7 @@ import ErrorDisplay from '@/components/ErrorDisplay';
 const Collections = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [collectionToDelete, setCollectionToDelete] = useState<{ id: string; name: string } | null>(null);
 
   // --- DATA FETCHING & MUTATIONS ---
   // Only fetch collections if user is logged in
@@ -35,9 +47,21 @@ const Collections = () => {
   };
 
   const handleDeleteCollection = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this collection? This cannot be undone.')) {
-      deleteCollectionMutation.mutate(id);
+    const collection = collections?.find(c => c.id === id);
+    if (collection) {
+      setCollectionToDelete({ id, name: collection.name });
     }
+  };
+
+  const confirmDeleteCollection = () => {
+    if (collectionToDelete) {
+      deleteCollectionMutation.mutate(collectionToDelete.id);
+      setCollectionToDelete(null);
+    }
+  };
+
+  const cancelDeleteCollection = () => {
+    setCollectionToDelete(null);
   };
 
   const handleUpdateCollection = (params: { id: string; data: { name?: string; description?: string; coverImage?: string } }) => {
@@ -300,6 +324,49 @@ const Collections = () => {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!collectionToDelete} onOpenChange={(open) => !open && cancelDeleteCollection()}>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <FolderOpen className="h-4 w-4 text-red-600" />
+              </div>
+              Delete Collection
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              Are you sure you want to delete{' '}
+              <span className="font-semibold text-gray-900">"{collectionToDelete?.name}"</span>?
+              <br />
+              <br />
+              This action cannot be undone. All items in this collection will be removed from the collection, but the items themselves will not be deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel 
+              onClick={cancelDeleteCollection}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCollection}
+              disabled={deleteCollectionMutation.isPending}
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {deleteCollectionMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Collection'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
