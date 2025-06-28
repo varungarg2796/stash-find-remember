@@ -1,418 +1,247 @@
-import { useState, useEffect } from "react";
-import { Item } from "@/types";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import ImageUploader from "./form/ImageUploader";
-import IconSelector from "./form/IconSelector";
-import QuantityInput from "./form/QuantityInput";
-import LocationSelector from "./form/LocationSelector";
-import PriceInput from "./form/PriceInput";
-import TagSelector from "./form/TagSelector";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { CalendarIcon, AlertCircle } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { validateItemForm } from "@/utils/validationUtils";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { Item } from '@/types';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import ImageUploader from './form/ImageUploader';
+import IconSelector from './form/IconSelector';
+import QuantityInput from './form/QuantityInput';
+import LocationSelector from './form/LocationSelector';
+import PriceInput from './form/PriceInput';
+import TagSelector from './form/TagSelector';
+import ImageAnalysis from './ImageAnalysis';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { CalendarIcon, Loader2, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ItemFormProps {
   initialData?: Partial<Item>;
-  onSubmit: (data: Omit<Item, "id">) => void;
+  // The onSubmit now passes the raw File object separately
+  onSubmit: (data: Omit<Item, 'id' | 'createdAt'>, imageFile?: File) => void;
   onCancel: () => void;
   submitLabel: string;
+  isSubmitting?: boolean;
   isEditing?: boolean;
 }
 
-// Define default initial data outside the component for a stable reference
-const defaultInitialItemData: Omit<Item, "id"> = {
-  name: "",
-  description: "",
-  imageUrl: "",
-  iconType: null,
-  quantity: 1,
-  location: "",
-  tags: [],
-  price: undefined,
-  priceless: false,
-  acquisitionDate: undefined,
-  expiryDate: undefined,
-  createdAt: new Date()
-};
-
-const getPlaceholderImage = (name: string = ""): string => {
-  return "/placeholder.svg";
-};
-
 const ItemForm = ({
-  initialData: initialDataProp = defaultInitialItemData,
+  initialData = {},
   onSubmit,
   onCancel,
   submitLabel,
-  isEditing = false
+  isEditing = false,
+  isSubmitting = false
 }: ItemFormProps) => {
-  const [formData, setFormData] = useState<Omit<Item, "id">>({ ...defaultInitialItemData, ...initialDataProp });
-  const [useIcon, setUseIcon] = useState<boolean>(!!initialDataProp.iconType);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<Partial<Omit<Item, 'id'>>>({
+    name: '',
+    description: '',
+    quantity: 1,
+    location: '',
+    tags: [],
+    price: undefined,
+    priceless: false,
+    ...initialData
+  });
 
-  // Effect to reset the form if initialDataProp changes
+  const [useIcon, setUseIcon] = useState<boolean>(!!initialData?.iconType);
+  const [imageFile, setImageFile] = useState<File | undefined>();
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>(initialData.imageUrl || '');
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  
+  // Clean up the temporary object URL when the component unmounts
   useEffect(() => {
-    setFormData({ ...defaultInitialItemData, ...initialDataProp });
-    setUseIcon(!!initialDataProp.iconType);
-  }, [initialDataProp]);
-
-  // Effect to handle UI changes when toggling between icon and image
-  useEffect(() => {
-    setFormData(prev => {
-      if (useIcon) {
-        return { ...prev, imageUrl: "" };
-      } else {
-        return { ...prev, iconType: null };
+    return () => {
+      if (imagePreviewUrl && imagePreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreviewUrl);
       }
-    });
-  }, [useIcon]);
+    };
+  }, [imagePreviewUrl]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleImageChange = (file: File | null) => {
+    if (file) {
+      setImageFile(file);
+      setImagePreviewUrl(URL.createObjectURL(file));
+      setFormData(prev => ({...prev, imageUrl: ''})); // Clear existing imageUrl
+    } else {
+      setImageFile(undefined);
+      setImagePreviewUrl('');
     }
   };
 
-  const handleQuantityChange = (quantity: number) => {
-    setFormData(prev => ({ ...prev, quantity }));
-    if (errors.quantity) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.quantity;
-        return newErrors;
-      });
-    }
+  const handleAnalysisStart = () => {
+    setIsAnalyzing(true);
   };
 
-  const handleLocationChange = (location: string) => {
-    setFormData(prev => ({ ...prev, location }));
+  const handleAnalysisResult = (result: { name: string; tags: string[] }) => {
+    // Just store the analysis result, don't auto-apply
+    console.log('Analysis result received:', result);
+    setIsAnalyzing(false);
   };
 
-  const handlePricelessToggle = (checked: boolean) => {
+  const handleApplyName = (name: string) => {
     setFormData(prev => ({
       ...prev,
-      priceless: checked,
-      price: checked ? undefined : prev.price
+      name: name
     }));
-    if (errors.price) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.price;
-        return newErrors;
-      });
-    }
+    toast.success(`Applied suggested name: "${name}"`);
   };
 
-  const handlePriceChange = (value: number | undefined) => {
-    setFormData(prev => ({ ...prev, price: value }));
-    if (errors.price) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.price;
-        return newErrors;
-      });
-    }
-  };
-
-  const handleTagsChange = (tags: string[]) => {
-    setFormData(prev => ({ ...prev, tags }));
-    if (errors.tags) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.tags;
-        return newErrors;
-      });
-    }
-  };
-
-  const handleImageChange = (imageUrl: string) => {
+  const handleApplyTags = (tags: string[]) => {
     setFormData(prev => ({
       ...prev,
-      imageUrl,
+      tags: [...new Set([...(prev.tags || []), ...tags])] // Merge tags, removing duplicates
     }));
-  };
-
-  const handleIconChange = (iconType: string | null) => {
-    setFormData(prev => ({
-      ...prev,
-      iconType,
-    }));
+    toast.success(`Applied ${tags.length} suggested tag${tags.length !== 1 ? 's' : ''}`);
   };
 
   const handleImageMethodToggle = (useIconValue: boolean) => {
     setUseIcon(useIconValue);
+    // Clear the other method's data
+    if (useIconValue) {
+      setImageFile(undefined);
+      setImagePreviewUrl('');
+    } else {
+      setFormData(prev => ({ ...prev, iconType: undefined }));
+    }
+  };
+  
+  const handleIconChange = (iconType: string | null) => {
+    setFormData(prev => ({ ...prev, iconType: iconType || undefined }));
   };
 
-  const handleDateChange = (date: Date | undefined) => {
-    setFormData(prev => ({ ...prev, acquisitionDate: date }));
-  };
-
-  const handleExpiryDateChange = (date: Date | undefined) => {
-    setFormData(prev => ({ ...prev, expiryDate: date }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    const validation = validateItemForm(formData);
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      setIsSubmitting(false);
-      toast.error("Please fix the errors in the form");
+    
+    // Prevent submission during analysis
+    if (isAnalyzing) {
+      console.log('Preventing form submission during analysis');
       return;
     }
-
-    let finalData = { ...formData };
-
-    // Simple fallback system - no smart defaults
-    if (useIcon) {
-      // If using icon mode but no icon selected, use default box icon
-      if (!finalData.iconType) {
-        finalData.iconType = "box";
-      }
-      finalData.imageUrl = "";
-    } else {
-      // If using image mode but no image selected, use placeholder
-      if (!finalData.imageUrl) {
-        finalData.imageUrl = "/placeholder.svg";
-      }
-      finalData.iconType = null;
+    
+    if (!formData.name) {
+      toast.error("Item name is required.");
+      return;
     }
-
-    try {
-      await onSubmit(finalData);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // The parent component (`AddItem.tsx`) now handles the submission logic
+    onSubmit(formData as Omit<Item, 'id'|'createdAt'>, imageFile);
   };
+  
+  // --- Other Handlers ---
+  const handleQuantityChange = (quantity: number) => setFormData(prev => ({ ...prev, quantity }));
+  const handleLocationChange = (location: string) => setFormData(prev => ({ ...prev, location }));
+  const handleTagsChange = (tags: string[]) => setFormData(prev => ({ ...prev, tags }));
+  const handlePriceChange = (price?: number) => setFormData(prev => ({ ...prev, price }));
+  const handlePricelessToggle = (priceless: boolean) => setFormData(prev => ({ ...prev, priceless, price: priceless ? undefined : prev.price }));
+  const handleDateChange = (date?: Date) => setFormData(prev => ({ ...prev, acquisitionDate: date }));
+  const handleExpiryDateChange = (date?: Date) => setFormData(prev => ({ ...prev, expiryDate: date }));
+  const clearAcquisitionDate = () => setFormData(prev => ({ ...prev, acquisitionDate: undefined }));
+  const clearExpiryDate = () => setFormData(prev => ({ ...prev, expiryDate: undefined }));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Item Name*
-        </label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Enter item name"
-          className={errors.name ? "border-destructive" : ""}
-          required
-        />
-        {errors.name && (
-          <div className="text-destructive text-xs flex items-center mt-1">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            {errors.name}
-          </div>
-        )}
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Item Name*</label>
+        <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Enter item name" required />
+      </div>
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <Textarea id="description" name="description" value={formData.description} onChange={handleChange} placeholder="Enter item description" rows={4} />
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-          Description
-        </label>
-        <Textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Enter item description"
-          className={errors.description ? "border-destructive" : ""}
-          rows={4}
-        />
-        {errors.description && (
-          <div className="text-destructive text-xs flex items-center mt-1">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            {errors.description}
-          </div>
-        )}
-        <div className="text-xs text-muted-foreground mt-1">
-          {formData.description?.length || 0}/500
-        </div>
-      </div>
-
-      <div>
-        <div className="mb-3">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Item Visual
-          </label>
+        <div className="mb-3"><label className="block text-sm font-medium text-gray-700 mb-2">Item Visual</label>
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={!useIcon ? "default" : "outline"}
-              onClick={() => handleImageMethodToggle(false)}
-              className="flex-1"
-            >
-              📷 Upload Image
-            </Button>
-            <Button
-              type="button"
-              variant={useIcon ? "default" : "outline"}
-              onClick={() => handleImageMethodToggle(true)}
-              className="flex-1"
-            >
-              🎨 Use Icon
-            </Button>
+            <Button type="button" variant={!useIcon ? 'default' : 'outline'} onClick={() => handleImageMethodToggle(false)} className="flex-1">📷 Upload Image</Button>
+            <Button type="button" variant={useIcon ? 'default' : 'outline'} onClick={() => handleImageMethodToggle(true)} className="flex-1">🎨 Use Icon</Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {useIcon 
-              ? "Choose an icon to represent your item"
-              : "Upload a photo or we'll show a placeholder"
-            }
-          </p>
         </div>
-
         {useIcon ? (
-          <IconSelector
-            selectedIcon={formData.iconType || null}
-            onSelectIcon={handleIconChange}
-          />
+          <IconSelector selectedIcon={formData.iconType || null} onSelectIcon={handleIconChange} />
         ) : (
-          <ImageUploader
-            imageUrl={formData.imageUrl}
-            onImageChange={handleImageChange}
-            getPlaceholderImage={getPlaceholderImage}
-            itemName={formData.name}
-          />
+          <div className="space-y-3 sm:space-y-4">
+            <ImageUploader onImageChange={handleImageChange} previewUrl={imagePreviewUrl} />
+            
+            {/* AI Image Analysis Component */}
+            <ImageAnalysis 
+              imageFile={imageFile || null}
+              onAnalysisStart={handleAnalysisStart}
+              onAnalysisResult={handleAnalysisResult}
+              onApplyName={handleApplyName}
+              onApplyTags={handleApplyTags}
+            />
+          </div>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Acquisition Date
-        </label>
-        <Popover>
-          <PopoverTrigger asChild>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Acquisition Date</label>
+        <div className="flex gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !formData.acquisitionDate && "text-muted-foreground")} type="button">
+                <CalendarIcon className="mr-2 h-4 w-4" />{formData.acquisitionDate ? format(formData.acquisitionDate, "PPP") : <span>When did you get this item?</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={formData.acquisitionDate} onSelect={handleDateChange} disabled={(date) => date > new Date()} initialFocus /></PopoverContent>
+          </Popover>
+          {formData.acquisitionDate && (
             <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !formData.acquisitionDate && "text-muted-foreground"
-              )}
               type="button"
+              variant="outline"
+              size="icon"
+              onClick={clearAcquisitionDate}
+              className="flex-shrink-0"
+              title="Clear acquisition date"
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {formData.acquisitionDate ? format(formData.acquisitionDate, "PPP") : <span>When did you get this item?</span>}
+              <X className="h-4 w-4" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={formData.acquisitionDate}
-              onSelect={handleDateChange}
-              disabled={(date) => date > new Date()}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
-          </PopoverContent>
-        </Popover>
+          )}
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Expiry Date (Optional)
-        </label>
-        <Popover>
-          <PopoverTrigger asChild>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date (Optional)</label>
+        <div className="flex gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !formData.expiryDate && "text-muted-foreground")} type="button">
+                <CalendarIcon className="mr-2 h-4 w-4" />{formData.expiryDate ? format(formData.expiryDate, "PPP") : <span>When does this item expire?</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={formData.expiryDate} onSelect={handleExpiryDateChange} disabled={(date) => date < new Date()} initialFocus /></PopoverContent>
+          </Popover>
+          {formData.expiryDate && (
             <Button
-              variant="outline"
-              className={cn(
-                "w-full justify-start text-left font-normal",
-                !formData.expiryDate && "text-muted-foreground"
-              )}
               type="button"
+              variant="outline"
+              size="icon"
+              onClick={clearExpiryDate}
+              className="flex-shrink-0"
+              title="Clear expiry date"
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {formData.expiryDate ? format(formData.expiryDate, "PPP") : <span>When does this item expire?</span>}
+              <X className="h-4 w-4" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={formData.expiryDate}
-              onSelect={handleExpiryDateChange}
-              disabled={(date) => date < new Date()}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
-          </PopoverContent>
-        </Popover>
+          )}
+        </div>
       </div>
 
-      <QuantityInput
-        quantity={formData.quantity}
-        onChange={handleQuantityChange}
-      />
-      {errors.quantity && (
-        <div className="text-destructive text-xs flex items-center mt-1">
-          <AlertCircle className="h-3 w-3 mr-1" />
-          {errors.quantity}
-        </div>
-      )}
-
-      <LocationSelector
-        value={formData.location}
-        onChange={handleLocationChange}
-        isEditing={isEditing}
-      />
-
-      <PriceInput
-        price={formData.price}
-        priceless={!!formData.priceless}
-        onPriceChange={handlePriceChange}
-        onPricelessToggle={handlePricelessToggle}
-      />
-      {errors.price && (
-        <div className="text-destructive text-xs flex items-center mt-1">
-          <AlertCircle className="h-3 w-3 mr-1" />
-          {errors.price}
-        </div>
-      )}
-
-      <TagSelector
-        selectedTags={formData.tags}
-        onChange={handleTagsChange}
-        isEditing={isEditing}
-      />
-      {errors.tags && (
-        <div className="text-destructive text-xs flex items-center mt-1">
-          <AlertCircle className="h-3 w-3 mr-1" />
-          {errors.tags}
-        </div>
-      )}
+      <QuantityInput quantity={formData.quantity || 1} onChange={handleQuantityChange} />
+      <LocationSelector value={formData.location || ''} onChange={handleLocationChange} />
+      <TagSelector selectedTags={formData.tags || []} onChange={handleTagsChange} />
+      <PriceInput price={formData.price} priceless={!!formData.priceless} onPriceChange={handlePriceChange} onPricelessToggle={handlePricelessToggle} />
 
       <div className="flex space-x-4 pt-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="flex-1"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          className="flex-1" 
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Submitting..." : submitLabel}
+        <Button type="button" variant="outline" className="flex-1" onClick={onCancel} disabled={isSubmitting}>Cancel</Button>
+        <Button type="submit" className="flex-1" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {submitLabel}
         </Button>
       </div>
     </form>

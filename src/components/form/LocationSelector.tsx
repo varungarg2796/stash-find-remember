@@ -1,4 +1,3 @@
-
 import { Info } from "lucide-react";
 import {
   Select,
@@ -21,16 +20,12 @@ interface LocationSelectorProps {
   isEditing?: boolean;
 }
 
-const DEFAULT_LOCATIONS = [
-  "Kitchen", "Bedroom", "Living Room", "Bathroom", "Garage", 
-  "Attic", "Basement", "Office", "Closet", "Storage Room"
-];
-
 const LocationSelector = ({ value, onChange, isEditing = false }: LocationSelectorProps) => {
   const { user } = useAuth();
   
-  // Get locations from user preferences, with fallback to defaults
-  const locations = (user?.preferences?.locations || DEFAULT_LOCATIONS).filter(loc => loc && loc.trim() !== "");
+  // The user object now directly contains the locations array.
+  // We no longer need a separate DEFAULT_LOCATIONS fallback here.
+  const locations = user?.locations || [];
 
   return (
     <div>
@@ -49,7 +44,7 @@ const LocationSelector = ({ value, onChange, isEditing = false }: LocationSelect
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-[200px]">
-                  You can configure locations in your profile settings.
+                  You can add or remove locations in your profile settings.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -62,8 +57,11 @@ const LocationSelector = ({ value, onChange, isEditing = false }: LocationSelect
           <SelectValue placeholder="Select a location" />
         </SelectTrigger>
         <SelectContent>
+          {/* We now map over an array of objects, using loc.id as the key and loc.name for the value/display */}
           {locations.map(loc => (
-            <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+            <SelectItem key={loc.id} value={loc.name}>
+              {loc.name}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>

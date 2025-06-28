@@ -1,130 +1,79 @@
-
-import React, { createContext, useContext } from "react";
-import { Item, ItemHistory } from "@/types";
-import { 
-  useItemsQuery,
-  useActiveItemsQuery,
-  useArchivedItemsQuery,
-  useItemQuery,
+import React, { createContext, useContext, ReactNode } from 'react';
+import {
   useCreateItemMutation,
   useUpdateItemMutation,
   useDeleteItemMutation,
   useArchiveItemMutation,
   useRestoreItemMutation,
+  useGiftItemMutation,
   useUseItemMutation,
-  useGiftItemMutation
-} from "@/hooks/useItemsQuery";
+} from '@/hooks/useItemsQuery';
+import { Item } from '@/types';
+import { itemsApi } from '@/services/api/itemsApi';
+import { useMutation } from '@tanstack/react-query';
+
+
 
 type ItemsContextType = {
-  items: Item[];
-  addItem: (item: Omit<Item, "id" | "createdAt" | "history">) => void;
-  updateItem: (item: Item) => void;
+  addItem: (item: Partial<Omit<Item, 'id' | 'createdAt'>>) => void;
+  updateItem: (params: { id: string; data: Partial<Item> }) => void;
   deleteItem: (id: string) => void;
-  getItem: (id: string) => Item | undefined;
-  useItem: (id: string, note?: string) => void;
-  giftItem: (id: string, note?: string) => void;
-  archiveItem: (id: string, note?: string) => void;
-  restoreItem: (id: string, note?: string) => void;
-  addItemHistory: (itemId: string, action: ItemHistory['action'], note?: string) => void;
-  getArchivedItems: () => Item[];
-  getActiveItems: () => Item[];
-  isLoading?: boolean;
-  error?: Error | null;
+  archiveItem: (params: { id: string; note?: string }) => void;
+  restoreItem: (params: { id:string; note?: string }) => void;
+  giftItem: (params: { id: string; note?: string }) => void;
+  useItem: (params: { id: string; note?: string }) => void;
 };
 
 const ItemsContext = createContext<ItemsContextType | undefined>(undefined);
 
-export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
-  // Use TanStack Query hooks
-  const { data: allItems = [], isLoading, error } = useItemsQuery();
-  const { data: activeItems = [] } = useActiveItemsQuery();
-  const { data: archivedItems = [] } = useArchivedItemsQuery();
-  
-  // Mutations
-  const createItemMutation = useCreateItemMutation();
-  const updateItemMutation = useUpdateItemMutation();
-  const deleteItemMutation = useDeleteItemMutation();
-  const archiveItemMutation = useArchiveItemMutation();
-  const restoreItemMutation = useRestoreItemMutation();
+export const ItemsProvider = ({ children }: { children: ReactNode }) => {
+  const createMutation = useCreateItemMutation();
+  const updateMutation = useUpdateItemMutation();
+  const deleteMutation = useDeleteItemMutation();
+  const archiveMutation = useArchiveItemMutation();
+  const restoreMutation = useRestoreItemMutation();
+  const giftMutation = useGiftItemMutation();
   const useItemMutation = useUseItemMutation();
-  const giftItemMutation = useGiftItemMutation();
 
-  const addItem = (newItem: Omit<Item, "id" | "createdAt" | "history">) => {
-    createItemMutation.mutate(newItem);
+
+  const addItem = (item: Partial<Omit<Item, 'id' | 'createdAt'>>) => {
+    createMutation.mutate(item);
   };
 
-  const updateItem = (updatedItem: Item) => {
-    updateItemMutation.mutate(updatedItem);
+  const updateItem = (params: { id: string; data: Partial<Item> }) => {
+    updateMutation.mutate(params);
   };
 
   const deleteItem = (id: string) => {
-    deleteItemMutation.mutate(id);
+    deleteMutation.mutate(id);
   };
 
-  const getItem = (id: string) => {
-    return allItems.find((item) => item.id === id);
+  const archiveItem = (params: { id: string; note?: string }) => {
+    archiveMutation.mutate(params);
   };
 
-  const addItemHistory = (itemId: string, action: ItemHistory['action'], note?: string) => {
-    const item = getItem(itemId);
-    if (item) {
-      const updatedItem = {
-        ...item,
-        history: [
-          ...(item.history || []),
-          { 
-            id: Date.now().toString(), 
-            action, 
-            date: new Date(),
-            note 
-          }
-        ]
-      };
-      updateItem(updatedItem);
-    }
+  const restoreItem = (params: { id: string; note?: string }) => {
+    restoreMutation.mutate(params);
   };
-
-  const useItem = (id: string, note?: string) => {
-    useItemMutation.mutate({ id, note });
+  
+  const giftItem = (params: { id: string; note?: string }) => {
+    giftMutation.mutate(params);
   };
-
-  const giftItem = (id: string, note?: string) => {
-    giftItemMutation.mutate({ id, note });
-  };
-
-  const archiveItem = (id: string, note?: string) => {
-    archiveItemMutation.mutate({ id, note });
-  };
-
-  const restoreItem = (id: string, note?: string) => {
-    restoreItemMutation.mutate({ id, note });
-  };
-
-  const getArchivedItems = () => {
-    return archivedItems;
-  };
-
-  const getActiveItems = () => {
-    return activeItems;
+  
+  const useItem = (params: { id: string; note?: string }) => {
+    useItemMutation.mutate(params);
   };
 
   return (
     <ItemsContext.Provider
-      value={{ 
-        items: allItems, 
-        addItem, 
-        updateItem, 
-        deleteItem, 
-        getItem,
-        useItem,
-        giftItem,
+      value={{
+        addItem,
+        updateItem,
+        deleteItem,
         archiveItem,
         restoreItem,
-        addItemHistory,
-        getArchivedItems,
-        getActiveItems,
-        isLoading,
-        error: error as Error | null
+        giftItem,
+        useItem,
       }}
     >
       {children}
@@ -135,7 +84,9 @@ export const ItemsProvider = ({ children }: { children: React.ReactNode }) => {
 export const useItems = () => {
   const context = useContext(ItemsContext);
   if (context === undefined) {
-    throw new Error("useItems must be used within an ItemsProvider");
+    // Add more debugging info for mobile issues
+    console.error('useItems called outside ItemsProvider. Current component stack:', Error().stack);
+    throw new Error('useItems must be used within an ItemsProvider');
   }
   return context;
 };

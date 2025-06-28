@@ -1,287 +1,373 @@
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, PlusCircle, Package, Camera, Search, MapPin, Tag, ArrowRight, CheckCircle, MessageSquareMore } from 'lucide-react';
 
-import { useNavigate } from "react-router-dom";
-import AddItemButton from "@/components/AddItemButton";
-import FilterSection from "@/components/filter/FilterSection";
-import ItemsDisplay from "@/components/items/ItemsDisplay";
-import StashStats from "@/components/StashStats";
-import ItemCardSkeleton from "@/components/ItemCardSkeleton";
-import { useItemFiltering } from "@/hooks/useItemFiltering";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/context/AuthContext";
-import { useItems } from "@/context/ItemsContext";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { PlusCircle, Package, Camera, MapPin, Tag, Star, Search, Grid, List } from "lucide-react";
-import { useNavigationHelper } from "@/hooks/useNavigationHelper";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import AddItemButton from '@/components/AddItemButton';
+import FilterSection from '@/components/filter/FilterSection';
+import ItemsDisplay from '@/components/items/ItemsDisplay';
+import StashStats from '@/components/StashStats';
+import ItemCardSkeleton from '@/components/ItemCardSkeleton';
+import ErrorDisplay from '@/components/ErrorDisplay';
+
+import { useItemsQuery } from '@/hooks/useItemsQuery';
+import { FindAllItemsParams } from '@/services/api/itemsApi';
+import { useNavigationHelper } from '@/hooks/useNavigationHelper';
+import { SortOption } from '@/hooks/useItemFiltering'; // This type can be reused
+import { ViewMode } from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import { statsApi } from '@/services/api/statsApi';
 
 const MyStash = () => {
-  const { navigateWithState } = useNavigationHelper();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { user, login } = useAuth();
-  const { items } = useItems();
-  const [isLoading, setIsLoading] = useState(true);
-  const {
-    searchQuery,
-    activeFilter,
-    activeSubFilter,
-    viewMode,
-    sortBy,
-    filteredItems,
-    handleSearch,
-    handleFilterChange,
-    handleViewChange,
-    handleSortChange,
-    clearSubFilter
-  } = useItemFiltering();
+  const { navigateWithState } = useNavigationHelper();
 
-  const hasItems = useMemo(() => items.length > 0, [items.length]);
-  const itemsPerPage = 12;
+  // This state now directly drives the API query
+  const [filters, setFilters] = useState<FindAllItemsParams>({
+    page: 1,
+    limit: 12,
+    sort: 'newest',
+    archived: false,
+    search: '',
+  });
 
-  // Simulate loading state for demonstration
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
-    timeoutId = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
+  // The main data fetching hook - only fetch if user is logged in
+  const { data, isLoading, error } = useItemsQuery(filters, !!user);
+
+  // Fetch total items count to determine if stash is truly empty
+  const { data: statsData } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: statsApi.getDashboardStats,
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Check if there are any items at all in the inventory (not just filtered results)
+  const hasAnyItems = useMemo(() => (statsData?.totalItems ?? 0) > 0, [statsData]);
+  const hasFilteredResults = useMemo(() => (data?.data?.length ?? 0) > 0, [data]);
+
+  // --- Filter and Pagination Handlers ---
+
+  const handleSearch = useCallback((query: string) => {
+    setFilters(prev => ({ ...prev, search: query, page: 1 }));
   }, []);
 
-  const handleQuickLogin = useCallback(() => {
-    login({
-      id: "user-1",
-      name: "John Doe",
-      email: "john@example.com",
-      username: "johndoe",
-      avatarUrl: "https://i.pravatar.cc/150?u=user-1"
-    });
-  }, [login]);
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    () => (localStorage.getItem('stashViewMode') as ViewMode) || 'grid'
+  );
+
+  const handleFilterChange = useCallback((filter: string, subFilter?: string) => {
+    const newFilters = { ...filters, page: 1 };
+    
+    // Clear old filters before applying new ones
+    delete newFilters.tag;
+    delete newFilters.location;
+    delete newFilters.priceFilter;
+
+    if (filter === 'tags') newFilters.tag = subFilter;
+    if (filter === 'location') newFilters.location = subFilter;
+    if (filter === 'price' && subFilter) {
+      newFilters.priceFilter = subFilter as 'priceless' | 'with-price' | 'no-price';
+    }
+    
+    setFilters(newFilters);
+  }, [filters]);
+
+  useEffect(() => {
+    localStorage.setItem('stashViewMode', viewMode);
+  }, [viewMode]);
+
+  const handleViewChange = useCallback((view: ViewMode) => {
+    setViewMode(view);
+  }, []);
+  
+  const handleSortChange = useCallback((sort: SortOption) => {
+    setFilters(prev => ({ ...prev, sort, page: 1 }));
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+  }, []);
+
+  // --- Navigation Handlers ---
 
   const handleAddItem = useCallback(() => {
-    navigateWithState("/add-item", "/my-stash");
+    navigateWithState('/add-item', '/my-stash');
   }, [navigateWithState]);
 
   const handleClearFilters = useCallback(() => {
-    handleSearch("");
-    handleFilterChange("all");
-  }, [handleSearch, handleFilterChange]);
+    setFilters({ page: 1, limit: 12, sort: 'newest', archived: false, search: '' });
+  }, []);
 
-  // Show placeholder content for non-logged-in users
+  // --- Render Logic ---
+
   if (!user) {
     return (
-      <TooltipProvider>
-        <div className="max-w-screen-md mx-auto px-4 py-6 animate-fade-in-up">
-          <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-none">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Package className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Your Digital Stash
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+              Never lose track of your belongings again. Organize, search, and manage everything you own with powerful AI assistance.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => navigate('/')} 
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-8 py-3"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/')}
+                className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 px-8 py-3 font-semibold"
+              >
+                Learn More
+              </Button>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            {[
+              {
+                icon: <Camera className="h-8 w-8 text-purple-600" />,
+                title: "Snap & Store",
+                description: "Take photos of your items and let AI automatically categorize and tag them",
+                features: ["Auto-tagging", "Smart categorization", "Location tracking"]
+              },
+              {
+                icon: <Search className="h-8 w-8 text-blue-600" />,
+                title: "Instant Search",
+                description: "Find any item in seconds with powerful search and natural language queries",
+                features: ["Natural language search", "Filter by location", "Tag-based filtering"]
+              },
+              {
+                icon: <MapPin className="h-8 w-8 text-green-600" />,
+                title: "Location Tracking",
+                description: "Always know exactly where your items are stored with precise location mapping",
+                features: ["Room-level precision", "Visual location maps", "Quick location updates"]
+              }
+            ].map((feature, index) => (
+              <Card key={feature.title} className="border-2 border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300">
+                <CardHeader>
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center mb-4">
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">{feature.description}</p>
+                  <div className="space-y-2">
+                    {feature.features.map(item => (
+                      <div key={item} className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Demo Section */}
+          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
             <CardContent className="p-8">
-              <div className="text-center">
-                <Package className="mx-auto h-16 w-16 text-indigo-600 mb-4" />
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Personal Stash Awaits!</h2>
-                <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                  Imagine having all your belongings organized, searchable, and always at your fingertips. 
-                  Join thousands who never lose track of their stuff again!
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <Camera className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                    <h3 className="font-semibold mb-1">Photo Inventory</h3>
-                    <p className="text-sm text-gray-600">Snap photos and add descriptions</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <MapPin className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <h3 className="font-semibold mb-1">Location Tracking</h3>
-                    <p className="text-sm text-gray-600">Remember where everything is stored</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <Tag className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                    <h3 className="font-semibold mb-1">Smart Organization</h3>
-                    <p className="text-sm text-gray-600">Tags and categories that make sense</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <Button 
-                    onClick={handleQuickLogin}
-                    size="lg"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 text-lg w-full sm:w-auto"
-                  >
-                    Start Organizing for Free
-                    <Star className="ml-2 h-5 w-5" />
-                  </Button>
-                  <p className="text-sm text-gray-500">
-                    ✨ No credit card required • ✨ Setup in 30 seconds
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">See it in action</h3>
+                  <p className="text-gray-600 mb-6">
+                    Discover how easy it is to organize your entire home with Stasher's intelligent item management system.
                   </p>
+                  <div className="space-y-4">
+                    {[
+                      "📷 Snap photos of your items",
+                      "🏷️ Auto-generate smart tags",
+                      "📍 Track precise locations",
+                      "🔍 Search with natural language",
+                      "📊 View comprehensive statistics"
+                    ].map((step, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                          {index + 1}
+                        </div>
+                        <span className="text-gray-700">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {/* Sample Items */}
+                  {[
+                    {
+                      name: "MacBook Pro 16\"",
+                      location: "Home Office → Desk Drawer",
+                      tags: ["Electronics", "Work"],
+                      image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=120&h=120&fit=crop"
+                    },
+                    {
+                      name: "Winter Coat",
+                      location: "Bedroom Closet → Top Shelf",
+                      tags: ["Clothing", "Winter"],
+                      image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5e?w=120&h=120&fit=crop"
+                    },
+                    {
+                      name: "Camping Gear",
+                      location: "Garage → Storage Box #3",
+                      tags: ["Outdoor", "Sports"],
+                      image: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=120&h=120&fit=crop"
+                    }
+                  ].map((item, index) => (
+                    <Card key={item.name} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <img 
+                            src={item.image}
+                            alt={item.name}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                            <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                              <MapPin className="h-3 w-3" />
+                              {item.location}
+                            </div>
+                            <div className="flex gap-1 mt-2">
+                              {item.tags.map(tag => (
+                                <Badge key={tag} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Preview of what the interface looks like */}
-          <Card className="bg-gray-50 border-dashed border-2 border-gray-300">
-            <CardContent className="p-6">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Preview: Your Stash Interface</h3>
-                <p className="text-sm text-gray-500">This is what your organized collection will look like</p>
-              </div>
-              <div className="space-y-4 opacity-70">
-                {/* Mock search and filter bar */}
-                <div className="flex gap-2 items-center">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <div className="w-full h-10 bg-white border rounded-lg pl-10 flex items-center">
-                      <span className="text-gray-400 text-sm">Search your items...</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <div className="h-10 w-10 bg-white border rounded-lg flex items-center justify-center">
-                      <Grid className="h-4 w-4 text-gray-600" />
-                    </div>
-                    <div className="h-10 w-10 bg-white border rounded-lg flex items-center justify-center">
-                      <List className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mock filter tabs */}
-                <div className="flex gap-2 overflow-x-auto">
-                  <div className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium whitespace-nowrap">
-                    All Items
-                  </div>
-                  <div className="px-3 py-1 bg-white border rounded-full text-sm text-gray-600 whitespace-nowrap">
-                    Electronics
-                  </div>
-                  <div className="px-3 py-1 bg-white border rounded-full text-sm text-gray-600 whitespace-nowrap">
-                    Clothing
-                  </div>
-                  <div className="px-3 py-1 bg-white border rounded-full text-sm text-gray-600 whitespace-nowrap">
-                    Kitchen
-                  </div>
-                </div>
-
-                {/* Mock item cards */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white rounded-lg border p-3">
-                    <div className="aspect-square bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg mb-2 flex items-center justify-center">
-                      <Camera className="h-8 w-8 text-purple-600" />
-                    </div>
-                    <h4 className="font-medium text-sm mb-1">Wireless Headphones</h4>
-                    <p className="text-xs text-gray-500 mb-2">Electronics • Desk</p>
-                    <div className="flex gap-1">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">Electronics</span>
-                    </div>
-                  </div>
-                  <div className="bg-white rounded-lg border p-3">
-                    <div className="aspect-square bg-gradient-to-br from-green-100 to-green-200 rounded-lg mb-2 flex items-center justify-center">
-                      <Package className="h-8 w-8 text-green-600" />
-                    </div>
-                    <h4 className="font-medium text-sm mb-1">Coffee Mug</h4>
-                    <p className="text-xs text-gray-500 mb-2">Kitchen • Cupboard</p>
-                    <div className="flex gap-1">
-                      <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">Kitchen</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mock stats */}
-                <div className="bg-white rounded-lg border p-3">
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                      <div className="text-lg font-semibold text-gray-800">24</div>
-                      <div className="text-xs text-gray-500">Total Items</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold text-gray-800">$1,240</div>
-                      <div className="text-xs text-gray-500">Total Value</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold text-gray-800">8</div>
-                      <div className="text-xs text-gray-500">Categories</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* CTA Section */}
+          <div className="text-center mt-16">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to get organized?</h3>
+            <p className="text-gray-600 mb-8">Join thousands who've transformed their chaotic spaces into organized sanctuaries.</p>
+            <Button 
+              onClick={() => navigate('/')} 
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-8 py-3"
+            >
+              Start Organizing Free
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
         </div>
-      </TooltipProvider>
+      </div>
     );
   }
 
   return (
     <TooltipProvider>
-      <div className="max-w-screen-md mx-auto px-4 py-6 animate-fade-in-up">
-        {/* Welcome card for first-time users */}
-        {!hasItems && !isLoading && (
-          <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-none animate-scale-in">
-            <CardContent className="p-6">
-              <div className="text-left">
-                <h2 className="text-2xl font-bold text-gray-800">Let's add your first item! 🚀</h2>
-                <p className="mt-2 text-gray-600">
-                  Your stash is empty. Start by adding your first item to begin organizing your collection.
-                </p>
-                <div className="mt-4">
-                  <Button 
-                    onClick={handleAddItem}
-                    variant="default" 
-                    className="bg-indigo-600 hover:bg-indigo-700"
-                  >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add First Item
-                  </Button>
-                </div>
-              </div>
+      <div className="max-w-screen-md lg:max-w-5xl mx-auto px-4 py-6">
+        {!hasAnyItems && !isLoading && (
+          <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-none">
+            <CardContent className="p-6 text-center">
+              <Package className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
+              <h2 className="text-2xl font-bold text-gray-800">Your Stash is Empty</h2>
+              <p className="mt-2 text-gray-600">Start by adding your first item to begin organizing.</p>
+              <Button onClick={handleAddItem} className="mt-4">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Your First Item
+              </Button>
             </CardContent>
           </Card>
         )}
-
-        {/* Quick Stats - Only show when there are items */}
-        {hasItems && !isLoading && <StashStats />}
         
-        {/* Main content section with improved spacing and organization */}
+        {hasAnyItems && <StashStats />}
+        
+        
         <div className="space-y-6">
-          {/* Search and filters section */}
-          {!isLoading && (
-            <FilterSection 
-              searchQuery={searchQuery}
-              activeFilter={activeFilter}
-              activeSubFilter={activeSubFilter}
-              viewMode={viewMode}
-              sortBy={sortBy}
-              onSearchChange={handleSearch}
-              onFilterChange={handleFilterChange}
-              onViewChange={handleViewChange}
-              onSortChange={handleSortChange}
-              clearSubFilter={clearSubFilter}
-            />
-          )}
+          <FilterSection 
+            searchQuery={filters.search || ''}
+            activeFilter={filters.tag ? 'tags' : filters.location ? 'location' : filters.priceFilter ? 'price' : 'all'}
+            activeSubFilter={filters.tag || filters.location || filters.priceFilter}
+            viewMode={viewMode}
+            sortBy={filters.sort as SortOption}
+            onSearchChange={handleSearch}
+            onFilterChange={handleFilterChange}
+            onViewChange={handleViewChange}
+            onSortChange={handleSortChange}
+            clearSubFilter={handleClearFilters}
+            isLoading={isLoading}
+          />
           
-          {/* Loading skeletons or items display */}
           {isLoading ? (
-            <div className={viewMode === "grid" ? "grid grid-cols-2 gap-4" : "space-y-4"}>
-              {Array.from({ length: itemsPerPage }).map((_, index) => (
+            <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-4' : 'space-y-4'}>
+              {Array.from({ length: 4 }).map((_, index) => (
                 <ItemCardSkeleton key={index} viewMode={viewMode} />
               ))}
             </div>
+          ) : error ? (
+            <ErrorDisplay
+              title="Could Not Fetch Items"
+              message={error.message}
+              onRetry={() => window.location.reload()} // Or refetch from query
+            />
+          ) : data?.data && data.data.length === 0 && filters.search ? (
+            // No results found with search - suggest Ask Stasher
+            <Card className="text-center py-12 bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+              <CardContent>
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">No items found for "{filters.search}"</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Try using our AI-powered Ask Stasher for natural language search like "Where are my winter clothes?" 
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    onClick={() => navigate('/ask')}
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
+                  >
+                    <MessageSquareMore className="mr-2 h-4 w-4" />
+                    Try Ask Stasher
+                  </Button>
+                  <Button variant="outline" onClick={handleClearFilters}>
+                    Clear Search
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <ItemsDisplay 
-              items={filteredItems}
-              viewMode={viewMode}
+              items={data?.data || []}
+              viewMode={viewMode} // This would also use the dedicated viewMode state
               enablePagination={true}
-              itemsPerPage={itemsPerPage}
-              searchQuery={searchQuery}
-              activeFilter={activeFilter}
-              onClearFilters={handleClearFilters}
-              onAddItem={handleAddItem}
+              // Pass pagination handlers to the display component
+              currentPage={data?.currentPage}
+              totalPages={data?.totalPages}
+              onPageChange={handlePageChange}
             />
           )}
         </div>
         
-        {/* Fixed action button */}
-        {!isLoading && <AddItemButton onClick={handleAddItem} />}
+        <AddItemButton onClick={handleAddItem} />
       </div>
     </TooltipProvider>
   );

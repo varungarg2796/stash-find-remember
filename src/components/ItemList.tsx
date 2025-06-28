@@ -22,7 +22,7 @@ const ItemList: React.FC<ItemListProps> = ({
   onRestore
 }) => {
   const { user } = useAuth();
-  const currency = user?.preferences?.currency || 'INR';
+  const currency = user?.currency || 'INR';
 
   // Format currency based on user preference with compact notation for large values
   const formatCurrency = (amount: number) => {

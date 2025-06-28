@@ -4,14 +4,16 @@ import { CSS } from '@dnd-kit/utilities';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GripVertical, X } from "lucide-react";
+import ItemImage from "@/components/item/ItemImage";
 
 interface DraggableItemCardProps {
   item: any;
-  onRemove: () => void;
+  onRemove?: () => void;
   viewMode: 'grid' | 'list';
+  isReadOnly?: boolean;
 }
 
-const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps) => {
+const DraggableItemCard = ({ item, onRemove, viewMode, isReadOnly = false }: DraggableItemCardProps) => {
   const {
     attributes,
     listeners,
@@ -27,22 +29,26 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
     opacity: isDragging ? 0.5 : 1,
   };
 
+
   if (viewMode === 'list') {
     return (
       <Card ref={setNodeRef} style={style} className="touch-manipulation">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <div
-              {...attributes}
-              {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
-            >
-              <GripVertical className="h-4 w-4 text-gray-400" />
-            </div>
-            <img 
-              src={item.imageUrl} 
-              alt={item.name}
+            {!isReadOnly && (
+              <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+              >
+                <GripVertical className="h-4 w-4 text-gray-400" />
+              </div>
+            )}
+            <ItemImage 
+              item={item}
               className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+              iconSize="h-8 w-8"
+              fallbackIconSize="h-8 w-8"
             />
             <div className="flex-1 min-w-0">
               <h3 className="font-medium text-lg truncate">{item.name}</h3>
@@ -50,14 +56,16 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
                 <p className="text-sm text-muted-foreground truncate mt-1">{item.collectionNote}</p>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onRemove}
-              className="flex-shrink-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {!isReadOnly && onRemove && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onRemove}
+                className="flex-shrink-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -68,27 +76,32 @@ const DraggableItemCard = ({ item, onRemove, viewMode }: DraggableItemCardProps)
     <Card ref={setNodeRef} style={style} className="touch-manipulation">
       <div className="relative">
         <div className="aspect-square">
-          <img 
-            src={item.imageUrl} 
-            alt={item.name}
+          <ItemImage 
+            item={item}
             className="w-full h-full object-cover rounded-t-lg"
+            iconSize="h-16 w-16"
+            fallbackIconSize="h-16 w-16"
           />
         </div>
-        <div
-          {...attributes}
-          {...listeners}
-          className="absolute top-2 left-2 p-1 bg-white/80 rounded cursor-grab active:cursor-grabbing hover:bg-white"
-        >
-          <GripVertical className="h-4 w-4 text-gray-600" />
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onRemove}
-          className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        {!isReadOnly && (
+          <div
+            {...attributes}
+            {...listeners}
+            className="absolute top-2 left-2 p-1 bg-white/80 rounded cursor-grab active:cursor-grabbing hover:bg-white"
+          >
+            <GripVertical className="h-4 w-4 text-gray-600" />
+          </div>
+        )}
+        {!isReadOnly && onRemove && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onRemove}
+            className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       <CardContent className="p-4">
         <h3 className="font-medium text-lg truncate">{item.name}</h3>

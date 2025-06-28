@@ -1,259 +1,108 @@
-import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useItems } from "@/context/ItemsContext";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Save, Loader2, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
-import { 
-  Table, 
-  TableBody, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import BulkImportRow, { RowItem } from "@/components/form/BulkImportRow";
-import { validateItemName, validateQuantity, validatePrice } from "@/utils/validationUtils";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Plus, Save, Loader2, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import BulkImportRow, { RowItem } from '@/components/form/BulkImportRow';
+import { useBulkCreateItemsMutation } from '@/hooks/useItemsQuery';
+import { Item } from '@/types';
 
-const SAMPLE_LOCATIONS = ["Wardrobe", "Kitchen", "Bookshelf", "Drawer", "Garage", "Basement", "Attic"];
 const MAX_BULK_IMPORT_ITEMS = 40;
 
 const BulkImport = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { addItem, getActiveItems } = useItems();
-  
-  // Check authentication
+  const bulkCreateMutation = useBulkCreateItemsMutation();
+
+  // The locations for the dropdown now come directly from the user object
+  const availableLocations = user?.locations.map(loc => loc.name) || [];
+
+  const [rows, setRows] = useState<RowItem[]>([
+    { id: '1', name: '', description: '', quantity: 1, location: '', tags: '', price: undefined }
+  ]);
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
+
+  // Redirect if not logged in
   useEffect(() => {
     if (!user) {
-      navigate("/");
-      return;
+      navigate('/');
     }
   }, [user, navigate]);
 
-  // Don't render if user is not authenticated
-  if (!user) {
-    return null;
-  }
-
-  const activeItems = getActiveItems();
-  
-  // Extract unique locations from existing items, filtering out empty strings
-  const existingLocations = [...new Set(activeItems.map(item => item.location).filter(location => location && location.trim() !== ""))];
-  const availableLocations = [...new Set([...SAMPLE_LOCATIONS, ...existingLocations])];
-  
-  const [rows, setRows] = useState<RowItem[]>([
-    { id: "1", name: "", description: "", quantity: 1, location: "", tags: "", price: undefined }
-  ]);
-  const [showHelpDialog, setShowHelpDialog] = useState(false);
-  const [hasValidationErrors, setHasValidationErrors] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  
   const addRow = () => {
     if (rows.length >= MAX_BULK_IMPORT_ITEMS) {
-      toast.error(`Maximum ${MAX_BULK_IMPORT_ITEMS} items allowed in bulk import`);
+      toast.error(`Maximum ${MAX_BULK_IMPORT_ITEMS} items allowed.`);
       return;
     }
-    
-    const newRow: RowItem = {
-      id: Date.now().toString(),
-      name: "",
-      description: "",
-      quantity: 1,
-      location: "",
-      tags: "",
-      price: undefined
-    };
+    const newRow: RowItem = { id: Date.now().toString(), name: '', description: '', quantity: 1, location: '', tags: '', price: undefined };
     setRows([...rows, newRow]);
   };
   
   const deleteRow = (id: string) => {
-    if (rows.length === 1) {
-      toast.error("You must have at least one row");
-      return;
-    }
-    setRows(rows.filter(row => row.id !== id));
-    validateAllRows(rows.filter(row => row.id !== id));
-  };
-  
-  const updateRow = (id: string, field: keyof RowItem, value: any) => {
-    const updatedRows = rows.map(row => {
-      if (row.id === id) {
-        return { ...row, [field]: value };
-      }
-      return row;
-    });
-    
-    setRows(updatedRows);
-    // Validate if field is one we care about
-    if (["name", "quantity", "tags", "price"].includes(field)) {
-      const rowToValidate = updatedRows.find(row => row.id === id);
-      if (rowToValidate) {
-        validateRow(rowToValidate, updatedRows);
-      }
+    if (rows.length > 1) {
+      setRows(rows.filter(row => row.id !== id));
+    } else {
+      toast.error('You must have at least one row.');
     }
   };
   
-  const validateRow = (row: RowItem, allRows = rows): RowItem => {
-    const errors: any = {};
-    let hasErrors = false;
-    
-    // Validate name
-    const nameValidation = validateItemName(row.name);
-    if (!nameValidation.isValid) {
-      errors.name = nameValidation.message;
-      hasErrors = true;
-    }
-    
-    // Validate quantity
-    const quantityValidation = validateQuantity(row.quantity);
-    if (!quantityValidation.isValid) {
-      errors.quantity = quantityValidation.message;
-      hasErrors = true;
-    }
-    
-    // Validate price if provided
-    if (row.price !== undefined) {
-      const priceValidation = validatePrice(row.price);
-      if (!priceValidation.isValid) {
-        errors.price = priceValidation.message;
-        hasErrors = true;
-      }
-    }
-    
-    // Validate tags
-    const tagString = row.tags;
-    if (tagString) {
-      const tagArray = tagString.split(",");
-      if (tagArray.length > 10) {
-        errors.tags = "Maximum 10 tags allowed";
-        hasErrors = true;
-      } else if (tagArray.some(tag => tag.trim().length > 30)) {
-        errors.tags = "Each tag must be less than 30 characters";
-        hasErrors = true;
-      }
-    }
-    
-    // Update the rows state with validation results
-    const updatedRows = allRows.map(r => {
-      if (r.id === row.id) {
-        return { ...r, hasErrors, errors };
-      }
-      return r;
-    });
-    setRows(updatedRows);
-    
-    // Update the overall validation state
-    const anyErrors = updatedRows.some(r => r.hasErrors);
-    setHasValidationErrors(anyErrors);
-    
-    return { ...row, hasErrors, errors };
+  const updateRow = (
+    id: string,
+    field: keyof RowItem,
+    value: string | number | undefined
+  ) => {
+    setRows(rows.map(row => (row.id === id ? { ...row, [field]: value } : row)));
   };
   
-  const validateAllRows = useCallback((rowsToValidate = rows) => {
-    let anyErrors = false;
-    
-    const validatedRows = rowsToValidate.map(row => {
-      const validated = validateRow(row, rowsToValidate);
-      if (validated.hasErrors) anyErrors = true;
-      return validated;
-    });
-    
-    setRows(validatedRows);
-    setHasValidationErrors(anyErrors);
-    return !anyErrors;
-  }, [rows]);
-  
-  const handleSaveAll = async () => {
-    // Check item limit
-    if (rows.length > MAX_BULK_IMPORT_ITEMS) {
-      toast.error(`Cannot save more than ${MAX_BULK_IMPORT_ITEMS} items in bulk import`);
+  const handleSaveAll = () => {
+    // Basic client-side check for empty names
+    if (rows.some(row => !row.name.trim())) {
+      toast.error('All rows must have an item name.');
       return;
     }
     
-    // Validate all rows first
-    if (!validateAllRows()) {
-      toast.error("Please fix validation errors before saving");
-      return;
-    }
-    
-    setIsSaving(true);
-    
-    try {
-      // Process and save each row
-      const promises = rows.map(row => {
-        const item = {
-          name: row.name.trim(),
-          description: row.description.trim(),
-          quantity: parseInt(row.quantity.toString()) || 1,
-          location: row.location.trim(),
-          tags: row.tags.split(",").map(tag => tag.trim()).filter(Boolean),
-          price: row.price,
-          imageUrl: "/lovable-uploads/earbuds.png" // Default image
-        };
-        
-        return new Promise<void>((resolve) => {
-          // Simulate API delay and add item
-          setTimeout(() => {
-            addItem(item);
-            resolve();
-          }, 100);
-        });
-      });
-      
-      await Promise.all(promises);
-      
-      toast.success(`${rows.length} items added successfully`);
-      navigate("/");
-    } catch (error) {
-      toast.error("Failed to save items. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
+    // Convert frontend row state to the DTO format expected by the backend
+    const itemsToCreate: Partial<Omit<Item, 'id'>>[] = rows.map(row => ({
+      name: row.name.trim(),
+      description: row.description.trim(),
+      quantity: Number(row.quantity) || 1,
+      location: row.location?.trim() || undefined,
+      tags: row.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+      price: row.price,
+      // The backend will handle validation for non-existent tags/locations
+    }));
+
+    bulkCreateMutation.mutate(itemsToCreate, {
+      onSuccess: () => {
+        navigate('/my-stash');
+      },
+    });
   };
   
-  // Check if approaching limit
-  const isApproachingLimit = rows.length >= MAX_BULK_IMPORT_ITEMS - 5;
+  const isSaving = bulkCreateMutation.isPending;
   const isAtLimit = rows.length >= MAX_BULK_IMPORT_ITEMS;
-  
+
+  if (!user) return null; // Render nothing if user is not available
+
   return (
     <div className="max-w-screen-lg mx-auto px-4 py-6">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-        <ArrowLeft className="mr-2" size={18} />
-        Back
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4" disabled={isSaving}>
+        <ArrowLeft className="mr-2" size={18} /> Back
       </Button>
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold flex items-center">
-          <Plus size={24} className="mr-2 text-gray-600" />
-          Bulk Import Items
-        </h1>
-        
-        <Button 
-          variant="outline" 
-          onClick={() => setShowHelpDialog(true)}
-          className="text-sm"
-        >
-          How It Works
-        </Button>
+        <h1 className="text-3xl font-bold">Bulk Import Items</h1>
+        <Button variant="outline" onClick={() => setShowHelpDialog(true)}>How It Works</Button>
       </div>
 
-      {/* Item count and limit warning */}
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm text-gray-600">
-          Items: {rows.length} / {MAX_BULK_IMPORT_ITEMS}
-        </div>
-        {isApproachingLimit && (
-          <div className={`flex items-center text-sm ${isAtLimit ? 'text-red-600' : 'text-yellow-600'}`}>
-            <AlertTriangle size={16} className="mr-1" />
-            {isAtLimit ? 'Maximum items reached' : 'Approaching item limit'}
+        <p className="text-sm text-muted-foreground">Items: {rows.length} / {MAX_BULK_IMPORT_ITEMS}</p>
+        {isAtLimit && (
+          <div className="flex items-center text-sm text-red-600">
+            <AlertTriangle size={16} className="mr-1" /> Maximum items reached
           </div>
         )}
       </div>
@@ -261,17 +110,15 @@ const BulkImport = () => {
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[180px]">Name*</TableHead>
-                <TableHead className="w-[180px]">Description</TableHead>
-                <TableHead className="w-[100px]">Quantity</TableHead>
-                <TableHead className="w-[150px]">Location</TableHead>
-                <TableHead className="w-[180px]">Tags</TableHead>
-                <TableHead className="w-[120px]">Value/Cost</TableHead>
-                <TableHead className="w-[60px]"></TableHead>
-              </TableRow>
-            </TableHeader>
+            <TableHeader><TableRow>
+              <TableHead className="w-[180px]">Name*</TableHead>
+              <TableHead className="w-[180px]">Description</TableHead>
+              <TableHead className="w-[100px]">Quantity</TableHead>
+              <TableHead className="w-[150px]">Location</TableHead>
+              <TableHead className="w-[180px]">Tags (comma-separated)</TableHead>
+              <TableHead className="w-[120px]">Value/Cost</TableHead>
+              <TableHead className="w-[60px]"></TableHead>
+            </TableRow></TableHeader>
             <TableBody>
               {rows.map((row) => (
                 <BulkImportRow
@@ -280,7 +127,6 @@ const BulkImport = () => {
                   locations={availableLocations}
                   onUpdate={updateRow}
                   onDelete={deleteRow}
-                  validateRow={(row) => validateRow(row)}
                 />
               ))}
             </TableBody>
@@ -289,26 +135,11 @@ const BulkImport = () => {
       </div>
       
       <div className="flex justify-between">
-        <Button 
-          onClick={addRow} 
-          variant="outline" 
-          className="flex items-center"
-          disabled={isAtLimit}
-        >
-          <Plus size={16} className="mr-1" />
-          Add Row
+        <Button onClick={addRow} variant="outline" disabled={isAtLimit || isSaving}>
+          <Plus size={16} className="mr-1" /> Add Row
         </Button>
-        
-        <Button 
-          onClick={handleSaveAll} 
-          className="flex items-center"
-          disabled={hasValidationErrors || rows.length === 0 || isSaving || rows.length > MAX_BULK_IMPORT_ITEMS}
-        >
-          {isSaving ? (
-            <Loader2 size={16} className="mr-1 animate-spin" />
-          ) : (
-            <Save size={16} className="mr-1" />
-          )}
+        <Button onClick={handleSaveAll} disabled={isSaving}>
+          {isSaving ? <Loader2 size={16} className="mr-1 animate-spin" /> : <Save size={16} className="mr-1" />}
           {isSaving ? "Saving..." : "Save All Items"}
         </Button>
       </div>
@@ -318,20 +149,7 @@ const BulkImport = () => {
           <DialogHeader>
             <DialogTitle>How to Use Bulk Import</DialogTitle>
             <DialogDescription className="pt-4">
-              <ol className="list-decimal pl-5 space-y-2">
-                <li>Fill in the table with your item details using the form fields</li>
-                <li>Each row represents one item in your inventory</li>
-                <li>Only the Name field is required - all others are optional</li>
-                <li>For Tags, click the dropdown to select from available options</li>
-                <li>For Location, choose from the dropdown of existing locations</li>
-                <li>Value/Cost is optional - enter a price if you want to track item values</li>
-                <li>Click "Add Row" to add more items to your list (maximum {MAX_BULK_IMPORT_ITEMS} items)</li>
-                <li>Click "Save All Items" when ready - the system will process all items at once</li>
-              </ol>
-              
-              <p className="mt-4 text-sm text-muted-foreground">
-                <strong>Tip:</strong> You can add up to {MAX_BULK_IMPORT_ITEMS} items in a single bulk import. The system will validate all entries and add them to your inventory simultaneously.
-              </p>
+              Fill in the table with your item details. Only the Name is required. For tags, provide a comma-separated list. All locations and tags must already exist in your profile settings. Click "Save All Items" to import everything at once.
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

@@ -1,5 +1,3 @@
-
-import { useState } from "react";
 import { Tag, X, Info } from "lucide-react";
 import { 
   Select,
@@ -22,25 +20,20 @@ interface TagSelectorProps {
   isEditing?: boolean;
 }
 
-const DEFAULT_TAGS = [
-  "Electronics", "Clothing", "Books", "Kitchen", "Furniture",
-  "Tools", "Decor", "Sports", "Beauty", "Toys"
-];
-
 const TagSelector = ({ selectedTags, onChange, isEditing = false }: TagSelectorProps) => {
   const { user } = useAuth();
   
-  // Common tags from user preferences with fallback to defaults
-  const commonTags = (user?.preferences?.tags || DEFAULT_TAGS).filter(tag => tag && tag.trim() !== "");
+  // The user object now directly contains the tags array.
+  const commonTags = user?.tags || [];
   
-  const handleTagSelect = (tag: string) => {
-    if (!selectedTags.includes(tag)) {
-      onChange([...selectedTags, tag]);
+  const handleTagSelect = (tagName: string) => {
+    if (!selectedTags.includes(tagName)) {
+      onChange([...selectedTags, tagName]);
     }
   };
   
-  const handleRemoveTag = (tag: string) => {
-    onChange(selectedTags.filter(t => t !== tag));
+  const handleRemoveTag = (tagToRemove: string) => {
+    onChange(selectedTags.filter(t => t !== tagToRemove));
   };
   
   return (
@@ -69,20 +62,20 @@ const TagSelector = ({ selectedTags, onChange, isEditing = false }: TagSelectorP
       </div>
       
       <div className="mb-3">
-        <Select onValueChange={handleTagSelect}>
+        <Select onValueChange={handleTagSelect} value="">
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a tag" />
+            <SelectValue placeholder="Select tags to add..." />
           </SelectTrigger>
           <SelectContent>
             {commonTags.map(tag => (
               <SelectItem 
-                key={tag} 
-                value={tag}
-                disabled={selectedTags.includes(tag)}
+                key={tag.id} 
+                value={tag.name}
+                disabled={selectedTags.includes(tag.name)}
               >
                 <div className="flex items-center">
                   <Tag size={14} className="mr-2" />
-                  {tag}
+                  {tag.name}
                 </div>
               </SelectItem>
             ))}
@@ -91,23 +84,22 @@ const TagSelector = ({ selectedTags, onChange, isEditing = false }: TagSelectorP
       </div>
       
       <div className="flex flex-wrap gap-2 mt-2">
-        {selectedTags.map((tag, index) => (
+        {selectedTags.length > 0 ? selectedTags.map((tag, index) => (
           <div 
             key={index} 
-            className="bg-gray-100 rounded-full px-3 py-1 flex items-center"
+            className="bg-gray-100 rounded-full px-3 py-1 flex items-center text-sm"
           >
-            <span className="text-sm">{tag}</span>
+            <span>{tag}</span>
             <button 
               type="button" 
               onClick={() => handleRemoveTag(tag)}
-              className="ml-1 text-gray-500 hover:text-gray-700"
+              className="ml-1.5 text-muted-foreground hover:text-foreground"
             >
               <X size={14} />
             </button>
           </div>
-        ))}
-        {selectedTags.length === 0 && (
-          <p className="text-sm text-gray-500">No tags added yet</p>
+        )) : (
+          <p className="text-sm text-muted-foreground">No tags added yet.</p>
         )}
       </div>
     </div>

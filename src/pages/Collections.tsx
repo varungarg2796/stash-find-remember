@@ -1,180 +1,294 @@
-
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import { useCollections } from "@/context/CollectionsContext";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Users, Globe, Heart, Sparkles, FolderOpen, Share } from "lucide-react";
-import CollectionCard from "@/components/collection/CollectionCard";
-import CreateCollectionDialog from "@/components/collection/CreateCollectionDialog";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, FolderOpen, Loader2, Share2, Lock, Eye, Star, CheckCircle, ArrowRight, Grid3X3 } from 'lucide-react';
+import { useState } from 'react';
+import CollectionCard from '@/components/collection/CollectionCard';
+import CreateCollectionDialog from '@/components/collection/CreateCollectionDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  useCollectionsQuery,
+  useCreateCollectionMutation,
+  useDeleteCollectionMutation,
+  useUpdateCollectionMutation // We'll need this for inline editing
+} from '@/hooks/useCollectionsQuery'; // Assuming you add update mutation
+import { Collection } from '@/types';
+import ErrorDisplay from '@/components/ErrorDisplay';
 
 const Collections = () => {
-  const { user, login } = useAuth();
-  const { collections, addCollection, deleteCollection, updateCollection } = useCollections();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [collectionToDelete, setCollectionToDelete] = useState<{ id: string; name: string } | null>(null);
 
-  const handleQuickLogin = () => {
-    login({
-      id: "user-1",
-      name: "John Doe",
-      email: "john@example.com",
-      username: "johndoe",
-      avatarUrl: "https://i.pravatar.cc/150?u=user-1"
-    });
-  };
+  // --- DATA FETCHING & MUTATIONS ---
+  // Only fetch collections if user is logged in
+  const { data: collections, isLoading, error } = useCollectionsQuery(!!user);
+  const createCollectionMutation = useCreateCollectionMutation();
+  const deleteCollectionMutation = useDeleteCollectionMutation();
+  
+  // Note: You will need to create this hook and its corresponding API function
+  const updateCollectionMutation = useUpdateCollectionMutation(); 
 
+
+  // --- HANDLERS ---
   const handleCreateCollection = (name: string, description: string) => {
-    addCollection({
-      name,
-      description: description || undefined,
-      items: []
-    });
+    createCollectionMutation.mutate({ name, description });
   };
 
   const handleDeleteCollection = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this collection?")) {
-      deleteCollection(id);
+    const collection = collections?.find(c => c.id === id);
+    if (collection) {
+      setCollectionToDelete({ id, name: collection.name });
     }
   };
 
-  // Show placeholder content for non-logged-in users
+  const confirmDeleteCollection = () => {
+    if (collectionToDelete) {
+      deleteCollectionMutation.mutate(collectionToDelete.id);
+      setCollectionToDelete(null);
+    }
+  };
+
+  const cancelDeleteCollection = () => {
+    setCollectionToDelete(null);
+  };
+
+  const handleUpdateCollection = (params: { id: string; data: { name?: string; description?: string; coverImage?: string } }) => {
+    // The inline edit on the card will call this
+    updateCollectionMutation.mutate(params);
+  };
+  
   if (!user) {
     return (
-      <div className="max-w-screen-xl mx-auto px-4 py-6">
-        <div className="flex items-center mb-6">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(-1)}
-            className="mr-2"
-          >
-            <ArrowLeft size={18} />
-          </Button>
-          <h1 className="text-3xl font-bold">Collections</h1>
-        </div>
-
-        <Card className="mb-8 bg-gradient-to-r from-violet-50 to-purple-50 border-none">
-          <CardContent className="p-8">
-            <div className="text-center">
-              <FolderOpen className="mx-auto h-16 w-16 text-purple-600 mb-4" />
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Curate & Share Your Collections</h2>
-              <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                Create beautiful collections of your favorite items and share them with friends, family, or the entire community. 
-                Discover amazing collections from other passionate collectors!
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm">
-                  <Heart className="h-10 w-10 text-red-500 mx-auto mb-3" />
-                  <h3 className="font-semibold mb-2 text-lg">Curated Lists</h3>
-                  <p className="text-sm text-gray-600">Organize items by theme or passion</p>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm">
-                  <Users className="h-10 w-10 text-blue-500 mx-auto mb-3" />
-                  <h3 className="font-semibold mb-2 text-lg">Share & Discover</h3>
-                  <p className="text-sm text-gray-600">Connect with like-minded collectors</p>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm">
-                  <Globe className="h-10 w-10 text-green-500 mx-auto mb-3" />
-                  <h3 className="font-semibold mb-2 text-lg">Public or Private</h3>
-                  <p className="text-sm text-gray-600">Choose your privacy settings</p>
-                </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm">
-                  <Sparkles className="h-10 w-10 text-yellow-500 mx-auto mb-3" />
-                  <h3 className="font-semibold mb-2 text-lg">Beautiful Layouts</h3>
-                  <p className="text-sm text-gray-600">Showcase items in style</p>
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleQuickLogin}
-                size="lg"
-                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg mb-4"
-              >
-                Start Creating Collections
-                <Sparkles className="ml-2 h-5 w-5" />
-              </Button>
-              <p className="text-sm text-gray-500">
-                Join thousands of collectors sharing their passion
-              </p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <FolderOpen className="h-10 w-10 text-white" />
             </div>
-          </CardContent>
-        </Card>
+            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Smart Collections
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+              Group your items into beautiful collections and share them with friends, family, or the world. Perfect for wishlists, inventories, and showcases.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => navigate('/')} 
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-8 py-3"
+              >
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => navigate('/')}
+                className="border-2 border-blue-300 hover:border-blue-500 hover:bg-blue-50 px-8 py-3 font-semibold"
+              >
+                Learn More
+              </Button>
+            </div>
+          </div>
 
-        {/* Example collections */}
-        <div className="mb-6">
-          <h3 className="text-2xl font-semibold mb-6 text-gray-700">Example Collections</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {[
               {
-                title: "Vintage Camera Collection",
-                description: "A curated selection of classic film cameras from the 60s-90s",
-                items: 24,
-                isPublic: true,
-                theme: "bg-gradient-to-br from-amber-50 to-orange-100"
+                icon: <Grid3X3 className="h-8 w-8 text-blue-600" />,
+                title: "Organize by Theme",
+                description: "Create collections for any purpose - holiday decorations, kitchen gadgets, or hobby supplies",
+                features: ["Custom categories", "Drag & drop organization", "Smart suggestions"]
               },
               {
-                title: "My Sneaker Archive",
-                description: "Limited edition and rare sneakers collected over the years",
-                items: 18,
-                isPublic: false,
-                theme: "bg-gradient-to-br from-blue-50 to-indigo-100"
+                icon: <Share2 className="h-8 w-8 text-green-600" />,
+                title: "Share with Anyone",
+                description: "Make your collections public, share with family, or keep them private",
+                features: ["Public/private sharing", "Password protection", "Custom permissions"]
               },
               {
-                title: "Board Game Library",
-                description: "Strategy games, party games, and hidden gems for every occasion",
-                items: 47,
-                isPublic: true,
-                theme: "bg-gradient-to-br from-green-50 to-emerald-100"
+                icon: <Eye className="h-8 w-8 text-purple-600" />,
+                title: "Beautiful Showcases",
+                description: "Display your collections as stunning visual galleries with customizable layouts",
+                features: ["Visual gallery view", "Custom cover images", "Rich descriptions"]
               }
-            ].map((collection, index) => (
-              <Card key={index} className={`${collection.theme} border-dashed border-2 border-gray-300 opacity-75`}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-between text-base sm:text-lg">
-                    <span className="truncate">{collection.title}</span>
-                    <div className="flex gap-1">
-                      <div className="w-6 h-6 bg-gray-200 rounded"></div>
-                      <div className="w-6 h-6 bg-gray-200 rounded"></div>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {collection.description}
-                  </p>
-                  <div className="flex items-center justify-between text-sm mb-4">
-                    <span className="text-gray-500 font-medium">
-                      {collection.items} items
-                    </span>
-                    <div className="flex items-center gap-1">
-                      {collection.isPublic && (
-                        <Share className="h-3 w-3 text-green-600" />
-                      )}
-                      <span className={collection.isPublic ? "text-green-600 font-medium" : "text-gray-500"}>
-                        {collection.isPublic ? "Public" : "Private"}
-                      </span>
-                    </div>
+            ].map((feature) => (
+              <Card key={feature.title} className="border-2 border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300">
+                <CardHeader>
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center mb-4">
+                    {feature.icon}
                   </div>
-                  <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 mb-4">{feature.description}</p>
+                  <div className="space-y-2">
+                    {feature.features.map(item => (
+                      <div key={item} className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          {/* Use Cases Section */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">Perfect for Every Need</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[
+                {
+                  title: "🎁 Holiday Gift Lists",
+                  description: "Create shareable wishlists for birthdays, holidays, and special occasions",
+                  items: ["Birthday wishlists", "Holiday gift guides", "Wedding registries", "Baby shower lists"]
+                },
+                {
+                  title: "🏠 Home Inventory",
+                  description: "Organize household items by room, category, or importance",
+                  items: ["Kitchen essentials", "Seasonal decorations", "Important documents", "Emergency supplies"]
+                },
+                {
+                  title: "💼 Professional Collections",
+                  description: "Showcase portfolios, inventories, and professional assets",
+                  items: ["Art portfolios", "Tool inventories", "Equipment catalogs", "Product showcases"]
+                },
+                {
+                  title: "🎨 Hobby & Passion Projects",
+                  description: "Track collections, projects, and hobby-related items",
+                  items: ["Collectible items", "Craft supplies", "Reading lists", "Travel gear"]
+                }
+              ].map((useCase, index) => (
+                <Card key={index} className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+                  <CardContent className="p-6">
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">{useCase.title}</h4>
+                    <p className="text-gray-600 mb-4">{useCase.description}</p>
+                    <div className="space-y-2">
+                      {useCase.items.map((item, itemIndex) => (
+                        <div key={itemIndex} className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                          <span className="text-sm text-gray-700">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Demo Collections */}
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 mb-16">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">Example Collections</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    title: "Kitchen Essentials",
+                    itemCount: 24,
+                    coverImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop",
+                    isPublic: true,
+                    description: "Must-have tools for any home chef"
+                  },
+                  {
+                    title: "Holiday Decorations",
+                    itemCount: 18,
+                    coverImage: "https://images.unsplash.com/photo-1512389142860-9c449e58a543?w=300&h=200&fit=crop",
+                    isPublic: false,
+                    description: "Christmas lights, ornaments, and more"
+                  },
+                  {
+                    title: "Camping Gear",
+                    itemCount: 31,
+                    coverImage: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=300&h=200&fit=crop",
+                    isPublic: true,
+                    description: "Everything needed for outdoor adventures"
+                  }
+                ].map((collection, index) => (
+                  <Card key={index} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <div className="relative">
+                      <img 
+                        src={collection.coverImage}
+                        alt={collection.title}
+                        className="w-full h-32 object-cover rounded-t-lg"
+                      />
+                      <div className="absolute top-2 right-2">
+                        {collection.isPublic ? (
+                          <Badge className="bg-green-100 text-green-700">
+                            <Eye className="h-3 w-3 mr-1" />
+                            Public
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-700">
+                            <Lock className="h-3 w-3 mr-1" />
+                            Private
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <CardContent className="p-4">
+                      <h4 className="font-bold text-gray-900 mb-2">{collection.title}</h4>
+                      <p className="text-sm text-gray-600 mb-3">{collection.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">{collection.itemCount} items</span>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                          <span className="text-xs text-gray-600">Featured</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CTA Section */}
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to create your first collection?</h3>
+            <p className="text-gray-600 mb-8">Start organizing and sharing your items with beautiful, customizable collections.</p>
+            <Button 
+              onClick={() => navigate('/')} 
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-8 py-3"
+            >
+              Create Your First Collection
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     );
+  }
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
+  if (error) {
+    return <ErrorDisplay title="Could not load collections" message={error.message} />;
   }
 
   return (
     <div className="max-w-screen-xl mx-auto px-4 py-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(-1)}
-            className="mr-2"
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-2">
             <ArrowLeft size={18} />
           </Button>
           <div className="flex items-center gap-3">
@@ -182,40 +296,77 @@ const Collections = () => {
             <h1 className="text-2xl sm:text-3xl font-bold">My Collections</h1>
           </div>
         </div>
-        
-        <CreateCollectionDialog 
-          onCreateCollection={handleCreateCollection}
-          triggerClassName="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
-        />
+        <CreateCollectionDialog onCreateCollection={handleCreateCollection} />
       </div>
 
-      {collections.length === 0 ? (
+      {(collections?.length ?? 0) === 0 ? (
         <Card className="text-center py-16">
           <CardContent>
             <FolderOpen className="mx-auto h-16 w-16 text-muted-foreground mb-6" />
             <h3 className="text-2xl font-semibold mb-3">No Collections Yet</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Create your first collection to group and share your items with others. Collections help you organize items by themes, occasions, or any way you like.
+              Create your first collection to group and share your items.
             </p>
-            <CreateCollectionDialog 
-              onCreateCollection={handleCreateCollection}
-              triggerClassName="bg-purple-600 hover:bg-purple-700"
-            />
+            <CreateCollectionDialog onCreateCollection={handleCreateCollection} />
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {collections.map((collection) => (
+          {collections?.map((collection) => (
             <CollectionCard
               key={collection.id}
               collection={collection}
-              onEdit={updateCollection}
+              // Pass the mutation handlers to the card for inline actions
+              onEdit={handleUpdateCollection}
               onDelete={handleDeleteCollection}
               onNavigate={(id) => navigate(`/collections/${id}`)}
             />
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!collectionToDelete} onOpenChange={(open) => !open && cancelDeleteCollection()}>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <FolderOpen className="h-4 w-4 text-red-600" />
+              </div>
+              Delete Collection
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              Are you sure you want to delete{' '}
+              <span className="font-semibold text-gray-900">"{collectionToDelete?.name}"</span>?
+              <br />
+              <br />
+              This action cannot be undone. All items in this collection will be removed from the collection, but the items themselves will not be deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel 
+              onClick={cancelDeleteCollection}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCollection}
+              disabled={deleteCollectionMutation.isPending}
+              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {deleteCollectionMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Collection'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

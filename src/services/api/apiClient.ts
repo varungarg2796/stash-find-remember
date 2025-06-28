@@ -1,64 +1,154 @@
 
 import { API_BASE_URL, getDefaultHeaders, REQUEST_TIMEOUT } from './config';
 
+interface RequestConfig {
+  headers?: Record<string, string>;
+}
+
 // Generic API client for making HTTP requests
 class ApiClient {
+  private isRefreshing = false;
+  private failedQueue: Array<{
+    resolve: () => void;
+    reject: (error: Error) => void;
+  }> = [];
+
+  private processQueue(error: Error | null) {
+    this.failedQueue.forEach(({ resolve, reject }) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+    
+    this.failedQueue = [];
+  }
+
+  private async refreshToken(): Promise<string> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Token refresh failed');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('accessToken', data.accessToken);
+    if (data.refreshToken) {
+      localStorage.setItem('refreshToken', data.refreshToken);
+    }
+    
+    return data.accessToken;
+  }
+
+  private async handleTokenRefresh(originalRequest: () => Promise<Response>): Promise<Response> {
+    if (this.isRefreshing) {
+      return new Promise((resolve, reject) => {
+        this.failedQueue.push({
+          resolve: () => {
+            originalRequest().then(resolve).catch(reject);
+          },
+          reject,
+        });
+      });
+    }
+
+    this.isRefreshing = true;
+
+    try {
+      await this.refreshToken();
+      this.processQueue(null);
+      return await originalRequest();
+    } catch (error) {
+      this.processQueue(error as Error);
+      // Clear tokens and redirect to login
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      window.location.href = '/';
+      throw error;
+    } finally {
+      this.isRefreshing = false;
+    }
+  }
   // GET request
   async get<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     const url = this.buildUrl(endpoint, params);
-    const response = await this.fetchWithTimeout(url, {
+    const makeRequest = () => this.fetchWithTimeout(url, {
       method: 'GET',
       headers: getDefaultHeaders(),
     });
     
-    return this.handleResponse<T>(response);
+    const response = await makeRequest();
+    return this.handleResponse<T>(response, makeRequest);
   }
 
-  // POST request
-  async post<T>(endpoint: string, data?: any): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown, config?: RequestConfig): Promise<T> {
     const url = this.buildUrl(endpoint);
-    const response = await this.fetchWithTimeout(url, {
-      method: 'POST',
-      headers: getDefaultHeaders(),
-      body: JSON.stringify(data),
-    });
+    const makeRequest = () => {
+      const headers = { ...getDefaultHeaders(), ...config?.headers };
+
+      // When sending FormData, the browser sets the Content-Type with the boundary.
+      // If we send FormData, we must remove our manual 'Content-Type' header.
+      if (data instanceof FormData) {
+        delete headers['Content-Type'];
+      }
+
+      return this.fetchWithTimeout(url, {
+        method: 'POST',
+        headers: headers,
+        body: data instanceof FormData ? data : JSON.stringify(data),
+      });
+    };
     
-    return this.handleResponse<T>(response);
+    const response = await makeRequest();
+    return this.handleResponse<T>(response, makeRequest);
   }
 
-  // PUT request
-  async put<T>(endpoint: string, data?: any): Promise<T> {
+  async put<T>(endpoint: string, data?: unknown, config?: RequestConfig): Promise<T> {
     const url = this.buildUrl(endpoint);
-    const response = await this.fetchWithTimeout(url, {
+    const makeRequest = () => this.fetchWithTimeout(url, {
       method: 'PUT',
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...config?.headers },
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<T>(response);
+    const response = await makeRequest();
+    return this.handleResponse<T>(response, makeRequest);
   }
 
-  // PATCH request
-  async patch<T>(endpoint: string, data?: any): Promise<T> {
+  async patch<T>(endpoint: string, data?: unknown, config?: RequestConfig): Promise<T> {
     const url = this.buildUrl(endpoint);
-    const response = await this.fetchWithTimeout(url, {
+    const makeRequest = () => this.fetchWithTimeout(url, {
       method: 'PATCH',
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...config?.headers },
       body: JSON.stringify(data),
     });
     
-    return this.handleResponse<T>(response);
+    const response = await makeRequest();
+    return this.handleResponse<T>(response, makeRequest);
   }
 
   // DELETE request
   async delete<T>(endpoint: string): Promise<T> {
     const url = this.buildUrl(endpoint);
-    const response = await this.fetchWithTimeout(url, {
+    const makeRequest = () => this.fetchWithTimeout(url, {
       method: 'DELETE',
       headers: getDefaultHeaders(),
     });
     
-    return this.handleResponse<T>(response);
+    const response = await makeRequest();
+    return this.handleResponse<T>(response, makeRequest);
   }
 
   // Helper method to build URL with query parameters
@@ -74,11 +164,16 @@ class ApiClient {
     return url.toString();
   }
 
-  // Helper method to handle response
-  private async handleResponse<T>(response: Response): Promise<T> {
+  // Helper method to handle response with token refresh
+  private async handleResponse<T>(response: Response, retryRequest?: () => Promise<Response>): Promise<T> {
+    if (response.status === 401 && retryRequest) {
+      const newResponse = await this.handleTokenRefresh(retryRequest);
+      return await this.handleResponse<T>(newResponse);
+    }
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Request failed with status ${response.status}`);
+      throw new Error(this.getErrorMessage(errorData, `Request failed with status ${response.status}`));
     }
     
     // Check if response is empty
@@ -112,6 +207,46 @@ class ApiClient {
         .catch(reject)
         .finally(() => clearTimeout(timeout));
     });
+  }
+
+  private getErrorMessage(errorData: unknown, fallback: string): string {
+    if (typeof errorData === 'string') {
+      return errorData;
+    }
+
+    if (
+      typeof errorData === 'object' &&
+      errorData !== null &&
+      'message' in errorData
+    ) {
+      const message = (errorData as { message: unknown }).message;
+      if (typeof message === 'string') {
+        return message;
+      }
+      if (
+        typeof message === 'object' &&
+        message !== null &&
+        'message' in message
+      ) {
+        const innerMessage = (message as { message: unknown }).message;
+        if (typeof innerMessage === 'string') {
+          return innerMessage;
+        }
+      }
+    }
+
+    if (
+      typeof errorData === 'object' &&
+      errorData !== null &&
+      'error' in errorData
+    ) {
+      const error = (errorData as { error: unknown }).error;
+      if (typeof error === 'string') {
+        return error;
+      }
+    }
+
+    return fallback;
   }
 }
 

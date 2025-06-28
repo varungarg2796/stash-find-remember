@@ -15,6 +15,8 @@ export interface Item {
   history?: ItemHistory[];
   acquisitionDate?: Date;
   expiryDate?: Date;
+  historyNote?: string;
+
 }
 
 export interface ItemHistory {
@@ -29,7 +31,11 @@ export interface Collection {
   name: string;
   description?: string;
   coverImage?: string;
-  items: CollectionItem[];
+  items: {
+    collectionNote?: string;
+    order: number;
+    item: Item;
+  }[];
   shareSettings: ShareSettings;
   createdAt: Date;
   updatedAt: Date;
@@ -67,4 +73,47 @@ export interface UserPreferences {
   currency?: string;
   locations?: string[];
   tags?: string[];
+}
+
+export interface User {
+  id: string;
+  email: string;
+  username: string;
+  name: string;
+  avatarUrl?: string;
+  plan: 'FREE' | 'PREMIUM';
+  currency?: string;
+  // The 'locations' and 'tags' will now be objects with an 'id' and 'name'
+  locations: { id: string; name: string }[];
+  tags: { id: string; name: string }[];
+  usage: {
+    itemCount: number;
+    itemLimit: number;
+    locationCount: number;
+    locationLimit: number;
+    tagCount: number;
+    tagLimit: number;
+  };
+}
+export interface ApiError {
+  message?: string | string[];
+  error?: string;
+  statusCode?: number;
+  queryStatus?: {
+    remaining: number;
+    total: number;
+    resetTime?: string;
+  };
+  response?: {
+    data?: {
+      message?: string | string[];
+      error?: string;
+      statusCode?: number;
+      queryStatus?: {
+        remaining: number;
+        total: number;
+        resetTime?: string;
+      };
+    };
+  };
 }
