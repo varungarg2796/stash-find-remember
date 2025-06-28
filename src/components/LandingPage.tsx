@@ -268,12 +268,152 @@ const Index = () => {
               </motion.p>
             </div>
 
+            {/* CTA Buttons */}
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-lg mx-auto mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.2, ease: "easeOut" }}
+            >
+              {user ? (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.4, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button 
+                      onClick={() => navigate('/my-stash')} 
+                      size="lg"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-10 py-6 text-lg rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 w-full sm:w-auto group"
+                    >
+                      <motion.div
+                        whileHover={{ rotate: 12 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <Box className="mr-3 h-5 w-5" />
+                      </motion.div>
+                      View Stash
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.6, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button 
+                      onClick={() => navigate('/ask')} 
+                      variant="outline" 
+                      size="lg"
+                      className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 px-10 py-6 text-lg rounded-xl font-semibold transition-all duration-300 w-full sm:w-auto"
+                    >
+                      <MessageSquare className="mr-3 h-5 w-5" /> 
+                      Ask AI
+                    </Button>
+                  </motion.div>
+                </>
+              ) : (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.4, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button 
+                      size="lg"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-10 py-6 text-lg rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 w-full sm:w-auto group"
+                    >
+                      <AnimatePresence mode="wait">
+                        {isActionClicked ? (
+                          <motion.div
+                            key="loading"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex items-center"
+                          >
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              className="mr-3"
+                            >
+                              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
+                            </motion.div>
+                            Creating Account...
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="cta"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex items-center"
+                          >
+                            Start Organizing Free
+                            <motion.div
+                              whileHover={{ x: 5 }}
+                              transition={{ type: "spring", stiffness: 300 }}
+                            >
+                              <ArrowRight className="ml-3 h-5 w-5" />
+                            </motion.div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.6, duration: 0.5 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      className="border-2 border-gray-300 hover:border-purple-400 hover:bg-purple-50 px-10 py-6 text-lg rounded-xl font-semibold transition-all duration-300 w-full sm:w-auto group"
+                    >
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <Play className="mr-3 h-5 w-5" />
+                      </motion.div>
+                      Watch Demo
+                    </Button>
+                  </motion.div>
+                </>
+              )}
+            </motion.div>
+
+            {/* Demo Section Separator */}
+            <motion.div
+              className="relative mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.8 }}
+            >
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent w-32"></div>
+                <div className="mx-4 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full border border-purple-200">
+                  <span className="text-sm font-semibold text-purple-700">✨ Ask Stasher Demo</span>
+                </div>
+                <div className="h-px bg-gradient-to-r from-transparent via-purple-300 to-transparent w-32"></div>
+              </div>
+            </motion.div>
+
             {/* Interactive Search Demo */}
             <motion.div 
-              className="max-w-2xl mx-auto space-y-6"
+              className="max-w-2xl mx-auto space-y-6 min-h-[600px]"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.5, ease: "easeOut" }}
+              transition={{ duration: 0.8, delay: 2.0, ease: "easeOut" }}
             >
               <motion.div 
                 className="relative group"
@@ -488,130 +628,6 @@ const Index = () => {
               </AnimatePresence>
             </motion.div>
 
-            {/* CTA Buttons */}
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-lg mx-auto"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 2, ease: "easeOut" }}
-            >
-              {user ? (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 2.2, duration: 0.5 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button 
-                      onClick={() => navigate('/my-stash')} 
-                      size="lg"
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-10 py-6 text-lg rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 w-full sm:w-auto group"
-                    >
-                      <motion.div
-                        whileHover={{ rotate: 12 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <Box className="mr-3 h-5 w-5" />
-                      </motion.div>
-                      View Stash
-                    </Button>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 2.4, duration: 0.5 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button 
-                      onClick={() => navigate('/ask')} 
-                      variant="outline" 
-                      size="lg"
-                      className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 px-10 py-6 text-lg rounded-xl font-semibold transition-all duration-300 w-full sm:w-auto"
-                    >
-                      <MessageSquare className="mr-3 h-5 w-5" /> 
-                      Ask AI
-                    </Button>
-                  </motion.div>
-                </>
-              ) : (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 2.2, duration: 0.5 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button 
-                      onClick={handleLogin} 
-                      size="lg" 
-                      disabled={isLoggingIn}
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-12 py-6 text-lg rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 w-full sm:w-auto group relative overflow-hidden"
-                    >
-                      <AnimatePresence mode="wait">
-                        {isLoggingIn ? (
-                          <motion.div
-                            key="loading"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex items-center"
-                          >
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            >
-                              <Loader2 className="mr-3 h-5 w-5" />
-                            </motion.div>
-                            Setting up your stash...
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="cta"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex items-center"
-                          >
-                            Start Organizing Free
-                            <motion.div
-                              whileHover={{ x: 5 }}
-                              transition={{ type: "spring", stiffness: 300 }}
-                            >
-                              <ArrowRight className="ml-3 h-5 w-5" />
-                            </motion.div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </Button>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 2.4, duration: 0.5 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button 
-                      variant="outline" 
-                      size="lg"
-                      className="border-2 border-gray-300 hover:border-purple-400 hover:bg-purple-50 px-10 py-6 text-lg rounded-xl font-semibold transition-all duration-300 w-full sm:w-auto group"
-                    >
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <Play className="mr-3 h-5 w-5" />
-                      </motion.div>
-                      Watch Demo
-                    </Button>
-                  </motion.div>
-                </>
-              )}
-            </motion.div>
           </div>
         </div>
       </div>
@@ -621,7 +637,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              See it in action
+              3 Simple Steps
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Three simple steps to transform chaos into organized bliss
