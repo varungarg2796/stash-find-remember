@@ -93,7 +93,7 @@ const Header = () => {
   return (
     <>
       <header className="py-3 px-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-        <div className="flex items-center justify-between max-w-full">
+        <div className="relative flex items-center justify-between max-w-full">
           {/* Mobile Menu Trigger */}
           <div className="lg:hidden flex-shrink-0">
             <Button 
@@ -150,8 +150,8 @@ const Header = () => {
             </NavigationMenu>
           </div>
           
-          {/* Logo - Centered on mobile, left-aligned on desktop */}
-          <div className="flex-1 md:flex-none flex justify-center md:justify-start items-center min-w-0 mx-4 md:mr-8">
+          {/* Logo - Absolutely centered on all screen sizes */}
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
               <Link to="/" className="flex items-center gap-2 min-w-0">
                 <img src="/stasher-logo.svg" alt="Stasher Logo" className="h-8 w-8 flex-shrink-0" />
                 <span className="font-bold text-xl truncate">Stasher</span>

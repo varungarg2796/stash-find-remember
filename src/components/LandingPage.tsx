@@ -123,6 +123,7 @@ const Index = () => {
   const [currentResultIndex, setCurrentResultIndex] = useState(0);
   const [showSearchResult, setShowSearchResult] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isActionClicked, setIsActionClicked] = useState(false);
 
   const stats = [
     { number: "50K+", label: "Items Tracked", icon: <Box className="h-4 w-4" /> },
@@ -197,7 +198,7 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 overflow-hidden">
       
       {/* Hero Section */}
-      <div className="relative pt-20 pb-32">
+      <div className="relative pt-12 pb-32">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
@@ -410,7 +411,7 @@ const Index = () => {
 
             {/* Interactive Search Demo */}
             <motion.div 
-              className="max-w-2xl mx-auto space-y-6 min-h-[600px]"
+              className="max-w-2xl mx-auto space-y-6 min-h-[550px]"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 2.0, ease: "easeOut" }}
@@ -432,7 +433,12 @@ const Index = () => {
                   <AnimatePresence>
                     {isTyping && (
                       <motion.div 
-                        className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                        className="absolute top-1/2 transform -translate-y-1/2"
+                        style={{
+                          left: `calc(50% + ${(searchQuery.length * 0.55)}ch)`,
+                          marginLeft: '0.1rem',
+                          transform: 'translateY(-60%)'
+                        }}
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0 }}
