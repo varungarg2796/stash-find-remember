@@ -217,7 +217,7 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
-                Organise your belongings
+                Organize your belongings
                 <motion.span 
                   className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent animate-gradient bg-300% font-extrabold"
                   initial={{ opacity: 0, scale: 0.9 }}
