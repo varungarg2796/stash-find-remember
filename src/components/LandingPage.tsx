@@ -39,6 +39,17 @@ import { collectionsApi } from '@/services/api/collectionsApi';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
+// Demo item type with optional image property
+type DemoItem = {
+  id: string;
+  name: string;
+  location: string;
+  tags: string[];
+  quantity: number;
+  description: string;
+  image?: string;
+};
+
 // Demo responses - mimicking the new AI response structure
 const demoResponses = [
   {
@@ -327,6 +338,7 @@ const Index = () => {
                     whileTap={{ scale: 0.95 }}
                   >
                     <Button 
+                      onClick={handleLogin}
                       size="lg"
                       className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-10 py-6 text-lg rounded-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 w-full sm:w-auto group"
                     >
@@ -773,9 +785,9 @@ const Index = () => {
                       <div className="flex items-center gap-4">
                         <div className="relative">
                           <div className="w-20 h-20 rounded-xl shadow-lg overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
-                            {item.image ? (
+                            {(item as DemoItem).image ? (
                               <img 
-                                src={item.image}
+                                src={(item as DemoItem).image}
                                 alt={item.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
