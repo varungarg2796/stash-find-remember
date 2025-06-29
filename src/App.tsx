@@ -60,7 +60,7 @@ const App = () => {
                       <Route path="/collections" element={<Collections />} />
                       <Route path="/collections/:id" element={<CollectionDetail />} />
                       <Route path="/share/collection/:shareId" element={<SharedCollection />} />
-                      <Route path="/auth/callback" element={<AuthCallback />} /> {/* ADD THIS LINE */}
+                      <Route path="/auth/callback" element={<AuthCallback />} /> { <AuthCallback /> }
 
                       {/* Error pages */}
                       <Route path="/error/collection-not-found" element={<CollectionNotFound />} />
