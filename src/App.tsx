@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,6 +42,7 @@ const App = () => {
             <CollectionsProvider>
               <Toaster />
               <Sonner />
+              <Analytics />
               <BrowserRouter>
                 <div className="flex flex-col min-h-screen">
                   <Header />
