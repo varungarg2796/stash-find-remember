@@ -7,6 +7,7 @@ import { ArrowLeft, FolderOpen, Loader2, Share2, Lock, Eye, Star, CheckCircle, A
 import { useState } from 'react';
 import CollectionCard from '@/components/collection/CollectionCard';
 import CreateCollectionDialog from '@/components/collection/CreateCollectionDialog';
+import { CollectionSuggestions } from '@/components/collection/CollectionSuggestions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,7 +87,7 @@ const Collections = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={() => navigate('/')} 
+                onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`} 
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-8 py-3"
               >
@@ -263,7 +264,7 @@ const Collections = () => {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to create your first collection?</h3>
             <p className="text-gray-600 mb-8">Start organizing and sharing your items with beautiful, customizable collections.</p>
             <Button 
-              onClick={() => navigate('/')} 
+              onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`} 
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold px-8 py-3"
             >
@@ -297,6 +298,11 @@ const Collections = () => {
           </div>
         </div>
         <CreateCollectionDialog onCreateCollection={handleCreateCollection} />
+      </div>
+
+      {/* AI Collection Suggestions */}
+      <div className="mb-8">
+        <CollectionSuggestions />
       </div>
 
       {(collections?.length ?? 0) === 0 ? (

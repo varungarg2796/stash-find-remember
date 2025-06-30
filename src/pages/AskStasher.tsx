@@ -117,7 +117,7 @@ const AskStasher = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                onClick={() => navigate('/')} 
+                onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`} 
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-8 py-3"
               >
@@ -311,7 +311,7 @@ const AskStasher = () => {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to never lose anything again?</h3>
             <p className="text-gray-600 mb-8">Join thousands who've transformed how they find their belongings.</p>
             <Button 
-              onClick={() => navigate('/')} 
+              onClick={() => window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`} 
               size="lg"
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-8 py-3"
             >

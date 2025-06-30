@@ -46,6 +46,32 @@ export interface AnalysisError {
   analysisStatus?: AnalysisStatus;
 }
 
+export interface CollectionSuggestion {
+  name: string;
+  description: string;
+  itemIds: string[];
+  itemNames: string[];
+  suggestedBy: 'location' | 'price' | 'gemini' | 'pattern';
+  confidence: number;
+  
+  // NEW: Shows which items are already in other collections
+  itemsAlreadyInCollections?: Array<{
+    itemId: string;
+    itemName: string;
+    existingCollections: Array<{
+      id: string;
+      name: string;
+    }>;
+  }>;
+}
+
+export interface CollectionSuggestionsResponse {
+  suggestions: CollectionSuggestion[];
+  totalUncollectedItems: number;
+  cached: boolean;
+  cacheExpiresAt?: Date;
+}
+
 // Helper function to convert File to base64
 export const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -91,5 +117,9 @@ export const aiApi = {
       }
       throw error;
     }
+  },
+
+  getCollectionSuggestions: (limit: number = 5): Promise<CollectionSuggestionsResponse> => {
+    return apiClient.get(`/ai/collection-suggestions?limit=${limit}`);
   },
 };
