@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DragEndEvent } from '@dnd-kit/core';
+import { motion } from 'framer-motion';
 import {
   useCollectionQuery,
   useUpdateCollectionMutation,
@@ -127,7 +128,7 @@ const CollectionDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30">
       <CollectionHeader
         onBack={() => navigate('/collections')}
         collection={collection}
@@ -136,23 +137,62 @@ const CollectionDetail = () => {
         onPreviewSharedView={previewSharedView}
       />
 
-      <div className="px-4 py-6">
-        <CollectionEditForm
-          collection={collection}
-          isEditingName={isEditingName}
-          editName={editName}
-          editDescription={editDescription}
-          editCoverImage={editCoverImage}
-          setEditName={setEditName}
-          setEditDescription={setEditDescription}
-          setEditCoverImage={setEditCoverImage}
-          onSave={handleSaveChanges}
-          onCancel={() => setIsEditingName(false)}
-          onStartEdit={() => setIsEditingName(true)}
-        />
-      </div>
+      {/* Hero Section with Collection Info */}
+      <motion.div 
+        className="relative bg-gradient-to-r from-purple-600/10 via-pink-500/10 to-indigo-600/10 border-b border-purple-100"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <CollectionEditForm
+            collection={collection}
+            isEditingName={isEditingName}
+            editName={editName}
+            editDescription={editDescription}
+            editCoverImage={editCoverImage}
+            setEditName={setEditName}
+            setEditDescription={setEditDescription}
+            setEditCoverImage={setEditCoverImage}
+            onSave={handleSaveChanges}
+            onCancel={() => setIsEditingName(false)}
+            onStartEdit={() => setIsEditingName(true)}
+          />
+          
+          {/* Collection Stats */}
+          <motion.div 
+            className="flex flex-wrap items-center gap-6 mt-6 text-sm text-gray-600"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <span className="font-medium">{collectionItems.length} items</span>
+            </div>
+            {collection?.createdAt && (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Created {new Date(collection.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              </div>
+            )}
+            {collection?.shareSettings?.isEnabled && (
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Publicly shared with people with URL</span>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </motion.div>
 
-      <div className="px-4 py-6 space-y-6">
+      {/* Main Content */}
+      <motion.div 
+        className="max-w-6xl mx-auto px-4 py-8 space-y-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
         <CollectionItemsSection
           isLoading={isLoading}
           collectionItems={collectionItems}
@@ -161,11 +201,12 @@ const CollectionDetail = () => {
           onDragEnd={handleDragEnd}
           onRemoveItem={(itemId) => removeItemMutation.mutate(itemId)}
         />
+        
         <AddItemsSection
           availableItems={availableItems}
           onAddItem={(itemId) => addItemMutation.mutate(itemId)}
         />
-      </div>
+      </motion.div>
     </div>
   );
 };

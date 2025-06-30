@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useItems } from '@/context/ItemsContext'; // For actions like archive, gift
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import { getIconByName } from '@/utils/iconUtils';
 const ItemDetailInner = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
   // --- DATA FETCHING ---
@@ -55,7 +56,11 @@ const ItemDetailInner = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // --- HANDLERS ---
-  const handleEdit = () => navigate(`/edit-item/${id}`);
+  const handleEdit = () => {
+    const from = searchParams.get('from');
+    const editUrl = from ? `/edit-item/${id}?from=${from}` : `/edit-item/${id}`;
+    navigate(editUrl);
+  };
   
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to permanently delete this item?')) {
@@ -114,7 +119,18 @@ const ItemDetailInner = () => {
 
   return (
     <div className="max-w-screen-md mx-auto px-4 py-6">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+      <Button 
+        variant="ghost" 
+        onClick={() => {
+          const from = searchParams.get('from');
+          if (from === 'collections') {
+            navigate('/collections');
+          } else {
+            navigate(-1);
+          }
+        }} 
+        className="mb-4"
+      >
         <ArrowLeft className="mr-2" size={18} /> Back
       </Button>
       

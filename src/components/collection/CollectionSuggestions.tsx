@@ -22,6 +22,7 @@ export const CollectionSuggestions: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [suggestions, setSuggestions] = useState<CollectionSuggestion[]>([]);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
+  const [hasEverTriggered, setHasEverTriggered] = useState(false); // Track if user has ever clicked the button
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -49,6 +50,7 @@ export const CollectionSuggestions: React.FC = () => {
     }
 
     setIsGenerating(true);
+    setHasEverTriggered(true); // Mark that user has tried to get suggestions
     
     try {
       console.log('Making API call to get suggestions...');
@@ -229,8 +231,8 @@ export const CollectionSuggestions: React.FC = () => {
     );
   }
 
-  // Show zero API results state  
-  if (suggestions.length === 0 && !isGenerating && queryStatus && queryStatus.remaining < (queryStatus.total || 30)) {
+  // Show zero API results state - ONLY if user has actually tried to get suggestions
+  if (hasEverTriggered && suggestions.length === 0 && !isGenerating) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -244,13 +246,27 @@ export const CollectionSuggestions: React.FC = () => {
                 <Lightbulb className="h-8 w-8 text-amber-600" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-amber-900 mb-2">No suggestions found</h3>
+                <h3 className="text-xl font-bold text-amber-900 mb-2">No new suggestions found</h3>
                 <p className="text-amber-700 mb-4">
-                  AI couldn't find any new collection opportunities. Try adding more items to give AI more to work with!
+                  AI analyzed your items but couldn't find any new collection opportunities right now. This could mean your items are already well-organized!
                 </p>
-                <div className="text-sm text-amber-600 bg-amber-100 rounded-lg p-3 mx-auto max-w-md">
-                  💡 <strong>Pro tip:</strong> The more items you have, the smarter the suggestions become. Add 10+ items for the best results!
+                <div className="text-sm text-amber-600 bg-amber-100 rounded-lg p-3 mx-auto max-w-md mb-4">
+                  💡 <strong>Pro tip:</strong> Try adding more items, or come back later as AI suggestions improve over time!
                 </div>
+                {queryStatus && (
+                  <div className="flex items-center justify-center gap-4 text-sm text-gray-600 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>
+                        {queryStatus.remaining}/{queryStatus.total} AI queries left today
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4" />
+                      <span>Try again costs 1 credit</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <Button
                 onClick={handleGenerateSuggestions}
@@ -377,7 +393,13 @@ export const CollectionSuggestions: React.FC = () => {
                 Let AI analyze your items and suggest smart collections to help organize your inventory.
               </p>
               <div className="text-sm text-purple-600 bg-purple-100 rounded-lg p-3 mb-4 mx-auto max-w-md">
-                🎯 <strong>Smart tip:</strong> AI gets better with more items! 10+ items unlock the most creative suggestions.
+                {queryStatus && queryStatus.remaining === queryStatus.total ? (
+                  // First time user - more welcoming message
+                  <>✨ <strong>Welcome!</strong> Add some items to your inventory, then let AI suggest the perfect collections to organize them.</>
+                ) : (
+                  // Returning user - tip about more items
+                  <>🎯 <strong>Smart tip:</strong> AI gets better with more items! 10+ items unlock the most creative suggestions.</>
+                )}
               </div>
               <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-6">
                 <div className="flex items-center gap-2">
