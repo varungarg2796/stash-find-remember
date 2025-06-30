@@ -7,6 +7,7 @@ import { ArrowLeft, FolderOpen, Loader2, Share2, Lock, Eye, Star, CheckCircle, A
 import { useState } from 'react';
 import CollectionCard from '@/components/collection/CollectionCard';
 import CreateCollectionDialog from '@/components/collection/CreateCollectionDialog';
+import { CollectionSuggestions } from '@/components/collection/CollectionSuggestions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -297,6 +298,11 @@ const Collections = () => {
           </div>
         </div>
         <CreateCollectionDialog onCreateCollection={handleCreateCollection} />
+      </div>
+
+      {/* AI Collection Suggestions */}
+      <div className="mb-8">
+        <CollectionSuggestions />
       </div>
 
       {(collections?.length ?? 0) === 0 ? (
