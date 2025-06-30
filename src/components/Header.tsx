@@ -153,8 +153,7 @@ const Header = () => {
           {/* Logo - Absolutely centered on all screen sizes */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
               <Link to="/" className="flex items-center gap-2 min-w-0">
-                <img src="/stasher-logo.svg" alt="Stasher Logo" className="h-8 w-8 flex-shrink-0" />
-                <span className="font-bold text-xl truncate">Stasher</span>
+                <img src="/stasher-logo.svg" alt="Stasher Logo" className="h-12 w-12 flex-shrink-0" />
               </Link>
           </div>
           
