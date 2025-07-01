@@ -10,9 +10,7 @@ import {
   MapPin, 
   Tag, 
   Calendar, 
-  Gift,
   Package,
-  Archive,
   Trash2,
   Edit,
   MoreVertical,
@@ -36,17 +34,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useItems } from "@/context/ItemsContext";
-import { toast } from "sonner";
+import { DeleteItemModal } from '@/components/DeleteItemModal';
 import { useNavigationHelper } from "@/hooks/useNavigationHelper";
 import ItemCardImage from "./item/ItemCardImage";
 import ItemCardDetails from "./item/ItemCardDetails";
@@ -59,41 +48,9 @@ interface ItemCardProps {
 const ItemCard = ({ item, index = 0 }: ItemCardProps) => {
   const navigate = useNavigate();
   const { navigateWithState } = useNavigationHelper();
-  const { useItem, giftItem, archiveItem, deleteItem } = useItems();
+  const { deleteItem } = useItems();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [actionNote, setActionNote] = useState('');
-  const [actionType, setActionType] = useState<'gift' | 'archive' | null>(null);
-  const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
 
-  const handleUse = (note?: string) => {
-    useItem({ id: item.id, note });
-    // Don't navigate away for use action as item might still exist
-  };
-
-  const openActionDialog = (type: 'gift' | 'archive') => {
-    setActionType(type);
-    setActionNote('');
-    setIsActionDialogOpen(true);
-  };
-
-  const executeAction = () => {
-    if (!actionType) return;
-    const params = { id: item.id, note: actionNote };
-
-    switch (actionType) {
-      case 'gift':
-        giftItem(params);
-        if (item.quantity <= 1) {
-          navigate("/my-stash");
-        }
-        break;
-      case 'archive':
-        archiveItem(params);
-        navigate("/my-stash");
-        break;
-    }
-    setIsActionDialogOpen(false);
-  };
 
   const handleDelete = () => {
     deleteItem(item.id);
@@ -122,35 +79,10 @@ const ItemCard = ({ item, index = 0 }: ItemCardProps) => {
     visible: { 
       opacity: 1, 
       y: 0, 
-      scale: 1,
-      transition: {
-        duration: 0.4,
-        delay: index * 0.1,
-        ease: "easeOut"
-      }
+      scale: 1
     }
   };
 
-  const dropdownVariants = {
-    hidden: { opacity: 0, scale: 0.95, y: -10 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
-      y: 0,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut"
-      }
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.95,
-      y: -10,
-      transition: {
-        duration: 0.15
-      }
-    }
-  };
 
   return (
     <motion.div
@@ -159,10 +91,14 @@ const ItemCard = ({ item, index = 0 }: ItemCardProps) => {
       animate="visible"
       whileHover={{ 
         scale: 1.03, 
-        y: -4,
-        transition: { duration: 0.2, ease: "easeOut" }
+        y: -4
       }}
       whileTap={{ scale: 0.98 }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.1,
+        ease: "easeOut"
+      }}
     >
       <Card className="group shadow-lg cursor-pointer relative overflow-hidden border-0 bg-white/80 backdrop-blur-sm">
         <motion.div
@@ -203,50 +139,20 @@ const ItemCard = ({ item, index = 0 }: ItemCardProps) => {
                     </Button>
                   </motion.div>
                 </DropdownMenuTrigger>
-                <AnimatePresence>
-                  <DropdownMenuContent 
-                    align="end" 
-                    asChild
-                    forceMount
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleEdit}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={confirmDelete}
+                    className="text-destructive focus:text-destructive"
                   >
-                    <motion.div
-                      variants={dropdownVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      className="bg-popover text-popover-foreground shadow-md rounded-md border min-w-[8rem] overflow-hidden p-1 z-50"
-                    >
-                      <motion.div whileHover={{ backgroundColor: "rgba(0,0,0,0.05)" }} className="rounded-sm">
-                        <DropdownMenuItem onClick={handleEdit}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                      </motion.div>
-                      <motion.div whileHover={{ backgroundColor: "rgba(0,0,0,0.05)" }} className="rounded-sm">
-                        <DropdownMenuItem onClick={() => openActionDialog('gift')}>
-                          <Gift className="mr-2 h-4 w-4" />
-                          Mark as Gifted
-                        </DropdownMenuItem>
-                      </motion.div>
-                      <DropdownMenuSeparator />
-                      <motion.div whileHover={{ backgroundColor: "rgba(0,0,0,0.05)" }} className="rounded-sm">
-                        <DropdownMenuItem onClick={() => openActionDialog('archive')}>
-                          <Archive className="mr-2 h-4 w-4" />
-                          Archive
-                        </DropdownMenuItem>
-                      </motion.div>
-                      <motion.div whileHover={{ backgroundColor: "rgba(239, 68, 68, 0.1)" }} className="rounded-sm">
-                        <DropdownMenuItem 
-                          onClick={confirmDelete}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </motion.div>
-                    </motion.div>
-                  </DropdownMenuContent>
-                </AnimatePresence>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </div>
 
@@ -265,80 +171,15 @@ const ItemCard = ({ item, index = 0 }: ItemCardProps) => {
         </CardContent>
       </Card>
 
-      <AnimatePresence>
-        {showDeleteDialog && (
-          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-            <AlertDialogContent asChild>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ duration: 0.2 }}
-                className="bg-background text-foreground shadow-lg rounded-lg border max-w-lg"
-              >
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Item</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete "{item.name}"? This action cannot be undone and the item will be permanently removed from your stash.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete Permanently
-                    </AlertDialogAction>
-                  </motion.div>
-                </AlertDialogFooter>
-              </motion.div>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-      </AnimatePresence>
+      <DeleteItemModal
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        itemName={item.name}
+        itemId={item.id}
+        isDeleting={false}
+      />
 
-      <AnimatePresence>
-        {isActionDialogOpen && (
-          <Dialog open={isActionDialogOpen} onOpenChange={setIsActionDialogOpen}>
-            <DialogContent asChild>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ duration: 0.2 }}
-                className="bg-background text-foreground shadow-lg rounded-lg border max-w-lg"
-              >
-                <DialogHeader>
-                  <DialogTitle>
-                    {actionType === 'gift' && 'Mark as Gifted'}
-                    {actionType === 'archive' && 'Archive Item'}
-                  </DialogTitle>
-                  <DialogDescription>Add an optional note for your item's history.</DialogDescription>
-                </DialogHeader>
-                <div className="py-2">
-                  <Textarea 
-                    placeholder={actionType === 'gift' ? "e.g., Gifted to Jane for her birthday" : "e.g., No longer needed"} 
-                    value={actionNote} 
-                    onChange={(e) => setActionNote(e.target.value)} 
-                  />
-                </div>
-                <DialogFooter>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button variant="outline" onClick={() => setIsActionDialogOpen(false)}>Cancel</Button>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button onClick={executeAction}>Confirm</Button>
-                  </motion.div>
-                </DialogFooter>
-              </motion.div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };

@@ -8,6 +8,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { useItemsQuery } from '@/hooks/useItemsQuery';
 import { useItems } from '@/context/ItemsContext';
 import ErrorDisplay from '@/components/ErrorDisplay';
+import { DeleteItemModal } from '@/components/DeleteItemModal';
 
 const Archive = () => {
   const { user } = useAuth();
@@ -16,6 +17,8 @@ const Archive = () => {
   const { deleteItem, restoreItem } = useItems();
   
   const [sortBy, setSortBy] = useState<string>('newest');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
 
   // --- DATA FETCHING with TanStack Query ---
   // We call useItemsQuery with the specific filter for archived items
@@ -37,8 +40,18 @@ const Archive = () => {
 
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to permanently delete this archived item?')) {
-      deleteItem(id);
+    const item = archivedItems.find(item => item.id === id);
+    if (item) {
+      setItemToDelete({ id, name: item.name });
+      setDeleteModalOpen(true);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      deleteItem(itemToDelete.id);
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
     }
   };
   
@@ -107,6 +120,15 @@ const Archive = () => {
           </Button>
         </div>
       )}
+      
+      <DeleteItemModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={itemToDelete?.name || ''}
+        itemId={itemToDelete?.id || ''}
+        isDeleting={false}
+      />
     </div>
   );
 };

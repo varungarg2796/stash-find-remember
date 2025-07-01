@@ -1,16 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { Package, IndianRupee, MapPin, Tag, Eye, EyeOff, ChevronUp, ChevronDown, Loader2 } from 'lucide-react';
+import { Package, IndianRupee, MapPin, Tag, Eye, EyeOff, ChevronUp, ChevronDown, Loader2, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useQuery } from '@tanstack/react-query';
-import { statsApi } from '@/services/api/statsApi'; // Import the new API service
+import { statsApi } from '@/services/api/statsApi';
+import { useNavigate } from 'react-router-dom';
+import { TagLocationManager } from '@/components/TagLocationManager';
 
 const StashStats = () => {
   const { user } = useAuth(); // We still need the user for their currency preference
+  const navigate = useNavigate();
   const [showValue, setShowValue] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isManagerOpen, setIsManagerOpen] = useState(false);
+  const [managerTab, setManagerTab] = useState<'tags' | 'locations'>('tags');
   
   // Use TanStack Query to fetch the stats data
   const { data: statsData, isLoading } = useQuery({
@@ -49,11 +54,21 @@ const StashStats = () => {
     return null;
   }
 
+  const handleTagsClick = () => {
+    setManagerTab('tags');
+    setIsManagerOpen(true);
+  };
+
+  const handleLocationsClick = () => {
+    setManagerTab('locations');
+    setIsManagerOpen(true);
+  };
+
   const stats = [
     { title: "Items", value: statsData.totalItems, icon: Package, color: "text-blue-600" },
     { title: "Value", value: showValue ? formatCurrency(statsData.totalValue) : "•••", icon: IndianRupee, color: "text-green-600", hasToggle: true },
-    { title: "Locations", value: statsData.uniqueLocations, icon: MapPin, color: "text-purple-600" },
-    { title: "Tags", value: statsData.uniqueTags, icon: Tag, color: "text-orange-600" },
+    { title: "Locations", value: statsData.uniqueLocations, icon: MapPin, color: "text-purple-600", isClickable: true, onClick: handleLocationsClick },
+    { title: "Tags", value: statsData.uniqueTags, icon: Tag, color: "text-orange-600", isClickable: true, onClick: handleTagsClick },
   ];
 
   return (
@@ -79,11 +94,31 @@ const StashStats = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-xs text-muted-foreground truncate">{stat.title}</div>
-                    <div className="font-bold text-sm truncate flex items-center gap-1" title={String(stat.value)}>
+                    <div 
+                      className={`font-bold text-sm truncate flex items-center gap-1 ${
+                        stat.isClickable ? 'cursor-pointer hover:text-primary transition-colors' : ''
+                      }`} 
+                      title={stat.isClickable ? `Click to manage ${stat.title.toLowerCase()}` : String(stat.value)}
+                      onClick={stat.onClick}
+                    >
                       {stat.value}
                       {stat.hasToggle && (
                         <Button variant="ghost" size="icon" className="h-3 w-3 p-0 hover:bg-transparent" onClick={() => setShowValue(!showValue)}>
                           {showValue ? <Eye className="h-2.5 w-2.5 text-muted-foreground" /> : <EyeOff className="h-2.5 w-2.5 text-muted-foreground" />}
+                        </Button>
+                      )}
+                      {stat.isClickable && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-3 w-3 p-0 hover:bg-transparent opacity-60 hover:opacity-100" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            stat.onClick?.();
+                          }}
+                          title={`Manage ${stat.title.toLowerCase()}`}
+                        >
+                          <Pencil className="h-2 w-2 text-muted-foreground" />
                         </Button>
                       )}
                     </div>
@@ -97,6 +132,12 @@ const StashStats = () => {
           </CardContent>
         </Card>
       </CollapsibleContent>
+      
+      <TagLocationManager
+        isOpen={isManagerOpen}
+        onClose={() => setIsManagerOpen(false)}
+        initialTab={managerTab}
+      />
     </Collapsible>
   );
 };

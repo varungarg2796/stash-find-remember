@@ -1,7 +1,9 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, DollarSign } from 'lucide-react';
+import { ChevronDown, DollarSign, Settings } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/context/AuthContext'; // We'll get user's preferences from here
+import { useState } from 'react';
+import { TagLocationManager } from '@/components/TagLocationManager';
 
 interface FilterTabsProps {
   onFilterChange: (filter: string, subFilter?: string) => void;
@@ -12,6 +14,8 @@ interface FilterTabsProps {
 const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTabsProps) => {
   const { user } = useAuth(); // Get user to access their defined tags and locations
   const isMobile = useIsMobile();
+  const [isManagerOpen, setIsManagerOpen] = useState(false);
+  const [managerTab, setManagerTab] = useState<'tags' | 'locations'>('tags');
   
   // These now come from the user's profile data
   const uniqueTags = user?.tags.map(t => t.name).sort() || [];
@@ -25,6 +29,20 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
 
   const handleSubFilterClick = (subFilter: string, parentFilter: string) => {
     onFilterChange(parentFilter, subFilter);
+  };
+
+  const handleManageTags = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setManagerTab('tags');
+    setIsManagerOpen(true);
+  };
+
+  const handleManageLocations = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setManagerTab('locations');
+    setIsManagerOpen(true);
   };
 
   const filters = [
@@ -41,39 +59,59 @@ const FilterTabs = ({ onFilterChange, activeFilter, activeSubFilter }: FilterTab
   ];
 
   return (
-    <div className="flex space-x-1 sm:space-x-2 overflow-x-auto pb-2 no-scrollbar">
-      {filters.map((filter) => (
-        <div key={filter.id} className="relative">
-          {filter.subItems ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors focus:outline-none flex items-center ${activeFilter === filter.id ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
+    <>
+      <div className="flex space-x-1 sm:space-x-2 overflow-x-auto pb-2 no-scrollbar">
+        {filters.map((filter) => (
+          <div key={filter.id} className="relative">
+            {filter.subItems ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors focus:outline-none flex items-center ${activeFilter === filter.id ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
+                >
+                  {filter.icon} {isMobile ? filter.mobileLabel : filter.label} <ChevronDown size={16} className="ml-1" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {/* Manage button for tags and locations */}
+                  {(filter.id === 'tags' || filter.id === 'location') && (
+                    <>
+                      <DropdownMenuItem
+                        onClick={filter.id === 'tags' ? handleManageTags : handleManageLocations}
+                        className="text-blue-600 font-medium border-b"
+                      >
+                        <Settings size={14} className="mr-2" />
+                        Manage {filter.id === 'tags' ? 'Tags' : 'Locations'}
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {filter.subItems.map((subItem: string | { id: string; label: string }) => (
+                    <DropdownMenuItem
+                      key={typeof subItem === 'string' ? subItem : subItem.id}
+                      onClick={() => handleSubFilterClick(typeof subItem === 'string' ? subItem : subItem.id, filter.id)}
+                      className={activeSubFilter === (typeof subItem === 'string' ? subItem : subItem.id) ? 'bg-muted' : ''}
+                    >
+                      {typeof subItem === 'string' ? subItem : subItem.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <button
+                onClick={() => handleFilterClick(filter.id)}
+                className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors focus:outline-none ${activeFilter === filter.id ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
               >
-                {filter.icon} {isMobile ? filter.mobileLabel : filter.label} <ChevronDown size={16} className="ml-1" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {filter.subItems.map((subItem: string | { id: string; label: string }) => (
-                  <DropdownMenuItem
-                    key={typeof subItem === 'string' ? subItem : subItem.id}
-                    onClick={() => handleSubFilterClick(typeof subItem === 'string' ? subItem : subItem.id, filter.id)}
-                    className={activeSubFilter === (typeof subItem === 'string' ? subItem : subItem.id) ? 'bg-muted' : ''}
-                  >
-                    {typeof subItem === 'string' ? subItem : subItem.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <button
-              onClick={() => handleFilterClick(filter.id)}
-              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-colors focus:outline-none ${activeFilter === filter.id ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80'}`}
-            >
-              {isMobile ? filter.mobileLabel : filter.label}
-            </button>
-          )}
-        </div>
-      ))}
-    </div>
+                {isMobile ? filter.mobileLabel : filter.label}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <TagLocationManager
+        isOpen={isManagerOpen}
+        onClose={() => setIsManagerOpen(false)}
+        initialTab={managerTab}
+      />
+    </>
   );
 };
 
