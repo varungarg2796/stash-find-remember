@@ -1,4 +1,3 @@
-import { Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -6,12 +5,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 
 interface LocationSelectorProps {
@@ -33,23 +26,6 @@ const LocationSelector = ({ value, onChange, isEditing = false }: LocationSelect
         <label htmlFor="location" className="block text-sm font-medium text-gray-700">
           Location
         </label>
-        
-        {isEditing && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="ml-2">
-                  <Info size={14} className="text-gray-400" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-[200px]">
-                  You can add or remove locations in your profile settings.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
       </div>
       
       <Select value={value} onValueChange={onChange}>

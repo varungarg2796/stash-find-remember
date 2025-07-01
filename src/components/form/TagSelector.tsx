@@ -1,4 +1,4 @@
-import { Tag, X, Info } from "lucide-react";
+import { Tag, X } from "lucide-react";
 import { 
   Select,
   SelectContent, 
@@ -6,12 +6,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 
 interface TagSelectorProps {
@@ -42,23 +36,6 @@ const TagSelector = ({ selectedTags, onChange, isEditing = false }: TagSelectorP
         <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
           Tags
         </label>
-        
-        {isEditing && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="ml-2">
-                  <Info size={14} className="text-gray-400" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-[200px]">
-                  You can configure common tags in your profile settings.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
       </div>
       
       <div className="mb-3">

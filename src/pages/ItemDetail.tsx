@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import { useItemQuery, useDeleteItemMutation } from '@/hooks/useItemsQuery';
 import { getIconByName } from '@/utils/iconUtils';
+import { DeleteItemModal } from '@/components/DeleteItemModal';
 
 const ItemDetailInner = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +55,7 @@ const ItemDetailInner = () => {
   const [actionNote, setActionNote] = useState('');
   const [actionType, setActionType] = useState<'gift' | 'archive' | 'restore' | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // --- HANDLERS ---
   const handleEdit = () => {
@@ -63,11 +65,16 @@ const ItemDetailInner = () => {
   };
   
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to permanently delete this item?')) {
-      deleteMutation.mutate(id!, {
-        onSuccess: () => navigate('/my-stash'),
-      });
-    }
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    deleteMutation.mutate(id!, {
+      onSuccess: () => {
+        setIsDeleteModalOpen(false);
+        navigate('/my-stash');
+      },
+    });
   };
 
   const openActionDialog = (type: 'gift' | 'archive' | 'restore') => {
@@ -252,6 +259,15 @@ const ItemDetailInner = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <DeleteItemModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={item?.name || ''}
+        itemId={id || ''}
+        isDeleting={deleteMutation.isPending}
+      />
     </div>
   );
 };

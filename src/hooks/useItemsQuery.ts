@@ -85,6 +85,8 @@ export const useCreateItemMutation = () => {
     onSuccess: () => {
       // Invalidate all 'items' queries to refetch the list
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      // Invalidate dashboard stats to refresh counts and values
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       toast.success('Item added successfully!');
     },
     onError: (err: ApiError) => {
@@ -105,6 +107,8 @@ export const useUpdateItemMutation = () => {
     onSuccess: (updatedItem) => {
       // Invalidate list queries to reflect the update
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      // Invalidate dashboard stats to refresh counts and values
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       // Immediately update the cache for the single item view
       queryClient.setQueryData(QUERY_KEYS.item(updatedItem.id), updatedItem);
       toast.success('Item updated successfully!');
@@ -126,6 +130,8 @@ export const useDeleteItemMutation = () => {
     mutationFn: itemsApi.remove,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      // Invalidate dashboard stats to refresh counts and values
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       toast.success('Item deleted successfully!');
     },
     onError: (err: ApiError) => {
@@ -160,6 +166,8 @@ export const useArchiveItemMutation = () => {
     mutationFn: ({ id, note }: { id: string; note?: string }) => itemsApi.archive(id, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      // Invalidate dashboard stats to refresh counts and values
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       toast.success('Item archived.');
     },
     onError: (err: ApiError) => toast.error('Failed to archive item', { description: getErrorMessage(err, 'Failed to archive item') }),
@@ -172,6 +180,8 @@ export const useRestoreItemMutation = () => {
     mutationFn: ({ id, note }: { id: string; note?: string }) => itemsApi.restore(id, note),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
+      // Invalidate dashboard stats to refresh counts and values
+      queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
       toast.success('Item restored.');
     },
     onError: (err: ApiError) => toast.error('Failed to restore item', { description: getErrorMessage(err, 'Failed to restore item') }),

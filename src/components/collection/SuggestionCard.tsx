@@ -15,13 +15,15 @@ import {
   RotateCcw,
   Lightbulb,
   FolderOpen,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 
 interface SuggestionCardProps {
   suggestion: CollectionSuggestion;
   onCreateCollection: (suggestion: CollectionSuggestion) => void;
   onDismiss: (suggestion: CollectionSuggestion) => void;
+  isCreating?: boolean;
 }
 
 const getSuggestionIcon = (type: CollectionSuggestion['suggestedBy']) => {
@@ -67,7 +69,8 @@ const getConfidenceBadge = (confidence: number) => {
 export const SuggestionCard: React.FC<SuggestionCardProps> = ({
   suggestion,
   onCreateCollection,
-  onDismiss
+  onDismiss,
+  isCreating = false
 }) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
@@ -150,11 +153,12 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({
           <Button
             onClick={handleCreateClick}
             className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            disabled={isCreating}
           >
-            {hasConflicts ? (
+            {isCreating ? (
               <>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Collection
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
               </>
             ) : (
               <>

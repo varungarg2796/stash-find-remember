@@ -23,6 +23,7 @@ export const CollectionSuggestions: React.FC = () => {
   const [suggestions, setSuggestions] = useState<CollectionSuggestion[]>([]);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(new Set());
   const [hasEverTriggered, setHasEverTriggered] = useState(false); // Track if user has ever clicked the button
+  const [creatingCollections, setCreatingCollections] = useState<Set<string>>(new Set()); // Track which collections are being created
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -83,7 +84,12 @@ export const CollectionSuggestions: React.FC = () => {
   };
 
   const handleCreateCollection = async (suggestion: CollectionSuggestion) => {
+    const suggestionKey = `${suggestion.name}-${suggestion.suggestedBy}`;
+    
     try {
+      // Add to creating set
+      setCreatingCollections(prev => new Set([...prev, suggestionKey]));
+      
       const newCollection = await collectionsApi.create({
         name: suggestion.name,
         description: suggestion.description,
@@ -111,6 +117,13 @@ export const CollectionSuggestions: React.FC = () => {
         title: "Error",
         description: "Failed to create collection. Please try again.",
         variant: "destructive",
+      });
+    } finally {
+      // Remove from creating set
+      setCreatingCollections(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(suggestionKey);
+        return newSet;
       });
     }
   };
@@ -346,24 +359,30 @@ export const CollectionSuggestions: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {visibleSuggestions.map((suggestion, index) => (
-              <motion.div
-                key={`${suggestion.name}-${suggestion.suggestedBy}-${index}`}
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ 
-                  duration: 0.5,
-                  delay: 0.1 * index,
-                  ease: 'easeOut'
-                }}
-              >
-                <SuggestionCard
-                  suggestion={suggestion}
-                  onCreateCollection={handleCreateCollection}
-                  onDismiss={handleDismissSuggestion}
-                />
-              </motion.div>
-            ))}
+            {visibleSuggestions.map((suggestion, index) => {
+              const suggestionKey = `${suggestion.name}-${suggestion.suggestedBy}`;
+              const isCreating = creatingCollections.has(suggestionKey);
+              
+              return (
+                <motion.div
+                  key={`${suggestion.name}-${suggestion.suggestedBy}-${index}`}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: 0.1 * index,
+                    ease: 'easeOut'
+                  }}
+                >
+                  <SuggestionCard
+                    suggestion={suggestion}
+                    onCreateCollection={handleCreateCollection}
+                    onDismiss={handleDismissSuggestion}
+                    isCreating={isCreating}
+                  />
+                </motion.div>
+              );
+            })}
           </motion.div>
         </AnimatePresence>
       </motion.div>
