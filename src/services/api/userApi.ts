@@ -30,13 +30,4 @@ export const userApi = {
     return apiClient.patch('/users/me/preferences', data);
   },
   
-  // Save user tags
-  saveUserTags: (tags: string[]) => {
-    return apiClient.patch<User>('/users/me/tags', { tags });
-  },
-  
-  // Save user locations
-  saveUserLocations: (locations: string[]) => {
-    return apiClient.patch<User>('/users/me/locations', { locations });
-  }
 };

@@ -28,6 +28,7 @@ export const TagLocationManager: React.FC<TagLocationManagerProps> = ({
 }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { updateUserInContext } = useAuth();
   const [activeTab, setActiveTab] = useState(initialTab);
   const [newTag, setNewTag] = useState('');
   const [newLocation, setNewLocation] = useState('');
@@ -72,9 +73,16 @@ export const TagLocationManager: React.FC<TagLocationManagerProps> = ({
       
       return { previousUserData };
     },
-    onSuccess: () => {
+    onSuccess: (newTag) => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      
+      // Update AuthContext as well
+      const updatedUserData = queryClient.getQueryData(['userProfile']);
+      if (updatedUserData) {
+        updateUserInContext(updatedUserData as any);
+      }
+      
       toast.success('Tag added successfully!');
       setNewTag('');
     },
@@ -107,6 +115,13 @@ export const TagLocationManager: React.FC<TagLocationManagerProps> = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      
+      // Update AuthContext as well
+      const updatedUserData = queryClient.getQueryData(['userProfile']);
+      if (updatedUserData) {
+        updateUserInContext(updatedUserData as any);
+      }
+      
       toast.success('Tag deleted successfully!');
     },
     onError: (error: any, _variables, context) => {
@@ -136,9 +151,16 @@ export const TagLocationManager: React.FC<TagLocationManagerProps> = ({
       
       return { previousUserData };
     },
-    onSuccess: () => {
+    onSuccess: (newLocation) => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      
+      // Update AuthContext as well
+      const updatedUserData = queryClient.getQueryData(['userProfile']);
+      if (updatedUserData) {
+        updateUserInContext(updatedUserData as any);
+      }
+      
       toast.success('Location added successfully!');
       setNewLocation('');
     },
@@ -171,6 +193,13 @@ export const TagLocationManager: React.FC<TagLocationManagerProps> = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardStats'] });
+      
+      // Update AuthContext as well
+      const updatedUserData = queryClient.getQueryData(['userProfile']);
+      if (updatedUserData) {
+        updateUserInContext(updatedUserData as any);
+      }
+      
       toast.success('Location deleted successfully!');
     },
     onError: (error: any, _variables, context) => {
